@@ -2346,29 +2346,48 @@ function showOut(kind,url){
   if(kind==="gif") $("outImg").src=url; else {const v=$("outVid"); v.onerror=()=>{v.onerror=null; readURL(outBlob).then(u=>{v.src=u})}; v.src=url; v.play().catch(()=>{})}
   $("out").style.display="block";
 }
-const GIF_FPS=25;
+const GIF_LIMIT=14.3e6; // X/Twitter accepts GIFs up to 15MB
+/* one shared palette for the whole clip (no colour flicker between frames),
+   and pixels that did not change since the previous frame are written as transparent,
+   which the GIF compressor squeezes to almost nothing */
+async function encodeGif(run,dark,EW,fps,label,p0,p1){
+  const {GIFEncoder,quantize,applyPalette}=window.gifenc;
+  const EH=Math.round(EW*4/3);
+  const c=document.createElement("canvas"); c.width=EW; c.height=EH; const x=c.getContext("2d",{willReadFrequently:true});
+  const sc=document.createElement("canvas"); sc.width=Math.round(EW/2); sc.height=Math.round(EH/2); const sx=sc.getContext("2d",{willReadFrequently:true});
+  const times=[0.2,0.9,1.6,2.4,3.1,3.8,4.5,5.2,5.6,6.0,6.4,6.9,7.5,8.1,8.7], parts=[];
+  for(const ts of times){render(x,EW,ts,ts,{run,dark}); sx.drawImage(c,0,0,sc.width,sc.height); parts.push(sx.getImageData(0,0,sc.width,sc.height).data)}
+  const merged=new Uint8ClampedArray(parts.reduce((a,b)=>a+b.length,0)); let o=0; for(const s of parts){merged.set(s,o); o+=s.length}
+  const pal=quantize(merged,255,{format:"rgb565"}); const TI=pal.length; const palette=pal.concat([[0,0,0]]);
+  const N=Math.round(END*fps), gif=GIFEncoder(); let prev=null;
+  for(let f=0;f<N;f++){
+    const ts=f/fps; render(x,EW,ts,ts,{run,dark});
+    const idx=applyPalette(x.getImageData(0,0,EW,EH).data,pal,"rgb565");
+    let out=idx;
+    if(prev){out=new Uint8Array(idx.length); for(let i=0;i<idx.length;i++) out[i]=idx[i]===prev[i]?TI:idx[i]}
+    gif.writeFrame(out,EW,EH,f===0?{palette,delay:1000/fps,dispose:1}:{delay:1000/fps,transparent:true,transparentIndex:TI,dispose:1});
+    prev=idx;
+    if(f%3===0){prog(p0+(p1-p0)*f/N,`${label} ${Math.round(100*f/N)}%`); await tick()}
+  }
+  gif.finish(); return {bytes:gif.bytes(),EW,EH,fps};
+}
 $("make").addEventListener("click",async()=>{
   if(!S.run) return; busy(true); $("out").style.display="none";
   try{
     try{await document.fonts.load('30px Jua'); await document.fonts.load('13px "Noto Sans KR"')}catch(e){}
-    const {GIFEncoder,quantize,applyPalette}=window.gifenc;
-    const EW=S.hq?720:540, EH=EW*4/3, run=S.run, dark=isDark();
-    const c=document.createElement("canvas"); c.width=EW; c.height=EH; const x=c.getContext("2d",{willReadFrequently:true});
-    const sc=document.createElement("canvas"); sc.width=EW/2; sc.height=EH/2; const sx=sc.getContext("2d",{willReadFrequently:true});
-    const N=Math.round(END*GIF_FPS), gif=GIFEncoder();
-    prog(0.01,"움짤 만드는 중…");
-    for(let f=0;f<N;f++){
-      const ts=f/GIF_FPS; render(x,EW,ts,ts,{run,dark});
-      const data=x.getImageData(0,0,EW,EH).data;
-      sx.drawImage(c,0,0,sc.width,sc.height);
-      const palette=quantize(sx.getImageData(0,0,sc.width,sc.height).data,256,{format:"rgb565"});
-      gif.writeFrame(applyPalette(data,palette,"rgb565"),EW,EH,{palette,delay:1000/GIF_FPS});
-      if(f%2===0){prog(0.02+0.96*f/N,`빨래 개는 중… ${Math.round(100*f/N)}%`); await tick()}
+    const run=S.run, dark=isDark();
+    const plans=S.hq?[[720,25],[640,25],[540,25],[540,20],[480,20],[420,16]]:[[540,25],[540,20],[480,20],[420,16]];
+    let res=null;
+    for(let i=0;i<plans.length;i++){
+      const [w,fps]=plans[i];
+      res=await encodeGif(run,dark,w,fps,i?"용량 맞추는 중…":"움짤 만드는 중…",0.02,0.98);
+      if(res.bytes.length<=GIF_LIMIT) break;
     }
-    gif.finish(); outBlob=new Blob([gif.bytes()],{type:"image/gif"}); outExt="gif";
+    outBlob=new Blob([res.bytes],{type:"image/gif"}); outExt="gif";
     showOut("gif",await readURL(outBlob));
-    prog(1,`움짤 완성 · ${EW}×${EH} · ${GIF_FPS}fps · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
-  }catch(err){console.error(err); $("status").textContent="움짤을 만들지 못했어요. 고화질을 끄고 다시 눌러 주세요."; $("progress").style.display="none"}
+    const mb=(outBlob.size/1048576).toFixed(1);
+    prog(1,`움짤 완성 · ${res.EW}×${res.EH} · ${res.fps}fps · ${mb}MB`+(outBlob.size<=GIF_LIMIT?" · X 업로드 가능":"")); setTimeout(()=>{$("progress").style.display="none"},500);
+  }catch(err){console.error(err); $("status").textContent="움짤을 만들지 못했어요. 다시 눌러 주세요."; $("progress").style.display="none"}
   finally{busy(false)}
 });
 function pickMime(){const list=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"]; for(const m of list){try{if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m)) return m}catch(e){}} return null}
