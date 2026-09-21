@@ -2011,6 +2011,8 @@ const cv=document.getElementById("cv"), pc=cv.getContext("2d");
 let tl=0, playing=false, last=performance.now(), revealed=false;
 function sizeCv(){const r=cv.getBoundingClientRect(); const dpr=Math.min(window.devicePixelRatio||1,2); cv.width=Math.round(r.width*dpr); cv.height=Math.round(r.width*dpr*4/3)}
 new ResizeObserver(sizeCv).observe(cv); sizeCv();
+// the wash keeps its timeline running off screen (sound, result card); only the drawing is skipped
+let onScreen=true; try{new IntersectionObserver(es=>{onScreen=es[es.length-1].isIntersecting},{rootMargin:"80px"}).observe(cv)}catch(e){}
 function stepTouch(dt,now){
   IA.per.forEach((P,i)=>{
     if(!P) return;
@@ -2060,7 +2062,7 @@ function frame(now){
   const dt=Math.min(0.05,(now-last)/1000); last=now;
   if(playing){tl+=dt; if(!revealed&&tl>=6.3){revealed=true; showResult()}}
   stepTouch(dt,now/1000);
-  if(!document.hidden) render(pc,cv.width,playing?tl:0,now/1000,{live:true});
+  if(!document.hidden&&onScreen) render(pc,cv.width,playing?tl:0,now/1000,{live:true});
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);

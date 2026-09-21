@@ -30,13 +30,13 @@ python3 -m http.server 8000 # then open http://localhost:8000  (needed for sound
 | Keycap materials | `capMaterial()`; shared `surfMat(kind,hex)`; hologram = `holoize(mat)` |
 | Character placement | `buildChar()` — `inside` (plane in resin), `top` (print clipped to the top outline), `stand` (acrylic cut by `acrylicOutline()`) |
 | Top decorations | `buildDeco()`; `sitOn()` keeps a deco's bottom exactly on the top face |
-| Glitter (3D flakes) | `glitterGeo/glitterMat/makeParticles/stirParticles/stepParticles` |
+| Glitter (3D flakes) | `glitterGeo/glitterMat/makeParticles/stirParticles/stepParticles`; fenced by `fenceTable/fenceLim`; star-dust halo `starGlow/twinkle` |
 | Switch tester model | block, `cavity`, `bot` (housing), `topHousing`, `spring`, `stem`, chain (`chain` group) |
 | Base + name sticker | `baseMaterial()`, `applyBase()`, `nameSticker()` |
 | RGB light | `applyRGB(t)` — modes off/solid/breath/rainbow |
 | Background | `setBg()` (vertical gradients in `BGS`, or an uploaded image) |
 | Camera | `CAM` {zoom,panX,panY,locked}, `camApply()`, pointer handlers (1 finger turn, 2 fingers pinch/pan, wheel zoom, right-drag pan), `resetView()` |
-| Press + sounds | `pressKey()`, `sfx(kind)`; own recordings via `loadSoundFiles()` → see `sounds/README.md` |
+| Press + sounds | `pressKey()`, `sfx(kind)`; recorded packs `PACKS` / `loadPack()` / `pickSound()` / `previewSwitch()` → see `sounds/README.md` |
 | Share link | `writeHash()/readHash()` (options only; the character image is never uploaded anywhere) |
 
 Colours: always go through `lin(hex)` (sRGB → linear) before giving them to three.js, otherwise
@@ -46,19 +46,41 @@ Transparent things: resin/jelly/acrylic use `transmission` with `depthWrite:fals
 must be visible *through* them (character plane, glitter) must be **opaque** (use `alphaTest`, not
 `transparent`), because r128's transmission pass only captures opaque objects.
 
-## Next task the owner has in mind
+## Switch sounds (done)
 
-Replace the synthesized switch sounds with her own recordings. The hook already exists:
-put files in `sounds/` using the names in `sounds/README.md`; `sfx()` prefers them and falls back
-to the synth. Things that may be worth doing while there:
-- per-material variation (e.g. a deeper sound for resin/jelly — the synth already does this via `deep`)
-- a "sound pack" option chip if she records more than one set.
+The five switches are the owner's own keyboard recordings (the same packs her desktop timer uses),
+one folder each under `sounds/`. `PACKS` lists how many files each has and a `gain` that evens out
+their loudness. Each press picks a different key clip (never one of the last two), now and then a
+space/enter/shift/backspace, so it sounds like typing. Only the chosen switch's folder is fetched;
+decoding goes through an `OfflineAudioContext` so it needs no user gesture and is ready before the
+first press. `previewSwitch()` waits for a new pack before its demo press, so switching never plays
+the synth. The synth in `sfx()` is only the fallback for when the files can't load (opened as a file).
+Old share links with `red/brown/blue` fall back to the default switch (`readHash` checks every option).
+
+## Glitter must stay inside the cap
+
+Flakes are fenced by the cap's real cross-section: `fenceTable(p)` stores, for 180 angles, how far the
+outline is from the centre (the heart's concave notch also looks 6° either side), and
+`fenceLim = min(0.72·R·w, R·w − 1.3)` keeps a flake centre ≥1.3 inside the wall. The old square box
+let flakes out of the heart (and the round cap's corners). If you add a cap shape, run a headless
+shake test (all glitter kinds × shapes, thousands of frames) and count flakes outside the outline.
+
+## Performance rules (keep them when editing)
+
+- **Free what `rebuild()` throws away.** It runs on every option click. `freeTree()` disposes the old
+  geometry/materials/textures; anything built once and shared must be registered with `keep()`
+  (glitter geo/mats, glow texture/material, NOISE, env map…) or it will be freed while still in use.
+  Check with `__k.renderer.info.memory` after ~50 option clicks — it must stay flat.
+- Typing the name only calls `applyBase()` (the sticker), not `rebuild()`.
+- The loop skips drawing while the 3D view is off screen (`ONSCREEN`, IntersectionObserver). Exports
+  render on their own, so they are unaffected.
+- No `preserveDrawingBuffer`: every read (PNG, GIF, `__k.shot`) copies the canvas right after its own
+  render in the same task. Keep it that way — reading the canvas later would get a blank image.
 
 ## Deploying into the game site
 
-Copy `index.html` (+ `sounds/` if used) into `satans-game/keycap/`, then add a card for it in the hub
-`satans-game/index.html` next to "사탄의 세탁" (same markup as that card; link `keycap/index.html`).
-Other games in that repo use the same look (white/pastel page, Jua + Noto Sans KR fonts).
+This folder *is* `satans-game/keycap/` now (source, build script and built page together). Edit `src/`,
+run `python build.py`, commit both. The hub card is in `satans-game/index.html`.
 
 ## Known limits / gotchas
 

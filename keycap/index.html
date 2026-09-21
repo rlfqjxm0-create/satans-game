@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>사탄의 키캡 공방 · 사탄의 게임</title>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -171,7 +172,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
         <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
         <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요.</p><div class="chips" id="glitChips"></div></div>
-      <div class="group"><h2>스위치</h2><p class="sub">스위치마다 타건음이 달라요.</p><div class="chips" id="swChips"></div></div>
+      <div class="group"><h2>스위치</h2><p class="sub">직접 녹음한 키보드 소리예요. 누를 때마다 다른 키 소리가 나요.</p><div class="chips" id="swChips"></div></div>
       <div class="group"><h2>RGB 조명</h2><div class="chips" id="rgbChips"></div><div class="swatches" id="rgbSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
@@ -1437,7 +1438,14 @@ function motion(res,t,k){ // returns offsets
 const $=id=>document.getElementById(id);
 function toast(m){const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2600)}
 const INK="#4E5F73";
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"blue", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true};
+/* GPU clean-up. rebuild() runs on every option click, so the meshes it throws away must give their
+   geometry / materials / textures back - three.js never frees them by itself (46 clicks used to leave
+   173 geometries and 16 textures behind). Things built once and shared go into KEEP and are never freed. */
+const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
+const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
+function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
+function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true};
 const OPT={
   shape:{cherry:"체리",sa:"SA",round:"동글",heart:"하트"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -1446,19 +1454,20 @@ const OPT={
   base:{clear:"투명",tint:"컬러 투명",gloss:"유광",matte:"무광",holo:"홀로그램"},
   decoMat:{gloss:"유광",matte:"무광",holo:"홀로그램"},
   glitter:{none:"없음",star:"별가루",snow:"눈송이",heart:"하트",aurora:"오로라"},
-  sw:{red:"적축 · 도각",brown:"갈축 · 보글",blue:"청축 · 딸깍"},
+  sw:{mango:"망고스틴축",frog:"개구리축",tico:"저소음축",violet:"바이올렛축",black:"흑축"},
   rgb:{off:"끄기",solid:"고정",breath:"숨쉬기",rainbow:"무지개"},
   bg:{peach:"피치 노을",lilac:"라일락",soda:"소다",sunset:"핑크 선셋",night:"밤하늘"}
 };
 const BASE_COLORS=["#FFB8D0","#FFD9A0","#FFF1A8","#BDEBD2","#A8D8FF","#C9B8FF","#FFFFFF","#3A3F4B"];
 const DECO_COLORS=["#FFFFFF","#FF8FB0","#FFD45C","#7FC8F0","#9BE39A","#B28CFF","#2C2F36","#E3344B"];
 const BGS={peach:["#FFE3D3","#FFC9DE","#E7D3FF"],lilac:["#F3E8FF","#D9CCFF","#BFD5FF"],soda:["#E4FFF6","#BFEFFF","#D8D3FF"],sunset:["#FFD6E7","#FFB4C8","#B9A4FF"],night:["#12143A","#2E2766","#6A4C9C"]};
-const SWC={red:"#E8455B",brown:"#A0704E",blue:"#2F8FE8"};
+// stem colour of each switch (연핑크 · 연초록 · 파랑 · 보라 · 검정)
+const SWC={mango:"#FFB3CE",frog:"#A6E3B4",tico:"#3E8EEB",violet:"#9B6BFF",black:"#26282E"};
 const lin=(h)=>new THREE.Color(h).convertSRGBToLinear();
 
 /* ---------- renderer / scene ---------- */
 const cv=$("cv");
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
 renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 const scene=new THREE.Scene();
@@ -1472,7 +1481,7 @@ camera.position.set(0,32,90); camera.lookAt(0,6,0); camera.fov=31;
   es.add(new THREE.Mesh(g,new THREE.MeshBasicMaterial({side:THREE.BackSide,vertexColors:true})));
   const panel=(x,y,z,w,h,s,col)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(col||0xffffff).multiplyScalar(s),side:THREE.DoubleSide})); m.position.set(x,y,z); m.lookAt(0,0,0); es.add(m)};
   panel(-40,50,30,50,30,3.4); panel(46,26,24,26,50,1.6,0xffe6f2); panel(0,60,-40,60,20,1.4); panel(-50,10,-20,20,40,1.2,0xdde8ff); panel(0,-30,50,80,10,0.45);
-  scene.environment=pm.fromScene(es,0.04).texture;
+  scene.environment=keep(pm.fromScene(es,0.04).texture);
 })();
 scene.add(new THREE.HemisphereLight(0xffffff,0xd6c8ee,0.35));
 const keyL=new THREE.DirectionalLight(0xffffff,0.95); keyL.position.set(-30,60,40); scene.add(keyL);
@@ -1509,6 +1518,9 @@ function surfMat(kind,hex,extra){
 
 /* ---------- background ---------- */
 function setBg(){
+  const prev=scene.background; setBgNow(); if(prev&&prev!==scene.background&&prev.isTexture&&!KEEP.has(prev)) prev.dispose();
+}
+function setBgNow(){
   if(S.bgImg){scene.background=S.bgImg; document.documentElement.style.setProperty("--stage","#EEE"); return}
   const st=BGS[S.bg]; scene.background=canvasTex(8,640,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h); st.forEach((c,i)=>g.addColorStop(i/(st.length-1),c)); x.fillStyle=g; x.fillRect(0,0,w,h)},true);
   document.documentElement.style.setProperty("--stage",st[0]);
@@ -1568,7 +1580,7 @@ for(const [x,z] of [[-3.2,-2.2],[1.6,-3.8]]){const pin=new THREE.Mesh(new THREE.
 const topHousingGeo=(()=>{const p={sec:"sq",bw:15,tw:11.4,h:4.2,n0:8,n1:6,dish:0,dome:0,bev:0.8,tilt:0}; return capGeometry(p,true)})();
 const topHousing=new THREE.Mesh(topHousingGeo,new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.08,transmission:0.9,transparent:true,clearcoat:1,depthWrite:false})); topHousing.position.y=0; topHousing.scale.y=0.82; topHousing.renderOrder=2; sw.add(topHousing);
 const spring=(()=>{const pts=[]; for(let i=0;i<=120;i++){const a=i/120*Math.PI*2*6; pts.push(new THREE.Vector3(Math.cos(a)*1.6,-3.6+i/120*5.4,Math.sin(a)*1.6))} return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),240,0.18,6,false),metal)})(); sw.add(spring);
-const stemMat=new THREE.MeshPhysicalMaterial({color:lin(SWC.blue),roughness:0.35,clearcoat:0.5});
+const stemMat=new THREE.MeshPhysicalMaterial({color:lin(SWC[S.sw]),roughness:0.35,clearcoat:0.5});
 const stem=new THREE.Group(); const stemBase=new THREE.Mesh(roundedBox(6,2.4,6,0.8),stemMat); stemBase.position.y=2.6; stem.add(stemBase);
 {const s1=new THREE.Mesh(new THREE.BoxGeometry(4.2,3.2,1.25),stemMat); s1.position.set(0,4.6,0); stem.add(s1); const s2=new THREE.Mesh(new THREE.BoxGeometry(1.25,3.2,4.2),stemMat); s2.position.set(0,4.6,0); stem.add(s2)}
 sw.add(stem);
@@ -1589,6 +1601,7 @@ const chain=new THREE.Group(); root.add(chain);
 // RGB light under the switch
 const rgbLight=new THREE.PointLight(0xff66cc,0,40,1.6); rgbLight.position.set(0,-3,0); root.add(rgbLight);
 const glowTex=canvasTex(128,128,(x)=>{const g=x.createRadialGradient(64,64,6,64,64,64); g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.4,"rgba(255,255,255,.4)"); g.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle=g; x.fillRect(0,0,128,128)});
+keep(NOISE); keep(shadowTex); keep(glowTex);   // shared by many materials - never freed
 const rgbGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xff66cc,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0})); rgbGlow.scale.set(34,34,1); rgbGlow.position.set(0,-2,0); root.add(rgbGlow);
 const rgbFloor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.MeshBasicMaterial({map:glowTex,color:0xff66cc,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0})); rgbFloor.rotation.x=-Math.PI/2; rgbFloor.position.y=-14.3; scene.add(rgbFloor);
 
@@ -1726,8 +1739,8 @@ function baseMaterial(){
   }
 }
 function applyBase(){
-  clearMat=baseMaterial(); block.material=clearMat; const see=S.base==="clear"||S.base==="tint"; cavity.visible=see; bot.visible=see||true;
-  if(nameMesh){root.remove(nameMesh); nameMesh=null}
+  const oldBase=clearMat; clearMat=baseMaterial(); block.material=clearMat; freeMat(oldBase); const see=S.base==="clear"||S.base==="tint"; cavity.visible=see; bot.visible=see||true;
+  if(nameMesh){root.remove(nameMesh); freeTree(nameMesh); nameMesh=null}
   if(S.name){nameMesh=new THREE.Mesh(new THREE.PlaneGeometry(18,6.75),new THREE.MeshPhysicalMaterial({map:nameSticker(S.name),transparent:true,alphaTest:0.05,roughness:0.35,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-3}));
     nameMesh.position.set(0,-7.4,11.36); nameMesh.rotation.z=0; nameMesh.renderOrder=6; root.add(nameMesh)}
 }
@@ -1741,51 +1754,89 @@ function glitterGeo(kind){
   else if(kind==="snow"){for(let i=0;i<24;i++){const a=i/24*Math.PI*2, r=[1,0.35,0.62,0.35][i%4]; i?s.lineTo(Math.cos(a)*r,Math.sin(a)*r):s.moveTo(Math.cos(a)*r,Math.sin(a)*r)} s.closePath()}
   else if(kind==="heart"){const k2=0.24; s.moveTo(0,-3.4*k2); s.bezierCurveTo(-1.6*k2,-2.2*k2,-4.6*k2,-0.6*k2,-4.6*k2,1.6*k2); s.bezierCurveTo(-4.6*k2,3.6*k2,-2.9*k2,4.6*k2,-1.7*k2,4.6*k2); s.bezierCurveTo(-0.8*k2,4.6*k2,-0.2*k2,4.1*k2,0,3.3*k2); s.bezierCurveTo(0.2*k2,4.1*k2,0.8*k2,4.6*k2,1.7*k2,4.6*k2); s.bezierCurveTo(2.9*k2,4.6*k2,4.6*k2,3.6*k2,4.6*k2,1.6*k2); s.bezierCurveTo(4.6*k2,-0.6*k2,1.6*k2,-2.2*k2,0,-3.4*k2)}
   else {for(let i=0;i<6;i++){const a=i/6*Math.PI*2; i?s.lineTo(Math.cos(a)*0.7,Math.sin(a)*0.7):s.moveTo(Math.cos(a)*0.7,Math.sin(a)*0.7)} s.closePath()}
-  const g=new THREE.ExtrudeGeometry(s,{depth:0.14,bevelEnabled:true,bevelThickness:0.07,bevelSize:0.07,bevelSegments:2,curveSegments:10}); g.center(); GLIT_GEO[kind]=g; return g;
+  const g=new THREE.ExtrudeGeometry(s,{depth:0.14,bevelEnabled:true,bevelThickness:0.07,bevelSize:0.07,bevelSegments:2,curveSegments:10}); g.center(); GLIT_GEO[kind]=keep(g); return g;
 }
 function glitterMat(kind){
   if(GLIT_MAT[kind]) return GLIT_MAT[kind];
   let m;
-  if(kind==="star") m=new THREE.MeshStandardMaterial({color:lin("#FFD45C"),metalness:1,roughness:0.16,emissive:lin("#FFB830"),emissiveIntensity:0.35});
+  if(kind==="star") m=new THREE.MeshStandardMaterial({color:lin("#FFD66B"),metalness:0.75,roughness:0.18,emissive:lin("#FFB938"),emissiveIntensity:0.85});
   else if(kind==="snow") m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FFFFFF"),metalness:0.35,roughness:0.12,clearcoat:1,emissive:lin("#DDEBFF"),emissiveIntensity:0.25}));
   else if(kind==="heart") m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FF8FB8"),metalness:0.25,roughness:0.14,clearcoat:1,emissive:lin("#FF6F9E"),emissiveIntensity:0.2}));
   else m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FFFFFF"),metalness:0.7,roughness:0.1,clearcoat:1}));
-  GLIT_MAT[kind]=m; return m;
+  GLIT_MAT[kind]=keep(m); return m;
 }
+/* The glitter is fenced by the cap's own cross-section, not by a square box - a square let flakes
+   wander outside the heart (and the round cap's corners). FENCE[a] = distance from the centre to the
+   outline along angle a, for a unit-size section; the heart's notch is concave, so it also looks a few
+   degrees either side. Checked for all four shapes: a flake centre on the fence stays >=1.3 inside the wall. */
+const FENCE_N=180, FENCES={};
+function fenceTable(p){const key=p.sec+p.n0+"/"+p.n1; if(FENCES[key]) return FENCES[key];
+  const secs=p.sec==="heart"?[section("heart",0,96)]:[section("se",p.n0,96),section("se",p.n1,96)], R=new Float32Array(FENCE_N);
+  for(let k=0;k<FENCE_N;k++){const a=k/FENCE_N*Math.PI*2, dx=Math.cos(a), dz=Math.sin(a); let best=Infinity;
+    for(const sec of secs) for(let i=0;i<sec.length;i++){const [x1,z1]=sec[i],[x2,z2]=sec[(i+1)%sec.length], ex=x2-x1, ez=z2-z1, den=ex*dz-dx*ez; if(Math.abs(den)<1e-12) continue;
+      const t=(ex*z1-x1*ez)/den, u=(dx*z1-dz*x1)/den; if(t>0&&u>=0&&u<1&&t<best) best=t}
+    R[k]=best}
+  const win=p.sec==="heart"?6:0, out=new Float32Array(FENCE_N);
+  for(let k=0;k<FENCE_N;k++){let m=R[k]; for(let j=-win;j<=win;j++) m=Math.min(m,R[(k+j+FENCE_N)%FENCE_N]); out[k]=m}
+  return (FENCES[key]=out)}
+function fenceAt(T,a){const f=((a/(Math.PI*2))%1+1)%1*FENCE_N, i=Math.floor(f)%FENCE_N; return lerp(T[i],T[(i+1)%FENCE_N],f-Math.floor(f))}
+const fenceLim=(T,a,w)=>{const r=fenceAt(T,a)*w; return Math.max(0,Math.min(r*0.72,r-1.3))};
+/* a soft halo + thin cross flare on every star flake; additive, so it reads as light, and each one
+   twinkles at its own pace. Shares the flakes' position array, so it costs one small draw call. */
+let GLOW_TEX=null, GLOW_MAT=null;
+function starGlow(pos,N){
+  if(!GLOW_TEX) GLOW_TEX=keep(canvasTex(64,64,(x)=>{const g=x.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.14,"rgba(255,244,200,.95)");
+    g.addColorStop(0.4,"rgba(255,206,100,.32)"); g.addColorStop(1,"rgba(255,190,80,0)"); x.fillStyle=g; x.fillRect(0,0,64,64);
+    x.globalCompositeOperation="lighter"; for(const [w,h] of [[64,3.2],[3.2,64]]){const l=x.createLinearGradient(32-w/2,32-h/2,32+w/2,32+h/2); l.addColorStop(0,"rgba(255,240,200,0)"); l.addColorStop(0.5,"rgba(255,252,236,1)"); l.addColorStop(1,"rgba(255,240,200,0)"); x.fillStyle=l; x.fillRect(32-w/2,32-h/2,w,h)}}));
+  if(!GLOW_MAT) GLOW_MAT=keep(new THREE.PointsMaterial({map:GLOW_TEX,size:2.9,sizeAttenuation:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,vertexColors:true}));
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.BufferAttribute(pos,3)); g.setAttribute("color",new THREE.BufferAttribute(new Float32Array(N*3),3));
+  const pts=new THREE.Points(g,GLOW_MAT); pts.renderOrder=4; pts.frustumCulled=false; return pts;
+}
+function twinkle(pts,N,t){const col=pts.geometry.attributes.color.array;
+  for(let i=0;i<N;i++){const s=0.5+0.5*Math.sin(t*(1.6+hash(i+300)*2.2)+hash(i+500)*6.28), k=0.3+0.7*s*s; col[i*3]=k; col[i*3+1]=k*0.92; col[i*3+2]=k*0.72}
+  pts.geometry.attributes.color.needsUpdate=true; pts.geometry.attributes.position.needsUpdate=true}
 function makeParticles(p,g){
   if(S.glitter==="none"||!(S.mat==="resin"||S.mat==="jelly")) return null;
-  const kind=S.glitter, N={star:38,snow:30,heart:28,aurora:46}[kind], scale={star:1.05,snow:1.1,heart:1.0,aurora:0.8}[kind];
+  const kind=S.glitter, N={star:60,snow:30,heart:28,aurora:46}[kind], scale={star:0.42,snow:1.1,heart:1.0,aurora:0.8}[kind];
   const mesh=new THREE.InstancedMesh(glitterGeo(kind),glitterMat(kind),N); mesh.renderOrder=1;
   const pos=new Float32Array(N*3), vel=new Float32Array(N*3), rot=new Float32Array(N*3), spin=new Float32Array(N*3), r=mulberry32(9);
-  for(let i=0;i<N;i++){const v=r()*0.3; const hw=lerp(p.bw,p.tw,v)/2*0.66; pos[i*3]=(r()*2-1)*hw; pos[i*3+1]=0.9+v*p.h*0.6; pos[i*3+2]=(r()*2-1)*hw;
+  const fence=fenceTable(p);
+  for(let i=0;i<N;i++){const v=r()*0.3, a=r()*Math.PI*2, rr=Math.sqrt(r())*fenceLim(fence,a,lerp(p.bw,p.tw,Math.pow(v,1.2))/2);
+    pos[i*3]=Math.cos(a)*rr; pos[i*3+1]=0.9+v*p.h*0.6; pos[i*3+2]=Math.sin(a)*rr;
     for(let a=0;a<3;a++){rot[i*3+a]=r()*6.28; spin[i*3+a]=(r()*2-1)*0.4}}
-  return {mesh,pos,vel,rot,spin,N,p,scale,dummy:new THREE.Object3D()};
+  const sys={mesh,pos,vel,rot,spin,N,p,scale,fence,dummy:new THREE.Object3D()};
+  if(kind==="star") sys.glow=starGlow(pos,N);
+  return sys;
 }
 function stirParticles(){if(!partSys) return; const {vel,spin,N}=partSys; for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2; vel[i*3]+=Math.cos(a)*(5+Math.random()*9); vel[i*3+1]+=9+Math.random()*14; vel[i*3+2]+=Math.sin(a)*(5+Math.random()*9); for(let k2=0;k2<3;k2++) spin[i*3+k2]+=(Math.random()*2-1)*9}}
 function stepParticles(dt,t){
-  if(!partSys) return; const {mesh,pos,vel,rot,spin,N,p,scale,dummy}=partSys, grav=S.glitter==="snow"?2.6:4.2;
+  if(!partSys) return; const {mesh,pos,vel,rot,spin,N,p,scale,fence,dummy}=partSys, grav=S.glitter==="snow"?2.6:4.2;
   for(let i=0;i<N;i++){const ix=i*3;
     vel[ix+1]-=grav*dt; const d=1-2.4*dt; vel[ix]*=d; vel[ix+1]*=d; vel[ix+2]*=d;
     pos[ix]+=vel[ix]*dt; pos[ix+1]+=vel[ix+1]*dt; pos[ix+2]+=vel[ix+2]*dt;
-    const floor=0.9, y=pos[ix+1], v=clamp((y-floor)/(p.h*0.85)), hw=lerp(p.bw,p.tw,v)/2*0.68;
+    const floor=0.9, y=pos[ix+1], v=clamp((y-floor)/(p.h*0.85));
     if(y<floor){pos[ix+1]=floor; vel[ix+1]=0; for(let k2=0;k2<3;k2++) spin[ix+k2]*=0.9}
     if(y>p.h*0.9){pos[ix+1]=p.h*0.9; vel[ix+1]*=-0.3}
-    if(Math.abs(pos[ix])>hw){pos[ix]=Math.sign(pos[ix])*hw; vel[ix]*=-0.4} if(Math.abs(pos[ix+2])>hw){pos[ix+2]=Math.sign(pos[ix+2])*hw; vel[ix+2]*=-0.4}
+    {const px=pos[ix], pz=pos[ix+2], rr=Math.hypot(px,pz);
+      if(rr>1e-6){const lim=fenceLim(fence,Math.atan2(pz,px),lerp(p.bw,p.tw,Math.pow(v,1.2))/2);
+        if(rr>lim){const ux=px/rr, uz=pz/rr, vr=vel[ix]*ux+vel[ix+2]*uz; pos[ix]=ux*lim; pos[ix+2]=uz*lim; if(vr>0){vel[ix]-=1.4*vr*ux; vel[ix+2]-=1.4*vr*uz}}}}
     const sd=1-1.5*dt; for(let k2=0;k2<3;k2++){rot[ix+k2]+=spin[ix+k2]*dt; spin[ix+k2]*=sd}
     // resting flakes lie flat-ish, like glitter settled at the bottom
     if(pos[ix+1]<=floor+0.01){rot[ix]=lerp(rot[ix],Math.round(rot[ix]/Math.PI)*Math.PI+Math.PI/2,dt*3)}
     dummy.position.set(pos[ix],pos[ix+1],pos[ix+2]); dummy.rotation.set(rot[ix],rot[ix+1],rot[ix+2]); dummy.scale.setScalar(scale*(0.85+0.3*hash(i+40))); dummy.updateMatrix(); mesh.setMatrixAt(i,dummy.matrix);
   }
   mesh.instanceMatrix.needsUpdate=true;
+  if(partSys.glow) twinkle(partSys.glow,N,t);
 }
 
 function rebuild(){
   const p=PROFILES[S.shape], flat=S.charPos==="top"||S.charPos==="stand";
+  capGroup.children.forEach(freeTree);
   while(capGroup.children.length) capGroup.remove(capGroup.children[0]);
   capGeo=capGeometry(p,flat);
   capMesh=new THREE.Mesh(capGeo,capMaterial()); capMesh.renderOrder=2; capGroup.add(capMesh);
   if(S.charPos!=="none"){charGroup=buildChar(p,capGeo); capGroup.add(charGroup)}
-  partSys=makeParticles(p,capGeo); if(partSys){capGroup.add(partSys.mesh); stepParticles(0.001,0)}
+  partSys=makeParticles(p,capGeo); if(partSys){capGroup.add(partSys.mesh); if(partSys.glow) capGroup.add(partSys.glow); stepParticles(0.001,0)}
   decoGroup=buildDeco(p,capGeo); capGroup.add(decoGroup);
   applyBase();
   stemMat.color.copy(lin(SWC[S.sw]));
@@ -1821,23 +1872,43 @@ let NB=null; function noiseBuf(a){if(NB) return NB; const b=a.createBuffer(1,a.s
 function burst(a,t0,lo,hi,vol,dec){const s=a.createBufferSource(); s.buffer=noiseBuf(a); const bp=a.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=Math.sqrt(lo*hi); bp.Q.value=Math.max(0.3,Math.sqrt(lo*hi)/(hi-lo)); const g=a.createGain(); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); s.connect(bp).connect(g).connect(a.destination); s.start(t0); s.stop(t0+dec+0.02)}
 function thump(a,t0,f,vol,dec){const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.setValueAtTime(f,t0); o.frequency.exponentialRampToValueAtTime(f*0.6,t0+dec); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); o.connect(g).connect(a.destination); o.start(t0); o.stop(t0+dec+0.02)}
 function chime(a,t0){[1568,2093,2637].forEach((f,i)=>{const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t0+i*0.05); g.gain.linearRampToValueAtTime(0.035,t0+i*0.05+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.05+0.5); o.connect(g).connect(a.destination); o.start(t0+i*0.05); o.stop(t0+i*0.05+0.55)})}
-/* Your own recorded switch sounds: drop files into ./sounds/ (see sounds/README.md).
-   When a file is found it is used; otherwise the built-in synthesized sound plays. */
-const SOUND_EXTS=[".mp3",".wav",".ogg",".m4a"], SOUND_BUF={}; let soundsTried=false;
-async function loadSoundFiles(){
-  if(soundsTried) return; soundsTried=true; const a=ac(); if(!a) return;
-  for(const sw of Object.keys(OPT.sw)) for(const kind of ["down","up"]){
-    for(const ext of SOUND_EXTS){try{const r=await fetch(`sounds/${sw}_${kind}${ext}`); if(!r.ok) continue; const buf=await a.decodeAudioData(await r.arrayBuffer()); (SOUND_BUF[`${sw}_${kind}`]=SOUND_BUF[`${sw}_${kind}`]||[]).push(buf); break}catch(e){}}
-    // optional variations: red_down_2.mp3, red_down_3.mp3 ... are picked at random for a livelier sound
-    for(let v=2;v<=6;v++){let got=false; for(const ext of SOUND_EXTS){try{const r=await fetch(`sounds/${sw}_${kind}_${v}${ext}`); if(!r.ok) continue; const buf=await a.decodeAudioData(await r.arrayBuffer()); (SOUND_BUF[`${sw}_${kind}`]=SOUND_BUF[`${sw}_${kind}`]||[]).push(buf); got=true; break}catch(e){}} if(!got) break}
-  }
+/* The owner's own keyboard recordings (the same packs her desktop timer uses), in sounds/<switch>/.
+   Every press plays a different key - now and then a space/enter/shift/backspace - so pressing the
+   keycap sounds like typing instead of one clip on repeat. gain evens the packs out (key RMS 841~1216). */
+const PACKS={mango:{keys:10,spec:1,gain:1.1},frog:{keys:10,spec:1,gain:0.96},tico:{keys:24,spec:4,gain:0.8},
+  violet:{keys:10,spec:1,gain:1.12},black:{keys:10,spec:1,gain:1.04}};
+const PACK_BUF={}, PACK_LOAD={};
+function loadPack(id){
+  if(PACK_LOAD[id]||!PACKS[id]) return PACK_LOAD[id]; const P=PACKS[id], names=[];
+  for(let i=1;i<=P.keys;i++) names.push("key"+i); for(const k of ["space","enter","shift","back"]) for(let i=1;i<=P.spec;i++) names.push(k+i);
+  // decoding needs no user gesture on an offline context, and AudioBuffers play on any context
+  let dec=null; try{dec=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,1,44100)}catch(e){}
+  if(!dec) return (PACK_LOAD[id]=Promise.resolve());
+  return (PACK_LOAD[id]=Promise.all(names.map(n=>fetch(`sounds/${id}/${n}.wav`).then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status))
+      .then(b=>new Promise((ok,no)=>dec.decodeAudioData(b,ok,no))).then(buf=>[n,buf]).catch(()=>null)))
+    .then(list=>{const pb={key:[],space:[],enter:[],shift:[],back:[]}; let got=0;
+      for(const it of list){if(!it) continue; pb[it[0].replace(/\d+$/,"")].push(it[1]); got++}
+      if(got&&pb.key.length) PACK_BUF[id]=pb}));   // nothing loaded (opened as a file) -> the synth below stays
 }
-function playFile(a,kind){const list=SOUND_BUF[`${S.sw}_${kind}`]; if(!list||!list.length) return false;
-  const src=a.createBufferSource(); src.buffer=list[Math.floor(Math.random()*list.length)]; src.playbackRate.value=0.96+Math.random()*0.08; const g=a.createGain(); g.gain.value=0.9; src.connect(g).connect(a.destination); src.start(); return true}
-function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; loadSoundFiles(); if(playFile(a,kind)) return; const t=a.currentTime; const deep=S.mat==="resin"||S.mat==="jelly"?0.9:1.1;
-  if(kind==="down"){if(S.sw==="blue"){burst(a,t,2800,7000,0.55,0.025); burst(a,t+0.012,3500,8000,0.35,0.02)} if(S.sw==="brown") burst(a,t,900,2400,0.25,0.03);
-    burst(a,t+0.02,500*deep,2200*deep,0.7,0.06); thump(a,t+0.02,170*deep,0.45,0.09)}
-  else{if(S.sw==="blue") burst(a,t,3000,7500,0.4,0.02); burst(a,t,700*deep,2600*deep,0.3,0.04); thump(a,t,230*deep,0.18,0.05)}}
+let lastKeys=[];
+function pickSound(pb){
+  const r=Math.random(); let kind="key";
+  if(r<0.06&&pb.space.length) kind="space"; else if(r<0.1&&pb.enter.length) kind="enter";
+  else if(r<0.13&&pb.shift.length) kind="shift"; else if(r<0.15&&pb.back.length) kind="back";
+  const list=pb[kind]; let i=Math.floor(Math.random()*list.length);
+  if(kind==="key"&&list.length>3){for(let n=0;n<8&&lastKeys.includes(i);n++) i=Math.floor(Math.random()*list.length); lastKeys=[i,...lastKeys].slice(0,2)}
+  return list[i];
+}
+function playPack(a){const pb=PACK_BUF[S.sw]; if(!pb) return false;
+  const src=a.createBufferSource(); src.buffer=pickSound(pb); src.playbackRate.value=0.98+Math.random()*0.04;
+  const g=a.createGain(); g.gain.value=PACKS[S.sw].gain; src.connect(g).connect(a.destination); src.start(); return true}
+// changing the switch: let its sounds arrive before the demo press, so it is heard with the new switch
+function previewSwitch(){ac(); const p=loadPack(S.sw); if(PACK_BUF[S.sw]||!p) pressKey(); else p.then(pressKey,pressKey)}
+function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; loadPack(S.sw);
+  if(PACK_BUF[S.sw]){if(kind==="down") playPack(a); return}   // a recording already holds the whole keystroke
+  const t=a.currentTime; const deep=S.mat==="resin"||S.mat==="jelly"?0.9:1.1;   // fallback when the files can't load
+  if(kind==="down"){burst(a,t+0.02,500*deep,2200*deep,0.7,0.06); thump(a,t+0.02,170*deep,0.45,0.09)}
+  else{burst(a,t,700*deep,2600*deep,0.3,0.04); thump(a,t,230*deep,0.18,0.05)}}
 
 /* ---------- loop ---------- */
 function resize(){const r=cv.getBoundingClientRect(); renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
@@ -1864,9 +1935,10 @@ function frame(now){
   if(!gesture&&!CAM.locked){rotY+=velY; velY*=0.92; if(idle>2.5) rotY+=dt*0.35}
   const target=pressed?1:0; pressV+=(target-press)*dt*260; pressV*=0.72; press+=pressV*dt*8; press=clamp(press,-0.2,1.1);
   stepParticles(dt,T);
-  if(!PAUSE){poseAt(T); renderer.render(scene,camera)}
+  if(!PAUSE&&ONSCREEN){poseAt(T); renderer.render(scene,camera)}
   requestAnimationFrame(frame);
 }
+let ONSCREEN=true; try{new IntersectionObserver(es=>{ONSCREEN=es[es.length-1].isIntersecting},{rootMargin:"80px"}).observe(cv)}catch(e){}
 requestAnimationFrame(frame);
 
 /* ---------- palette from the character ---------- */
@@ -1880,8 +1952,8 @@ function extractPalette(it){
 
 /* ---------- UI ---------- */
 function chipGroup(id,key,labels,after){const el=$(id); el.innerHTML="";
-  for(const k of Object.keys(labels)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=labels[k]; b.setAttribute("aria-pressed",String(S[key]===k));
-    b.addEventListener("click",()=>{S[key]=k; if(key==="bg") S.bgImg=null; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(after) after(k); else rebuild(); if(key==="sw") pressKey()}); el.appendChild(b)}}
+  for(const k of Object.keys(labels)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=labels[k]; if(key==="sw"){const d=document.createElement("span"); d.className="dot"; d.style.background=SWC[k]; b.prepend(d)} b.setAttribute("aria-pressed",String(S[key]===k));
+    b.addEventListener("click",()=>{S[key]=k; if(key==="bg") S.bgImg=null; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(after) after(k); else rebuild(); if(key==="sw") previewSwitch()}); el.appendChild(b)}}
 function swatches(id,key,list){const el=$(id); el.innerHTML="";
   const all=[...S.palette,...list].filter((c,i,a)=>a.indexOf(c)===i);
   all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); b.style.background=col; b.setAttribute("aria-label",col); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
@@ -1892,10 +1964,10 @@ function renderUI(){
   chipGroup("glitChips","glitter",OPT.glitter,()=>{rebuild(); pressKey()}); chipGroup("baseChips","base",OPT.base,()=>applyBase()); swatches("baseSw","baseColor",["#CFE3FF","#FFD1E3","#FFF1B8","#CDEFE0","#DCCBFF","#FFFFFF","#2C2F36"]); chipGroup("swChips","sw",OPT.sw); chipGroup("rgbChips","rgb",OPT.rgb,()=>{}); chipGroup("bgChips","bg",OPT.bg,()=>setBg());
   swatches("colSw","color",BASE_COLORS); swatches("decoSw","decoColor",DECO_COLORS); swatches("rgbSw","rgbColor",["#FF6FB5","#FF4D4D","#FFB547","#6BFF9E","#4DC3FF","#8C6BFF","#FFFFFF"]);
 }
-$("name").addEventListener("input",e=>{S.name=e.target.value.trim(); $("count").textContent=`${[...e.target.value].length}/6`; rebuild()});
+$("name").addEventListener("input",e=>{S.name=e.target.value.trim(); $("count").textContent=`${[...e.target.value].length}/6`; applyBase(); writeHash()});
 $("lookalike").addEventListener("click",()=>{const it=S.items[0]; if(!it){toast("먼저 캐릭터 그림을 넣어 주세요"); return} S.palette=extractPalette(it); if(!S.palette.length) return; S.color=S.palette[0]; S.decoColor=S.palette[1]||S.palette[0]; S.rgbColor=S.palette[2]||S.palette[0]; renderUI(); rebuild(); pressKey(); toast("캐릭터 색으로 칠했어요")});
 $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); return k[Math.floor(Math.random()*k.length)]};
-  S.shape=pk(OPT.shape); S.mat=pk(OPT.mat); S.deco=pk(OPT.deco); S.decoMat=pk(OPT.decoMat); S.glitter=pk(OPT.glitter); S.sw=pk(OPT.sw); S.rgb=pk(OPT.rgb);
+  S.shape=pk(OPT.shape); S.mat=pk(OPT.mat); S.deco=pk(OPT.deco); S.decoMat=pk(OPT.decoMat); S.glitter=pk(OPT.glitter); S.sw=pk(OPT.sw); S.rgb=pk(OPT.rgb); loadPack(S.sw);
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
 $("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
@@ -1908,10 +1980,14 @@ $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.tar
     S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
 function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
-function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1]))))); Object.assign(S,{base:o.bs||S.base,baseColor:o.bc||S.baseColor,shape:PROFILES[o.s]?o.s:S.shape,mat:o.m||S.mat,color:o.c||S.color,charPos:o.p||S.charPos,deco:OPT.deco[o.d]?o.d:S.deco,decoMat:o.dm||S.decoMat,decoColor:o.dc||S.decoColor,glitter:o.g||S.glitter,sw:o.w||S.sw,rgb:o.r||S.rgb,rgbColor:o.rc||S.rgbColor,bg:o.b||S.bg,name:o.n||""}); $("name").value=S.name}catch(e){}}
+function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+  const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
+  Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
+    charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
+    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):""}); $("name").value=S.name}catch(e){}}
 $("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
 function resetRun(){rebuild()}
-readHash(); setBg(); renderUI(); rebuild();
+readHash(); setBg(); renderUI(); rebuild(); (window.requestIdleCallback||setTimeout)(()=>loadPack(S.sw));
 
 /* ---------- slots & files ---------- */
 function renderSlots(){
