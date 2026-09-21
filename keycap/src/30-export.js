@@ -17,7 +17,8 @@ function snap(W,H){ // render one frame at a given size and hand back a 2D canva
 function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize(); camApply()}
 /* a little die-cut sticker, like the ones on handmade goods for sale: white border, soft shadow, the site cat */
 function watermark(x,W,H){
-  const s=W/1080, bw=318*s, bh=92*s, cx=W-60*s-bw/2, cy=H-64*s-bh/2, r=bh/2, col=S.color;
+  const s=W/1080; x.save(); x.font=`${38*s}px Jua, sans-serif`; const tw=x.measureText("사탄의 키캡").width; x.restore();
+  const bw=24*s+60*s+12*s+tw+30*s, bh=92*s, cx=W-60*s-bw/2, cy=H-64*s-bh/2, r=bh/2, col=S.color;   // cat + text, even margins
   const fill=mixHex(col,"#FFFFFF",0.55), ink=mixHex(col,"#2A2230",0.78), edge=mixHex(col,"#FFFFFF",0.2);
   x.save(); x.translate(cx,cy); x.rotate(-0.07);
   const pill=(w,h,rr)=>{x.beginPath(); x.moveTo(-w/2+rr,-h/2); x.arcTo(w/2,-h/2,w/2,h/2,rr); x.arcTo(w/2,h/2,-w/2,h/2,rr); x.arcTo(-w/2,h/2,-w/2,-h/2,rr); x.arcTo(-w/2,-h/2,w/2,-h/2,rr); x.closePath()};
@@ -25,9 +26,8 @@ function watermark(x,W,H){
   pill(bw+18*s,bh+18*s,r+9*s); x.fillStyle="#FFFFFF"; x.fill();      // the white die-cut border
   x.shadowColor="transparent";
   pill(bw,bh,r); x.fillStyle=fill; x.fill(); x.lineWidth=2.5*s; x.setLineDash([7*s,6*s]); x.strokeStyle=edge; pill(bw-12*s,bh-12*s,r-6*s); x.stroke(); x.setLineDash([]);
-  x.save(); x.translate(-bw/2+20*s,-30*s); x.scale(60*s/64,60*s/64); drawSatanCat(x); x.restore();
-  x.font=`${38*s}px Jua, sans-serif`; x.textAlign="left"; x.textBaseline="middle"; x.fillStyle=ink; x.fillText("사탄의 키캡",-bw/2+90*s,2*s);
-  x.fillStyle="#FFD66B"; for(const [px,py,k] of [[bw/2-4*s,-bh/2+4*s,1],[bw/2+10*s,-bh/2+26*s,0.6]]){x.beginPath(); for(let i=0;i<8;i++){const a=i*Math.PI/4, rr=(i%2?5:13)*s*k; x.lineTo(px+Math.cos(a)*rr,py+Math.sin(a)*rr)} x.closePath(); x.fill()}
+  x.save(); x.translate(-bw/2+24*s,-30*s); x.scale(60*s/64,60*s/64); drawSatanCat(x); x.restore();
+  x.font=`${38*s}px Jua, sans-serif`; x.textAlign="left"; x.textBaseline="middle"; x.fillStyle=ink; x.fillText("사탄의 키캡",-bw/2+96*s,2*s);
   x.restore();
 }
 function cardOverlay(x,W,H){ // the title and a little list, as a label sticker at the top left (+ the corner sticker)
@@ -44,8 +44,6 @@ function cardOverlay(x,W,H){ // the title and a little list, as a label sticker 
   x.textAlign="left"; x.textBaseline="alphabetic";
   x.font=`${46*s}px Jua, sans-serif`; x.fillStyle=ink; x.fillText(title,-bw/2+32*s,-bh/2+56*s);
   x.font=`${23*s}px "Noto Sans KR", sans-serif`; x.fillStyle=soft; x.fillText(sub,-bw/2+32*s,-bh/2+92*s);
-  // a heart doodle on the corner, like a sticker sheet
-  x.fillStyle="#FF8FB0"; x.strokeStyle="#FFFFFF"; x.lineWidth=5*s; heart(x,bw/2-4*s,-bh/2+2*s,17*s); x.stroke(); x.fill();
   x.restore(); watermark(x,W,H);
 }
 $("savePng").addEventListener("click",async()=>{

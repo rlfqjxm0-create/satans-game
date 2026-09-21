@@ -10,8 +10,9 @@ function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a
 const hash=i=>mulberry32(i*9973+17)(); const lin=h=>h; const keep=o=>o;
 function Col(){this.setScalar=()=>this; this.copy=()=>this} const THREE={Color:Col,
   InstancedMesh:function(){this.setMatrixAt=()=>{}; this.setColorAt=()=>{this.instanceColor=this.instanceColor||{}}; this.instanceMatrix={}},
-  Object3D:function(){const v={set(){}};this.position=v;this.rotation=v;this.scale={setScalar(){}};this.updateMatrix=()=>{}}};
+  Object3D:function(){const v={set(){}};this.position=v;this.rotation=v;this.quaternion={copy(){}};this.scale={setScalar(){}};this.updateMatrix=()=>{}}};
 const glitterGeo=()=>0, glitterMat=()=>0, glowMat=()=>0, GLOW_PLANE=0;
+const glowOf=G=>G.glow, BB_Q={copy(){return this},invert(){return this},multiply(){return this}}, capGroup={getWorldQuaternion(){}}, camera={quaternion:0};
 const S={glitter:"star",mat:"resin",charPos:"inside",glitColor:"",glow:false}; let partSys=null;`;
 eval(pre+src+`
 function distToPoly(px,pz,sec,w){let d=Infinity; for(let i=0;i<sec.length;i++){const x1=sec[i][0]*w,z1=sec[i][1]*w,x2=sec[(i+1)%sec.length][0]*w,z2=sec[(i+1)%sec.length][1]*w; const ex=x2-x1,ez=z2-z1; let t=((px-x1)*ex+(pz-z1)*ez)/(ex*ex+ez*ez); t=Math.max(0,Math.min(1,t)); d=Math.min(d,Math.hypot(px-(x1+t*ex),pz-(z1+t*ez)))} return d}

@@ -75,10 +75,11 @@ function faceTex(f,dark){ // dark keycap: the lines stay dark and every part get
     const shine=(px,py,rr)=>{x.fillStyle="#FFFFFF"; if(n>=1){x.beginPath(); x.arc(px-rr*0.3,py-rr*0.32,rr*0.3,0,7); x.fill()}
       if(n>=3){x.beginPath(); x.arc(px+rr*0.32,py+rr*0.26,rr*0.14,0,7); x.fill(); x.beginPath(); x.arc(px-rr*0.02,py+rr*0.5,rr*0.08,0,7); x.fill()} x.fillStyle=ink};
     // eye colour: a chosen colour is drawn like an anime iris - darker at the top, the colour below
-    const ec=f.eyeColor, eye=(py,R)=>{if(!ec) return ink; const g=x.createLinearGradient(0,py-R,0,py+R); g.addColorStop(0,mixHex(ec,"#1E1A24",0.55)); g.addColorStop(0.55,ec); g.addColorStop(1,mixHex(ec,"#FFFFFF",0.25)); return g};
+    let ec=f.eyeColor; const eye=(py,R)=>{if(!ec) return ink; const g=x.createLinearGradient(0,py-R,0,py+R); g.addColorStop(0,mixHex(ec,"#1E1A24",0.55)); g.addColorStop(0.55,ec); g.addColorStop(1,mixHex(ec,"#FFFFFF",0.25)); return g};
     const ring=()=>{if(ec){x.lineWidth=u*0.006; x.strokeStyle=ink; x.stroke()}};
     x.strokeStyle=ink;
-    for(const s of [-1,1]){const px=cx+s*ex, py=ey; x.fillStyle=eye(py,r*1.3);
+    for(const s of [-1,1]){ec=(f.odd&&s>0)?f.eyeColor2:f.eyeColor;   // 오드아이: the eye on the right has its own colour
+      const px=cx+s*ex, py=ey; x.fillStyle=eye(py,r*1.3);
       if(f.eyes==="round"){x.beginPath(); x.arc(px,py,r,0,7); x.fill(); ring(); shine(px,py,r)}
       if(f.eyes==="sparkle"){const R=r*1.42; x.fillStyle=eye(py,R); x.beginPath(); x.ellipse(px,py,R*0.92,R,0,0,7); x.fill(); ring(); shine(px,py,R)}
       if(f.eyes==="half"){ // cool half-moon: flat top, round bottom
@@ -139,7 +140,7 @@ function buildFace(p,g){
    stays 0), spread out 31 px with a few jump-flood passes, so filtering and mipmaps only ever blend in the right colour. */
 const FACE_TEX=new Map();   // every rebuild (any option) remakes the face mesh; the picture is only redrawn when the face changes
 function faceTexCached(){
-  const dark=faceDark(), key=[dark,S.eyes,S.shine,S.nose,S.mouth,S.extra.slice().sort().join("."),S.eyeColor].join("|");
+  const dark=faceDark(), key=[dark,S.eyes,S.shine,S.nose,S.mouth,S.extra.slice().sort().join("."),S.eyeColor,S.odd?S.eyeColor2:"-"].join("|");
   let t=FACE_TEX.get(key); if(t){FACE_TEX.delete(key); FACE_TEX.set(key,t); return t}
   t=keep(bleedTex(faceTex(S,dark))); FACE_TEX.set(key,t);
   if(FACE_TEX.size>6){const [k0,old]=FACE_TEX.entries().next().value; FACE_TEX.delete(k0); KEEP.delete(old); old.dispose()}
@@ -161,14 +162,18 @@ function bleedTex(ct){
 function renderFaceUI(){
   const box=$("animalChips"); box.innerHTML="";
   for(const [k,a] of Object.entries(ANIMALS)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=a.name;
-    b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color,eyeColor:""}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
+    b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color,eyeColor:"",odd:false}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
   for(const k of FACE_KEYS) chipGroup(k+"Chips",k,OPT[k]);
-  swatches("eyeSw","eyeColor",["","#5A3A2E","#3E6FD8","#3FA36B","#9A5BE0","#E0457B","#E0A03A","#D8323C","#8FD3FF"]);
+  const EYE_COLS=["","#5A3A2E","#3E6FD8","#3FA36B","#9A5BE0","#E0457B","#E0A03A","#D8323C","#8FD3FF"];
+  swatches("eyeSw","eyeColor",EYE_COLS); swatches("eyeSw2","eyeColor2",EYE_COLS); oddUI();
   const el=$("extraChips"); el.innerHTML="";
   for(const k of Object.keys(OPT.extra)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=OPT.extra[k]; b.setAttribute("aria-pressed",String(S.extra.includes(k)));
     b.addEventListener("click",()=>{const i=S.extra.indexOf(k); if(i>=0) S.extra.splice(i,1); else S.extra.push(k); b.setAttribute("aria-pressed",String(i<0)); rebuild()}); el.appendChild(b)}
-  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:""}); renderFaceUI(); rebuild()};
+  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false}); renderFaceUI(); rebuild()};
+  $("oddBtn").onclick=()=>{S.odd=!S.odd; if(S.odd&&S.eyeColor2===S.eyeColor) S.eyeColor2=S.eyeColor==="#3E6FD8"?"#E0A03A":"#3E6FD8"; renderFaceUI(); rebuild()};
 }
+function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.textContent=S.odd?"👀 오드아이 켜짐":"👀 오드아이"; $("oddBox").hidden=!S.odd;
+  $("eyeLab").textContent=S.odd?"왼쪽 눈 색":"눈 색"}
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
 readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)

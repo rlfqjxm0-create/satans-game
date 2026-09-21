@@ -9,7 +9,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:""};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -239,7 +239,7 @@ function buildChar(p,g){
 /* trace the character's silhouette (with a clear margin) the way an acrylic cutter would */
 const CUTS=new WeakMap();
 function acrylicOutline(it){
-  if(CUTS.has(it)) return CUTS.get(it);
+  if(CUTS.has(it.canvas)) return CUTS.get(it.canvas);   // keyed by the picture, not the slot: erasing the background makes a new picture
   const src=it.canvas, pad=0.06, G=120, s=G/Math.max(src.width,src.height)/(1+pad*2);
   const gw=Math.round(src.width*s+G*pad*2*(src.width/Math.max(src.width,src.height)))+4, gh=Math.round(src.height*s+G*pad*2*(src.height/Math.max(src.width,src.height)))+4;
   const c=document.createElement("canvas"); c.width=gw; c.height=gh; const x=c.getContext("2d"); const ox=(gw-src.width*s)/2, oy=(gh-src.height*s)/2; x.drawImage(src,ox,oy,src.width*s,src.height*s);
@@ -256,7 +256,7 @@ function acrylicOutline(it){
   let poly=rdp(pts,0.8); for(let it2=0;it2<2;it2++){const o=[]; for(let i=0;i<poly.length;i++){const p=poly[i], q=poly[(i+1)%poly.length]; o.push([p[0]*0.75+q[0]*0.25,p[1]*0.75+q[1]*0.25],[p[0]*0.25+q[0]*0.75,p[1]*0.25+q[1]*0.75])} poly=o}
   // texture: the character centred in the same frame as the outline
   const img=document.createElement("canvas"); const K=Math.min(8,1024/Math.max(gw,gh)); img.width=Math.round(gw*K); img.height=Math.round(gh*K); img.getContext("2d").drawImage(src,ox*K,oy*K,src.width*s*K,src.height*s*K);
-  const out={pts:poly.map(([X,Y])=>[X/gw,Y/gh]),ar:gw/gh,img}; CUTS.set(it,out); return out;
+  const out={pts:poly.map(([X,Y])=>[X/gw,Y/gh]),ar:gw/gh,img}; CUTS.set(it.canvas,out); return out;
 }
 function lathe(points,seg){return new THREE.LatheGeometry(points.map(([x,y])=>new THREE.Vector2(x,y)),seg||32)}
 function sitOn(geo){geo.computeBoundingBox(); const b=geo.boundingBox; geo.translate(-(b.min.x+b.max.x)/2,-b.min.y,-(b.min.z+b.max.z)/2); return geo}
@@ -378,7 +378,7 @@ function applyBase(){
    rad (worked out in makeParticles) = how far a flake plus its glow reaches from its centre. */
 const GLITTERS={
   star:{n:60,scale:0.42,grav:4.2,shape:"star",glow:{tex:"star",size:3.4,amt:1,lo:0.35,speed:[1.6,3.8]}},
-  snow:{n:30,scale:1.0,grav:2.6,shape:"snow",glow:{tex:"snow",size:2.7,amt:0.7,lo:0.55,speed:[0.5,1.1]}},
+  snow:{n:30,scale:1.0,grav:2.6,shape:"snow",glow:{tex:"snow",size:2.0,amt:0.3,lo:0.5,speed:[0.5,1.1]}},
   heart:{n:28,scale:1.0,grav:4.2,shape:"heart"},
   aurora:{n:46,scale:0.8,grav:4.2,shape:"hex"},
   pearl:{n:34,scale:0.62,grav:5.2,shape:"pearl"},
@@ -388,6 +388,11 @@ const GLITTERS={
 const GLIT_BASE={star:"#FFD66B",snow:"#FFFFFF",heart:"#FF8FB8",aurora:"#FFFFFF",pearl:"#FFF3EE",sakura:"#FFC2D4",confetti:"#FFFFFF"};
 const GLIT_R={star:1.02,snow:1.07,heart:1.12,hex:0.77,pearl:0.62,petal:1.03,cheart:1.1};   // unit radius of each shape
 const GLIT_GEO={}, GLIT_MAT={}, GLOW_TEX={}, GLOW_MAT={};
+/* A dark resin/jelly cap: the flakes were dulled to muddy colours by the dark resin in front of them. There every
+   kind lights up in its own colour and gets a soft light around it (drawn after the cap, so the tint can't dull it). */
+const DARK_GLOW={tex:"dot",size:2.3,amt:0.6,lo:0.3,speed:[0.7,1.9]};
+function darkCap(){if(!(S.mat==="resin"||S.mat==="jelly")) return false; const c=new THREE.Color(S.color); return (0.299*c.r+0.587*c.g+0.114*c.b)<0.4}
+function glowOf(G){const d=darkCap(); return G.glow?(d?Object.assign({},G.glow,{amt:G.glow.amt*1.3}):G.glow):(d?DARK_GLOW:null)}
 function starPts(r0,r1,n){const p=[]; for(let i=0;i<n*2;i++){const a=i/(n*2)*Math.PI*2-Math.PI/2, r=i%2?r1:r0; p.push([Math.cos(a)*r,Math.sin(a)*r])} return p}
 function snowPts(){const p=[]; for(let i=0;i<24;i++){const a=i/24*Math.PI*2, r=[1,0.35,0.62,0.35][i%4]; p.push([Math.cos(a)*r,Math.sin(a)*r])} return p}
 function heartShape(k){const s=new THREE.Shape(); s.moveTo(0,-3.4*k); s.bezierCurveTo(-1.6*k,-2.2*k,-4.6*k,-0.6*k,-4.6*k,1.6*k); s.bezierCurveTo(-4.6*k,3.6*k,-2.9*k,4.6*k,-1.7*k,4.6*k); s.bezierCurveTo(-0.8*k,4.6*k,-0.2*k,4.1*k,0,3.3*k);
@@ -416,7 +421,7 @@ function pearlize(mat){mat.onBeforeCompile=(sh)=>{sh.fragmentShader=sh.fragmentS
       gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*rb+0.08,0.55*f); }
     #include <tonemapping_fragment>`)}; mat.customProgramCacheKey=()=>"pearl"; return mat}
 function glitterMat(kind){
-  const key=kind+"|"+S.glitColor; if(GLIT_MAT[key]) return GLIT_MAT[key];
+  const dark=darkCap(), key=kind+"|"+S.glitColor+(dark?"|d":""); if(GLIT_MAT[key]) return GLIT_MAT[key];
   const col=lin(S.glitColor||GLIT_BASE[kind]); let m;
   if(kind==="star") m=new THREE.MeshStandardMaterial({color:col,metalness:0.75,roughness:0.18,emissive:col,emissiveIntensity:0.85});
   else if(kind==="snow") m=new THREE.MeshPhysicalMaterial({color:col,metalness:0,roughness:0.28,clearcoat:1,clearcoatRoughness:0.1,emissive:S.glitColor?col:lin("#E6F1FF"),emissiveIntensity:0.6});
@@ -425,22 +430,36 @@ function glitterMat(kind){
   else if(kind==="sakura") m=new THREE.MeshPhysicalMaterial({color:col,metalness:0,roughness:0.45,clearcoat:0.4,side:THREE.DoubleSide,emissive:col,emissiveIntensity:0.14});
   else if(kind==="confetti") m=new THREE.MeshStandardMaterial({color:0xffffff,metalness:0.1,roughness:0.5,side:THREE.DoubleSide,emissive:0x000000});
   else m=holoize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.7,roughness:0.1,clearcoat:1}));
+  // star dust and snowflakes light up themselves (not just a rim of light around them)
+  if(kind==="star"){m.emissiveIntensity=1.25; m.metalness=0.35; m.toneMapped=false}
+  if(kind==="snow"){m.emissiveIntensity=0.95; m.toneMapped=false}
+  if(dark&&m.emissive){ // on a dark cap every flake glows in its own colour
+    if(kind==="confetti"){m.emissive.set(0xffffff); m.emissiveIntensity=0.35}
+    else{m.emissive.copy(col); m.emissiveIntensity=Math.max(m.emissiveIntensity||0,kind==="star"||kind==="snow"?1.3:0.75)}
+    m.toneMapped=false}
+  /* The body itself bright: flakes used to be drawn before the resin and then covered by it, which dulled them no matter
+     how strongly they glowed. These are drawn AFTER the cap instead (still fully opaque), so nothing lies over them. */
+  if(kind==="star"||kind==="snow"||dark){m.transparent=true; m.opacity=1; m.depthWrite=true; m.userData.front=true}
   m.userData.e0=m.emissiveIntensity||0;
   return (GLIT_MAT[key]=keep(m));
 }
-// the glow texture: the flake's outline, filled and softly blurred (shadowBlur works in every browser)
+// the glow texture: a soft round light, brightest in the middle (an outline-shaped blur made a bright rim around the
+// flake instead of the flake itself glowing); star dust also gets four faint rays, like a twinkling star
 function glitGlowTex(tex){
   if(GLOW_TEX[tex]) return GLOW_TEX[tex];
-  const pts=tex==="star"?starPts(0.95,0.42,5):snowPts(), R=tex==="star"?38:51;   // tips at 30% / 40% of the texture
-  const t=canvasTex(128,128,(x)=>{x.translate(64,64); const path=()=>{x.beginPath(); pts.forEach(([px,py],i)=>{const X=px*R/0.95*(tex==="star"?1:0.95), Y=-py*R/0.95*(tex==="star"?1:0.95); i?x.lineTo(X,Y):x.moveTo(X,Y)}); x.closePath()};
-    x.shadowColor="rgba(255,255,255,1)"; x.fillStyle="rgba(255,255,255,1)";
-    for(const [b,a] of [[26,0.55],[14,0.8],[6,1]]){x.shadowBlur=b; x.globalAlpha=a; path(); x.fill()}});
+  const t=canvasTex(128,128,(x)=>{x.translate(64,64);
+    const g=x.createRadialGradient(0,0,0,0,0,62); g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.18,"rgba(255,255,255,.75)"); g.addColorStop(0.45,"rgba(255,255,255,.22)"); g.addColorStop(1,"rgba(255,255,255,0)");
+    x.fillStyle=g; x.fillRect(-64,-64,128,128);
+    if(tex==="star"){x.globalCompositeOperation="lighter"; for(const a of [0,Math.PI/2]){x.save(); x.rotate(a+Math.PI/4*0);
+      const r=x.createLinearGradient(-62,0,62,0); r.addColorStop(0,"rgba(255,255,255,0)"); r.addColorStop(0.5,"rgba(255,255,255,.55)"); r.addColorStop(1,"rgba(255,255,255,0)");
+      x.fillStyle=r; x.beginPath(); x.ellipse(0,0,62,2.6,0,0,7); x.fill(); x.restore()}}});
   return (GLOW_TEX[tex]=keep(t));
 }
-function glowMat(G){
-  const key=G.glow.tex+"|"+S.glitColor; if(GLOW_MAT[key]) return GLOW_MAT[key];
-  const base=G.glow.tex==="star"?"#FFD98A":"#DDEBFF", col=S.glitColor?new THREE.Color(S.glitColor).lerp(new THREE.Color("#FFFFFF"),0.4):new THREE.Color(base);
-  return (GLOW_MAT[key]=keep(new THREE.MeshBasicMaterial({map:glitGlowTex(G.glow.tex),color:col.convertSRGBToLinear(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})));
+function glowMat(gl,kind){
+  const key=gl.tex+"|"+kind+"|"+S.glitColor; if(GLOW_MAT[key]) return GLOW_MAT[key];
+  const base=kind==="star"?"#FFD98A":kind==="snow"?"#DDEBFF":kind==="confetti"?"#FFF1D6":mixHex(GLIT_BASE[kind]||"#FFFFFF","#FFFFFF",0.35);
+  const col=S.glitColor?new THREE.Color(S.glitColor).lerp(new THREE.Color("#FFFFFF"),0.4):new THREE.Color(base);
+  return (GLOW_MAT[key]=keep(new THREE.MeshBasicMaterial({map:glitGlowTex(gl.tex),color:col.convertSRGBToLinear(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})));
 }
 const GLOW_PLANE=keep(new THREE.PlaneGeometry(1,1));
 
@@ -477,20 +496,22 @@ function makeParticles(p,g){
   if(S.glitter==="none"||!(S.mat==="resin"||S.mat==="jelly")) return null;
   const kind=S.glitter, G=GLITTERS[kind]; if(!G) return null;
   const N=G.n, flat=S.charPos==="top"||S.charPos==="stand", F=fenceTable(p);
-  let rad=GLIT_R[G.shape]*G.scale*1.15; if(G.glow) rad=Math.max(rad,G.glow.size*G.scale*1.15/2*0.8);
-  const mesh=new THREE.InstancedMesh(glitterGeo(G.shape),glitterMat(kind),N); mesh.renderOrder=1; mesh.frustumCulled=false;
+  const gl=glowOf(G); let rad=GLIT_R[G.shape]*G.scale*1.15; if(gl) rad=Math.max(rad,gl.size*G.scale*1.15/2*0.8);
+  const mesh=new THREE.InstancedMesh(glitterGeo(G.shape),glitterMat(kind),N); mesh.renderOrder=mesh.material.userData.front?3:1; mesh.frustumCulled=false;
   if(G.multi){const c=new THREE.Color(); for(let i=0;i<N;i++){c.copy(lin(S.glitColor||G.multi[i%G.multi.length])); mesh.setColorAt(i,c)} mesh.instanceColor.needsUpdate=true}
-  let glow=null; if(G.glow){glow=new THREE.InstancedMesh(GLOW_PLANE,glowMat(G),N); glow.renderOrder=4; glow.frustumCulled=false; const c=new THREE.Color(1,1,1); for(let i=0;i<N;i++) glow.setColorAt(i,c)}
+  let glow=null; if(gl){glow=new THREE.InstancedMesh(GLOW_PLANE,glowMat(gl,kind),N); glow.renderOrder=4; glow.frustumCulled=false; const c=new THREE.Color(1,1,1); for(let i=0;i<N;i++) glow.setColorAt(i,c)}
   const pos=new Float32Array(N*3), vel=new Float32Array(N*3), rot=new Float32Array(N*3), spin=new Float32Array(N*3), r=mulberry32(9);
-  const sys={mesh,glow,G,pos,vel,rot,spin,rest:new Uint8Array(N),N,p,flat,F,rad,floor:rad*0.75+0.12,dummy:new THREE.Object3D(),tc:new THREE.Color()};
+  const sys={mesh,glow,gl,G,pos,vel,rot,spin,rest:new Uint8Array(N),N,p,flat,F,rad,floor:rad*0.75+0.12,dummy:new THREE.Object3D(),tc:new THREE.Color()};
   for(let i=0;i<N;i++){const y=sys.floor+r()*p.h*0.25, a=r()*Math.PI*2, rr=Math.sqrt(r())*fenceLim(F,a,wallW(p,y),rad);
     pos[i*3]=Math.cos(a)*rr; pos[i*3+1]=Math.min(y,ceilAt(sys,pos[i*3],Math.sin(a)*rr)); pos[i*3+2]=Math.sin(a)*rr;
     for(let k=0;k<3;k++){rot[i*3+k]=r()*6.28; spin[i*3+k]=(r()*2-1)*0.4}}
   return sys;
 }
 function stirParticles(){if(!partSys) return; const {vel,spin,N}=partSys; for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2; vel[i*3]+=Math.cos(a)*(5+Math.random()*9); vel[i*3+1]+=9+Math.random()*14; vel[i*3+2]+=Math.sin(a)*(5+Math.random()*9); for(let k2=0;k2<3;k2++) spin[i*3+k2]+=(Math.random()*2-1)*9}}
+const BB_Q=new THREE.Quaternion();
 function stepParticles(dt,t){
-  if(!partSys) return; const sys=partSys, {mesh,glow,G,pos,vel,rot,spin,rest,N,p,F,rad,floor,dummy,tc}=sys, grav=G.grav, lit=S.glow?1.5:1;
+  if(!partSys) return; if(partSys.glow){capGroup.getWorldQuaternion(BB_Q); BB_Q.invert().multiply(camera.quaternion)}   // glow faces the camera
+  const sys=partSys, {mesh,glow,gl,G,pos,vel,rot,spin,rest,N,p,F,rad,floor,dummy,tc}=sys, grav=G.grav, lit=S.glow?1.5:1;
   for(let i=0;i<N;i++){const ix=i*3;
     vel[ix+1]-=grav*dt; const d=1-2.4*dt; vel[ix]*=d; vel[ix+1]*=d; vel[ix+2]*=d;
     if(G.flutter){vel[ix]+=Math.sin(t*1.7+i*1.3)*2.2*dt; vel[ix+2]+=Math.cos(t*1.3+i*0.7)*2.2*dt}   // petals drift side to side
@@ -508,9 +529,9 @@ function stepParticles(dt,t){
     rest[i]=pos[ix+1]<=fl+0.01?1:0;
     const s=G.scale*(0.85+0.3*hash(i+40));
     dummy.position.set(pos[ix],pos[ix+1],pos[ix+2]); dummy.rotation.set(rot[ix],rot[ix+1],rot[ix+2]); dummy.scale.setScalar(s); dummy.updateMatrix(); mesh.setMatrixAt(i,dummy.matrix);
-    if(glow){dummy.scale.setScalar(s*G.glow.size); dummy.updateMatrix(); glow.setMatrixAt(i,dummy.matrix);
-      const sp=G.glow.speed, w=0.5+0.5*Math.sin(t*(sp[0]+hash(i+300)*(sp[1]-sp[0]))+hash(i+500)*6.28), lo=G.glow.lo;
-      glow.setColorAt(i,tc.setScalar((lo+(1-lo)*w*w)*G.glow.amt*lit))}
+    if(glow){dummy.quaternion.copy(BB_Q); dummy.scale.setScalar(s*gl.size); dummy.updateMatrix(); glow.setMatrixAt(i,dummy.matrix);
+      const sp=gl.speed, w=0.5+0.5*Math.sin(t*(sp[0]+hash(i+300)*(sp[1]-sp[0]))+hash(i+500)*6.28), lo=gl.lo;
+      glow.setColorAt(i,tc.setScalar((lo+(1-lo)*w*w)*gl.amt*lit))}
   }
   mesh.instanceMatrix.needsUpdate=true;
   if(glow){glow.instanceMatrix.needsUpdate=true; glow.instanceColor.needsUpdate=true}
@@ -677,7 +698,7 @@ function warmUp(){
   for(const sh of Object.keys(OPT.shape)) jobs.push({shape:sh});
   for(const c of ["top","stand","lie"]) jobs.push({charPos:c});
   for(const d of Object.keys(OPT.deco)) for(const dm of Object.keys(OPT.decoMat)) jobs.push({deco:d,decoMat:dm});
-  for(const gl of Object.keys(OPT.glitter)) jobs.push({mat:"resin",glitter:gl});
+  for(const gl of Object.keys(OPT.glitter)) jobs.push({mat:"resin",glitter:gl},{mat:"resin",glitter:gl,color:"#2C2F36"});
   for(const b of Object.keys(OPT.base)) jobs.push({base:b});
   jobs.push({shape:"soft",ears:"cat",eyes:"round",nose:"tri",mouth:"w",extra:["blush"]},{ears:"dog"});
   // a compile holds the page for tens to hundreds of ms (r128 waits for the GPU), so steps run only while
@@ -707,7 +728,7 @@ function chipGroup(id,key,labels,after){const el=$(id); el.innerHTML="";
     b.addEventListener("click",()=>{S[key]=k; if(key==="bg") S.bgImg=null; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(after) after(k); else rebuild(); if(key==="sw") previewSwitch()}); el.appendChild(b)}}
 function swatches(id,key,list){const el=$(id); el.innerHTML="";
   const all=[...S.palette,...list].filter((c,i,a)=>a.indexOf(c)===i);
-  all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); if(col) b.style.background=col; else if(key==="eyeColor"){b.style.background="#3B2F37"; b.title="기본 눈 색"} else {b.style.background="conic-gradient(#FFD66B,#FF8FB8,#8FD3FF,#B8A2FF,#FFD66B)"; b.title="기본 색"} b.setAttribute("aria-label",col||"기본 색"); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
+  all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); if(col) b.style.background=col; else if(key==="eyeColor"||key==="eyeColor2"){b.style.background="#3B2F37"; b.title="기본 눈 색"} else {b.style.background="conic-gradient(#FFD66B,#FF8FB8,#8FD3FF,#B8A2FF,#FFD66B)"; b.title="기본 색"} b.setAttribute("aria-label",col||"기본 색"); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
   const pick=document.createElement("input"); pick.type="color"; pick.className="sw pick"; pick.value=S[key]||"#FFD66B"; pick.setAttribute("aria-label","직접 고르기"); pick.addEventListener("input",()=>{S[key]=pick.value.toUpperCase(); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(pick);
 }
 function renderUI(){
@@ -733,7 +754,7 @@ $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.tar
     const c=document.createElement("canvas"); c.width=800; c.height=1000; const x=c.getContext("2d"); const k=Math.max(800/img.width,1000/img.height); x.drawImage(img,(800-img.width*k)/2,(1000-img.height*k)/2,img.width*k,img.height*k);
     S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":""]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
@@ -741,7 +762,7 @@ function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; c
     sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1});
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
-  if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],"")}
+  if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],""); S.odd=!!fe[7]; S.eyeColor2=fe[7]==="0"?"":col(fe[7],"#3E6FD8")}
   $("name").value=S.name}catch(e){}}
 $("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
 function resetRun(){rebuild()}

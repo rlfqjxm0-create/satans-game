@@ -83,7 +83,7 @@ shake test (all glitter kinds × shapes, thousands of frames) and count flakes o
 ## Shapes and character placement
 
 `PROFILES`: 체리, 푸딩 (replaced SA), 동글, 하트, 말랑 (`soft`, a wide body with a big flat top - made for faces).
-**Every top is flat** (dish 0, dome 0) by request. Old links with `catface`/`bunnyface` open as 말랑 + that ear preset.
+**Every top is flat** (dish 0, dome 0) by request. Old links with `catface`/`bunnyface` open as 말랑 + that ear preset. `acrylicOutline` caches by the picture (`it.canvas`), not the slot - erasing a background makes a new picture.
 
 ## 얼굴 만들기 (the second tab, `src/15-faces.js`)
 
@@ -124,6 +124,14 @@ limits, otherwise a flake tips out after being checked (that was the "pokes out 
 
 The glow sprite always faces the camera, so inside an opaque base it cut the walls in a hard diagonal. With an
 opaque base `applyRGB` moves it just behind the base (away from the camera) so it reads as a soft halo.
+
+## Glitter that shines by itself
+
+Star dust and snowflakes (and every kind on a dark resin/jelly cap, `darkCap()`) are drawn **after** the cap
+(`transparent` but fully opaque, `renderOrder 3`): drawn before it, the resin covered them and dulled them however
+strongly they glowed. Their glow (`glowOf()`) is a soft round light with a bright middle (star dust: four faint rays)
+that always faces the camera (`BB_Q`) - an outline-shaped blur on a plane turning with the flake made a bright rim and
+vanished edge-on. On a dark cap every kind gets `DARK_GLOW` in its own colour.
 
 ## Glow mode (야광)
 
