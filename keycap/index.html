@@ -138,6 +138,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
 
 #cv{aspect-ratio:4/5; touch-action:none; cursor:grab; background:var(--stage,#FFF6EC)}
 .tools{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+.hint .hs{display:none}
 @media (max-width:819px){
   .stage{display:contents}   /* its parts become rows of the page grid, so the frame can stick for the whole page */
   /* an app-like docked bar: full width, solid, rounded at the bottom; a shadow only once it is stuck */
@@ -147,6 +148,8 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   #cv{width:auto; height:min(38vh,92vw); max-width:100%; border-radius:22px}
   .tabs{top:var(--barh,0px); box-shadow:0 -14px 0 8px var(--bg),var(--shadow)}   /* docks right under the preview bar; the page-coloured band hides the gap */
   .layout>.hint,.layout>.tools,.layout>.stagebox{justify-self:center; width:100%}
+  .layout{grid-auto-rows:max-content} .layout>.hint{min-height:0; margin:0}   /* rows never squash (the hint's 2nd line ran into the buttons) */
+  .hint .hl{display:none} .hint .hs{display:inline}   /* a shorter hint on phones */
   /* like the computer: the page never scrolls. A thin title row stays on top and only the area under it scrolls,
      with the preview bar and the tabs docked at its top - so in practice only the menus move. */
   html,body{height:100%; overflow:hidden}
@@ -200,7 +203,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   <div class="layout">
     <section class="stage" aria-label="키캡 미리보기">
       <div class="frame"><canvas id="cv" aria-label="3D 키캡. 드래그하면 돌아가고 탭하면 눌려요"></canvas></div>
-      <p class="hint">드래그로 돌리기 · 두 손가락(또는 휠)로 확대 · 두 손가락 이동(또는 우클릭 드래그)으로 위치 옮기기 · 톡 누르면 딸깍!</p>
+      <p class="hint"><span class="hl">드래그로 돌리기 · 두 손가락(또는 휠)로 확대 · 두 손가락 이동(또는 우클릭 드래그)으로 위치 옮기기 · 톡 누르면 딸깍!</span><span class="hs">드래그로 돌리기 · 두 손가락으로 확대 · 톡 누르면 딸깍!</span></p>
       <div class="tools" style="margin-bottom:6px"><button type="button" class="chip" id="camLock" aria-pressed="false">🔓 카메라 고정</button><button type="button" class="chip" id="camReset">↺ 원래 위치로</button></div>
       <div class="tools">
         <button class="btn sub" id="pressBtn">딸깍 눌러 보기</button>
