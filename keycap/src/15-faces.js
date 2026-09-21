@@ -124,9 +124,32 @@ function faceInk(){const c=new THREE.Color(S.color); return (0.299*c.r+0.587*c.g
 function buildFace(p,g){
   const sec=g.userData.sec, w=g.userData.topW*0.96, shape=new THREE.Shape(); sec.forEach(([ux,uz],i)=>{const X=ux*w, Y=-uz*w; i?shape.lineTo(X,Y):shape.moveTo(X,Y)});
   const sg=new THREE.ShapeGeometry(shape,1), pos=sg.attributes.position, uv=[]; for(let i=0;i<pos.count;i++) uv.push(pos.getX(i)/(2*w)+0.5,pos.getY(i)/(2*w)+0.5); sg.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); sg.rotateX(-Math.PI/2);
-  const t=faceTex(S,faceInk()); t.anisotropy=8;
-  const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:t,transparent:true,alphaTest:0.02,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-6}));
-  m.position.y=g.userData.topY+0.06; return m;
+  const t=faceTexCached();
+  // no depth write, drawn after the cap: otherwise the resin stops at a hard, stair-stepped line around every part
+  const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:t,transparent:true,depthWrite:false,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-6}));
+  m.renderOrder=3; m.position.y=g.userData.topY+0.06; return m;
+}
+/* Soft edges: the empty pixels of a canvas are transparent BLACK, and texture filtering mixes that black into the
+   edge of every part (a dark, jagged rim). Here each empty pixel takes the colour of the nearest drawn one (alpha
+   stays 0), spread out 31 px with a few jump-flood passes, so filtering and mipmaps only ever blend in the right colour. */
+const FACE_TEX=new Map();   // every rebuild (any option) remakes the face mesh; the picture is only redrawn when the face changes
+function faceTexCached(){
+  const ink=faceInk(), key=[ink,S.eyes,S.shine,S.nose,S.mouth,S.extra.slice().sort().join("."),S.eyeColor].join("|");
+  let t=FACE_TEX.get(key); if(t){FACE_TEX.delete(key); FACE_TEX.set(key,t); return t}
+  t=keep(bleedTex(faceTex(S,ink))); FACE_TEX.set(key,t);
+  if(FACE_TEX.size>6){const [k0,old]=FACE_TEX.entries().next().value; FACE_TEX.delete(k0); KEEP.delete(old); old.dispose()}
+  return t;
+}
+function bleedTex(ct){
+  const c=ct.image, W=c.width, H=c.height, src=c.getContext("2d").getImageData(0,0,W,H).data; ct.dispose();
+  const out=new Uint8Array(W*H*4), near=new Int32Array(W*H).fill(-1);
+  for(let i=0;i<W*H;i++) if(src[i*4+3]>0) near[i]=i;
+  for(const st of [16,8,4,2,1]) for(let y=0;y<H;y++) for(let x=0;x<W;x++){const i=y*W+x; if(near[i]>=0) continue;
+    for(let dy=-st;dy<=st;dy+=st) for(let dx=-st;dx<=st;dx+=st){const X=x+dx, Y=y+dy; if(X<0||Y<0||X>=W||Y>=H) continue; const n=near[Y*W+X]; if(n>=0){near[i]=n; dy=dx=st+1}}}
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){const i=y*W+x, o=((H-1-y)*W+x)*4, n=near[i]>=0?near[i]:i;   // rows flipped: a DataTexture isn't
+    out[o]=src[n*4]; out[o+1]=src[n*4+1]; out[o+2]=src[n*4+2]; out[o+3]=src[i*4+3]}
+  const t=new THREE.DataTexture(out,W,H,THREE.RGBAFormat); t.encoding=THREE.sRGBEncoding;
+  t.magFilter=THREE.LinearFilter; t.minFilter=THREE.LinearMipmapLinearFilter; t.generateMipmaps=true; t.anisotropy=8; t.needsUpdate=true; return t;
 }
 
 /* the face tab */

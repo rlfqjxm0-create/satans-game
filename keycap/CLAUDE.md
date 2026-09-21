@@ -94,7 +94,10 @@ back of the key (-z)**, so the camera looks from higher up (`camApply`) and the 
 (rejected) or laid into the outline (rejected). Ears lie flat (level with the top, reaching back); they use the cap's own material object; dog ears hang at the sides.
 `S.decoLie` (가로로 눕히기) lays the top decoration flat at the back edge - the top of the head (`lieDown`).
 Keep every face part within 0.42 of the canvas centre (the top outline clips the rest - whiskers/blush were cut
-before). Lines turn pale on dark keycaps (`faceInk`). The share link carries the face as `fe`. `15-faces.js` also
+before). Lines turn pale on dark keycaps (`faceInk`). Soft edges: the face texture is a `DataTexture` whose empty pixels take the
+nearest drawn colour (`bleedTex`, alpha stays 0) - canvas transparent-black otherwise filters into a dark jagged rim - and
+the face mesh doesn't write depth and draws after the cap (depth made the resin stop at a hard stepped line). The picture
+is cached per face (`FACE_TEX`, 6 kept) because every rebuild remakes the mesh. The share link carries the face as `fe`. `15-faces.js` also
 runs the start-up (`readHash … rebuild … warmUp`) because it must come after everything it uses.
 
 `FIXED_SEC` lists outlines that are the same at every height (heart). `charPos`: 레진 속에 세우기 (`inside`) /
