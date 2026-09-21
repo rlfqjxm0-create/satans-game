@@ -74,7 +74,7 @@ $("makeVid").addEventListener("click",async()=>{
   if(!mime||!cv.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";
   const W=600, H=750, FPS=30, DUR=8, N=FPS*DUR, presses=[1.0,3.4,5.8].map(t=>Math.round(t*FPS)), keep=rotY;
-  let dest=null, a=null, hud=null, ac0=renderer.autoClear;
+  let dest=null, bed=null, a=null, hud=null, ac0=renderer.autoClear;
   try{
     try{await document.fonts.load('46px Jua')}catch(e){}
     a=ac(); if(a&&a.state!=="running") try{await a.resume()}catch(e){}
@@ -89,14 +89,18 @@ $("makeVid").addEventListener("click",async()=>{
     const draw=i=>{rotY=keep+Math.min(i,N)/N*Math.PI*2; poseAt(T); renderer.autoClear=true; renderer.render(scene,camera); renderer.autoClear=false; renderer.render(hud.scene,hud.cam); renderer.autoClear=ac0};
     draw(0); await new Promise(r=>requestAnimationFrame(r));
     const stream=cv.captureStream(FPS), track=stream.getVideoTracks()[0];
-    if(a&&S.sound&&a.createMediaStreamDestination){dest=a.createMediaStreamDestination(); outNode(a).connect(dest); dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t))}
+    if(a&&S.sound&&a.createMediaStreamDestination){dest=a.createMediaStreamDestination(); outNode(a).connect(dest); dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
+      // A silent graph sends no audio, so the recorder only starts the sound track at the first click and the clicks
+      // land seconds late against the picture. A far-too-quiet hum (-70 dB, into the recording only) keeps it running from 0.
+      bed=a.createOscillator(); const g=a.createGain(); g.gain.value=0.0003; bed.frequency.value=60; bed.connect(g); g.connect(dest); bed.start()}
     const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6e6}), chunks=[];
     rec.ondataavailable=e=>{if(e.data&&e.data.size) chunks.push(e.data)}; const stopped=new Promise(r=>rec.onstop=r);
     rec.start(250); const t0=performance.now(); let i=0;
     await new Promise(res=>{const loop=()=>{const due=(performance.now()-t0)/1000*FPS;
-      if(due>=i){ // one new frame per 1/30 s; a late frame is still drawn (never skipped), so the turn stays even
-        if(presses.includes(i)) pressKey();
-        draw(i); i++;
+      if(due>=i){ // one new frame per 1/30 s. On a slow phone the frame number catches up with the clock (frames are
+        // skipped), because the sound is recorded in real time: letting the picture fall behind put the clicks late.
+        const j=Math.max(i,Math.floor(due)); if(presses.some(q=>q>=i&&q<=j)) pressKey();
+        draw(j); i=j+1;
         prog(Math.min(1,i/N),`영상 녹화 중… ${Math.min(100,Math.round(100*i/N))}%`)}
       if(i<=N+6) requestAnimationFrame(loop); else res()}; requestAnimationFrame(loop)});
     rec.stop(); await stopped;
@@ -104,7 +108,7 @@ $("makeVid").addEventListener("click",async()=>{
     showOut("video",URL.createObjectURL(outBlob));
     prog(1,`영상 완성 · ${W}×${H} · ${DUR}초 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
   }catch(err){console.error(err); $("status").textContent="영상을 만들지 못했어요. 이미지로 저장해 주세요."; $("progress").style.display="none"}
-  finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
+  finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(bed) try{bed.stop(); bed.disconnect()}catch(e){} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
     rotY=keep; PAUSE=false; restoreSize(); busy(false)}
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});

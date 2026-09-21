@@ -139,8 +139,11 @@ clamp their vertices flat again (that shaved the base off). Geometry is cached i
 
 **Smooth video:** frames are drawn straight on the WebGL canvas and recorded from it (`cv.captureStream`); the title and
 the die-cut sticker watermark (`watermark()`) are one texture laid on top by an orthographic pass. Copying each frame
-into a 2D canvas made the page wait for the GPU and the video dropped frames - don't go back to that. Frame i is drawn at
-i/30 s and the turn/presses follow i. Image and video use **the preview's own camera** (`camApply()`, the user's zoom/pan and tilt) - a separate card
+into a 2D canvas made the page wait for the GPU and the video dropped frames - don't go back to that. The frame number
+follows the clock (a slow phone skips frames) because the sound is recorded in real time - letting the picture fall
+behind put the clicks late. A -70 dB hum goes into the recording only (`bed`): with a silent graph the recorder starts
+the sound track at the first click, and every click landed seconds late. Check sync by decoding the recorded file's
+audio and finding the clicks (they must sit at 1.0/3.4/5.8 s). Image and video use **the preview's own camera** (`camApply()`, the user's zoom/pan and tilt) - a separate card
 camera made the video jump at the start. The title is a die-cut label sticker too (`cardOverlay`).
 
 ## Phones
