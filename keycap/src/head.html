@@ -179,7 +179,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   .stage{position:static; height:100%; overflow-y:auto; overflow-x:hidden; scrollbar-width:none}
   .controls{max-height:none; height:100%}
   /* the buttons under the preview are made compact so the preview itself can be big */
-  .stage{gap:8px} .hint{font-size:12px; line-height:1.4; margin:0}
+  .stage{gap:8px} .stage>*{flex-shrink:0} .hint{font-size:12px; line-height:1.4; margin:0}
   .stage .tools{gap:6px} .stage .tools[style]{margin-bottom:0!important} .stage .chip{font-size:13.5px; padding:6px 12px}
   .stage .btn.sub{font-size:15px; padding:9px 12px}
   .stagebox{margin-top:0!important} .resultcard{padding:10px 12px; border-radius:20px}
@@ -221,7 +221,8 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="tabs" role="tablist" aria-label="꾸미기 메뉴"><button type="button" role="tab" id="tabMain" aria-selected="true">키캡 꾸미기</button><button type="button" role="tab" id="tabFace" aria-selected="false">🐾 얼굴 만들기</button></div>
       <div class="pane" id="paneMain" role="tabpanel">
       <div class="group"><h2>캐릭터 넣기</h2><p class="sub">배경이 있는 그림은 넣자마자 배경 지우기 창이 열려요.</p><div class="slots" id="slots"></div><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr" aria-label="그림 파일 고르기"></div>
-      <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div></div>
+      <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div>
+        <label class="slider" id="standRow" hidden style="margin-top:12px"><span class="lbl">스탠드 크기</span><input type="range" id="standSize" min="70" max="170" step="5" value="100" aria-label="스탠드 크기"></label></div>
       <div class="group"><h2>키캡 모양</h2><div class="chips" id="shapeChips"></div></div>
       <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
       <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
@@ -233,8 +234,9 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>RGB 조명</h2><div class="chips" id="rgbChips"></div><div class="swatches" id="rgbSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
-      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">밤하늘 배경에서 키캡과 반짝이가 은은하게 빛나요.</p>
+      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">불을 끈 듯 어두워지고, 키캡과 장식·반짝이가 형광 초록으로 빛나요.</p>
         <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
+        <div id="bgBlurRow" hidden style="margin-top:12px"><p class="sub" style="margin:0 0 8px">배경 흐리기</p><div class="chips" id="bgBlurChips"></div></div>
         <input type="file" id="bgFile" accept="image/*" class="sr" aria-label="배경 이미지 고르기"></div>
       </div>
       <div class="pane" id="paneFace" role="tabpanel" hidden>
@@ -248,7 +250,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
           <div id="oddBox" hidden><p class="lab">오른쪽 눈 색</p><div class="swatches" id="eyeSw2" aria-label="오른쪽 눈 색"></div></div></div>
         <div class="group"><h2>코</h2><div class="chips" id="noseChips"></div></div>
         <div class="group"><h2>입</h2><div class="chips" id="mouthChips"></div></div>
-        <div class="group"><h2>수염과 무늬</h2><p class="sub">여러 개를 같이 고를 수 있어요.</p><div class="chips" id="extraChips"></div></div>
+        <div class="group"><h2>수염·무늬·안경</h2><p class="sub">여러 개를 같이 고를 수 있어요.</p><div class="chips" id="extraChips"></div></div>
       </div>
     </section>
   </div>

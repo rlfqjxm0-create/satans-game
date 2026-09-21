@@ -179,7 +179,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   .stage{position:static; height:100%; overflow-y:auto; overflow-x:hidden; scrollbar-width:none}
   .controls{max-height:none; height:100%}
   /* the buttons under the preview are made compact so the preview itself can be big */
-  .stage{gap:8px} .hint{font-size:12px; line-height:1.4; margin:0}
+  .stage{gap:8px} .stage>*{flex-shrink:0} .hint{font-size:12px; line-height:1.4; margin:0}
   .stage .tools{gap:6px} .stage .tools[style]{margin-bottom:0!important} .stage .chip{font-size:13.5px; padding:6px 12px}
   .stage .btn.sub{font-size:15px; padding:9px 12px}
   .stagebox{margin-top:0!important} .resultcard{padding:10px 12px; border-radius:20px}
@@ -221,7 +221,8 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="tabs" role="tablist" aria-label="꾸미기 메뉴"><button type="button" role="tab" id="tabMain" aria-selected="true">키캡 꾸미기</button><button type="button" role="tab" id="tabFace" aria-selected="false">🐾 얼굴 만들기</button></div>
       <div class="pane" id="paneMain" role="tabpanel">
       <div class="group"><h2>캐릭터 넣기</h2><p class="sub">배경이 있는 그림은 넣자마자 배경 지우기 창이 열려요.</p><div class="slots" id="slots"></div><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr" aria-label="그림 파일 고르기"></div>
-      <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div></div>
+      <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div>
+        <label class="slider" id="standRow" hidden style="margin-top:12px"><span class="lbl">스탠드 크기</span><input type="range" id="standSize" min="70" max="170" step="5" value="100" aria-label="스탠드 크기"></label></div>
       <div class="group"><h2>키캡 모양</h2><div class="chips" id="shapeChips"></div></div>
       <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
       <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
@@ -233,8 +234,9 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>RGB 조명</h2><div class="chips" id="rgbChips"></div><div class="swatches" id="rgbSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
-      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">밤하늘 배경에서 키캡과 반짝이가 은은하게 빛나요.</p>
+      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">불을 끈 듯 어두워지고, 키캡과 장식·반짝이가 형광 초록으로 빛나요.</p>
         <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
+        <div id="bgBlurRow" hidden style="margin-top:12px"><p class="sub" style="margin:0 0 8px">배경 흐리기</p><div class="chips" id="bgBlurChips"></div></div>
         <input type="file" id="bgFile" accept="image/*" class="sr" aria-label="배경 이미지 고르기"></div>
       </div>
       <div class="pane" id="paneFace" role="tabpanel" hidden>
@@ -248,7 +250,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
           <div id="oddBox" hidden><p class="lab">오른쪽 눈 색</p><div class="swatches" id="eyeSw2" aria-label="오른쪽 눈 색"></div></div></div>
         <div class="group"><h2>코</h2><div class="chips" id="noseChips"></div></div>
         <div class="group"><h2>입</h2><div class="chips" id="mouthChips"></div></div>
-        <div class="group"><h2>수염과 무늬</h2><p class="sub">여러 개를 같이 고를 수 있어요.</p><div class="chips" id="extraChips"></div></div>
+        <div class="group"><h2>수염·무늬·안경</h2><p class="sub">여러 개를 같이 고를 수 있어요.</p><div class="chips" id="extraChips"></div></div>
       </div>
     </section>
   </div>
@@ -673,7 +675,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, standSize:1, bgBlur:"0", bgSrc:null, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -688,7 +690,7 @@ const OPT={
 };
 const BASE_COLORS=["#FFB8D0","#FFD9A0","#FFF1A8","#BDEBD2","#A8D8FF","#C9B8FF","#FFFFFF","#3A3F4B"];
 const DECO_COLORS=["#FFFFFF","#FF8FB0","#FFD45C","#7FC8F0","#9BE39A","#B28CFF","#2C2F36","#E3344B"];
-const BGS={peach:["#FFE3D3","#FFC9DE","#E7D3FF"],lilac:["#F3E8FF","#D9CCFF","#BFD5FF"],soda:["#E4FFF6","#BFEFFF","#D8D3FF"],sunset:["#FFD6E7","#FFB4C8","#B9A4FF"],night:["#12143A","#2E2766","#6A4C9C"]};
+const BGS={peach:["#FFE3D3","#FFC9DE","#E7D3FF"],lilac:["#F3E8FF","#D9CCFF","#BFD5FF"],soda:["#E4FFF6","#BFEFFF","#D8D3FF"],sunset:["#FFD6E7","#FFB4C8","#B9A4FF"],night:["#12143A","#2E2766","#6A4C9C"],glow:["#020403","#06100A","#020403"]};   // glow: 야광 (lights off)
 // stem colour of each switch (연핑크 · 연초록 · 파랑 · 보라 · 검정)
 const SWC={mango:"#FFB3CE",frog:"#A6E3B4",tico:"#3E8EEB",violet:"#9B6BFF",black:"#26282E"};
 const lin=(h)=>new THREE.Color(h).convertSRGBToLinear();
@@ -753,6 +755,7 @@ function setBg(){
   const prev=scene.background; setBgNow(); if(prev&&prev!==scene.background&&prev.isTexture&&!KEEP.has(prev)) prev.dispose();
 }
 function setBgNow(){
+  $("bgBlurRow").hidden=!S.bgImg;
   if(S.bgImg){scene.background=S.bgImg; document.documentElement.style.setProperty("--stage","#EEE"); return}
   const st=BGS[S.bg]; scene.background=canvasTex(8,640,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h); st.forEach((c,i)=>g.addColorStop(i/(st.length-1),c)); x.fillStyle=g; x.fillRect(0,0,w,h)},true);
   document.documentElement.style.setProperty("--stage",st[0]);
@@ -848,7 +851,7 @@ function capMaterial(){
   const col=lin(S.color);
   switch(S.mat){
     case "resin": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.04,transmission:0.62,transparent:true,clearcoat:1,clearcoatRoughness:0.03,side:THREE.DoubleSide,envMapIntensity:1.6,depthWrite:false});
-    case "jelly": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.3,transmission:0.45,transparent:true,clearcoat:0.8,clearcoatRoughness:0.2,side:THREE.DoubleSide,envMapIntensity:1.3,depthWrite:false});
+    case "jelly": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.32,transmission:0.3,transparent:true,clearcoat:0.8,clearcoatRoughness:0.2,side:THREE.DoubleSide,envMapIntensity:1.3,depthWrite:false});
     case "holo": return surfMat("holo",S.color);
     case "matte": return surfMat("matte",S.color);
     default: return surfMat("gloss",S.color);
@@ -897,7 +900,7 @@ function buildChar(p,g){
     // blended edges (tiny alphaTest only drops empty pixels) - 0.2 used to cut a jagged outline
     const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:charTex("top",charCanvas(true)),transparent:true,alphaTest:0.02,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-4})); m.position.y=topY+0.04; grp.add(m)}
   if(S.charPos==="stand"){ // standing on top of the keycap
-    const a=acrylic(12.5,1.3,5); a.piece.position.y=topY; grp.add(a.piece); grp.userData.standTop=topY+a.H}
+    const a=acrylic(12.5*S.standSize,1.3,5); a.piece.position.y=topY; grp.add(a.piece); grp.userData.standTop=topY+a.H}
   return grp;
 }
 /* trace the character's silhouette (with a clear margin) the way an acrylic cutter would */
@@ -944,7 +947,7 @@ function buildDeco(p,g){
   const main=surfMat(S.decoMat,S.decoColor), accentPink=surfMat(S.decoMat==="holo"?"holo":"gloss","#FFB8C9");
   const add=(geo,mat,x,y,z,rx,ry,rz)=>{const o=new THREE.Mesh(geo,mat); o.position.set(x,y,z); o.rotation.set(rx||0,ry||0,rz||0); grp.add(o); return o};
   const soft=(shape,depth,bev,bevSize)=>new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:bev,bevelSize:bevSize==null?bev:bevSize,bevelSegments:6,curveSegments:28});
-  const stand=S.charPos==="stand", floatBase=stand?(top+13.5):top;
+  const stand=S.charPos==="stand", floatBase=stand?(top+12.5*S.standSize+1):top;
   const F=fenceTable(p), inTop=(x,z)=>Math.hypot(x,z)<=fenceAt(F.R,Math.atan2(z,x))*w*0.97;
   // biggest scale (<=1) at which both bases (half-width hx, half-depth hz) sit inside the flat top
   const pair=(hx,hz,x0,z)=>{for(let f=1;f>=0.45;f-=0.05){const x=Math.max(x0,hx*f+0.25);
@@ -990,7 +993,7 @@ function buildDeco(p,g){
     case "halo":{
       const col=lin(S.decoColor==="#FFFFFF"?"#FFE38A":S.decoColor);
       const hm=S.decoMat==="holo"?surfMat("holo","#FFF3B0",{emissive:col,emissiveIntensity:0.5}):new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:S.decoMat==="matte"?0.45:0.75,roughness:S.decoMat==="matte"?0.6:0.25,metalness:0.2});
-      const R=Math.max(4.2,w*0.62), y=floatBase+6, Rk=R.toFixed(2);
+      const R=Math.max(4.2,w*0.62), y=floatBase+3.4, Rk=R.toFixed(2);   // a little above the head, not floating far off
       const ring=add(GEO("halo.ring"+Rk,()=>new THREE.TorusGeometry(R,0.5,20,64)),hm,0,y,0,Math.PI/2); ring.userData.float=y;
       const glow=new THREE.Mesh(GEO("halo.glow"+Rk,()=>new THREE.TorusGeometry(R,1.3,16,64)),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.16,blending:THREE.AdditiveBlending,depthWrite:false})); glow.rotation.x=Math.PI/2; glow.position.y=y; grp.add(glow); glow.userData.float=y;
       const gs=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col,transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false})); gs.scale.set(R*2.6,R*0.9,1); gs.position.y=y; grp.add(gs); gs.userData.float=y;
@@ -1214,7 +1217,7 @@ function rebuild(){
   decoGroup=buildDeco(p,capGeo); capGroup.add(decoGroup);
   applyBase();
   stemMat.color.copy(lin(SWC[S.sw]));
-  writeHash();
+  writeHash(); $("standRow").hidden=S.charPos!=="stand";
 }
 
 /* ---------- interaction: turn, pinch/scroll zoom, two-finger / right-drag pan, tap to press ---------- */
@@ -1318,10 +1321,18 @@ function applyRGB(t){
   if(clearMat.emissive) clearMat.emissive.copy(col).multiplyScalar(on?(see?0.18:0.05)*k:0);   // opaque: a faint tint, like light bleeding through
 }
 /* 야광 모드: the lights dim and the cap (in its own colour) and the glitter glow from inside, breathing slowly */
+const NEON=new THREE.Color("#39FF6A").convertSRGBToLinear();
+/* 야광 모드 is the lights going out: exposure drops, and the cap, its decorations and the glitter glow neon green
+   like glow-in-the-dark plastic (breathing slowly). Every material's own emissive is kept in userData to go back. */
+function glowMat_(m,on,k){if(!m||!m.emissive) return; const u=m.userData; if(!u.em0){u.em0=m.emissive.clone(); u.ei0=m.emissiveIntensity||0}
+  if(on){m.emissive.copy(NEON); m.emissiveIntensity=(m.toneMapped===false?0.9:2.6)*k} else if(u.glowOn){m.emissive.copy(u.em0); m.emissiveIntensity=u.ei0} u.glowOn=on}
 function applyGlow(t){const on=S.glow;
-  hemiL.intensity=on?0.2:0.35; keyL.intensity=on?0.55:0.95; rimL.intensity=on?0.32:0.55;
-  if(capMesh&&capMesh.material.emissive){capMesh.material.emissive.copy(capMesh.userData.col); capMesh.material.emissiveIntensity=on?0.42+0.08*Math.sin(t*1.3):0}
-  for(const k in GLIT_MAT){const m=GLIT_MAT[k]; if(m.emissive) m.emissiveIntensity=on?(m.userData.e0||0)*1.8+0.35:(m.userData.e0||0)}
+  renderer.toneMappingExposure=on?0.3:0.92;
+  hemiL.intensity=on?0.12:0.35; keyL.intensity=on?0.3:0.95; rimL.intensity=on?0.2:0.55;
+  const k=0.85+0.15*Math.sin(t*1.3);
+  if(capMesh&&capMesh.material.emissive){if(on){capMesh.material.emissive.copy(NEON); capMesh.material.emissiveIntensity=1.6*k} else {capMesh.material.emissive.copy(capMesh.userData.col); capMesh.material.emissiveIntensity=0}}
+  for(const key in GLIT_MAT) glowMat_(GLIT_MAT[key],on,k);
+  if(decoGroup){if(!decoGroup.userData.mats){const L=[]; decoGroup.traverse(o=>{if(o.material&&!L.includes(o.material)) L.push(o.material)}); decoGroup.userData.mats=L} decoGroup.userData.mats.forEach(m=>glowMat_(m,on,k))}
 }
 function poseAt(t){
   root.rotation.set(rotX,rotY,0);
@@ -1408,7 +1419,7 @@ $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); r
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
 function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.textContent=S.glow?"🌙 야광 켜짐":"🌙 야광 모드"}
-$("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(S.glow&&!S.bgImg&&S.bg!=="night"){S.bg="night"; setBg(); renderUI()} glowLabel(); writeHash()});
+$("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(!S.bgImg){if(S.glow){S.bg0=S.bg; S.bg="glow"} else S.bg=S.bg0&&S.bg0!=="glow"?S.bg0:"peach"; setBg(); renderUI()} glowLabel(); writeHash()});
 $("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
 $("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
 $("camLock").addEventListener("click",e=>{CAM.locked=!CAM.locked; velY=0; e.currentTarget.setAttribute("aria-pressed",String(CAM.locked)); e.currentTarget.textContent=CAM.locked?"🔒 카메라 고정됨":"🔓 카메라 고정"});
@@ -1416,14 +1427,25 @@ $("camReset").addEventListener("click",()=>{resetView(); toast("원래 위치로
 $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.target.value=""; if(!f) return;
   try{const img=await new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=r.result}; r.onerror=rej; r.readAsDataURL(f)});
     const c=document.createElement("canvas"); c.width=800; c.height=1000; const x=c.getContext("2d"); const k=Math.max(800/img.width,1000/img.height); x.drawImage(img,(800-img.width*k)/2,(1000-img.height*k)/2,img.width*k,img.height*k);
-    S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
+    S.bgSrc=c; S.bgBlur="0"; applyBgBlur(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
+function applyBgBlur(){if(!S.bgSrc) return; const src=S.bgSrc, W=src.width, H=src.height, rad={"0":0,"1":9,"2":24}[S.bgBlur]||0; let out=src;
+  if(rad){out=document.createElement("canvas"); out.width=W; out.height=H; const x=out.getContext("2d");
+    x.drawImage(src,0,0);   // the sharp picture underneath keeps the edges from fading out
+    if("filter" in CanvasRenderingContext2D.prototype){x.filter=`blur(${rad}px)`; x.drawImage(src,0,0); x.filter="none"}
+    else{ // no canvas filter (older Safari): shrink step by step, then grow step by step - smooth, not blocky
+      let cur=src, w=W, h=H; const steps=[]; const goal=rad>12?1/24:1/9;
+      while(w>W*goal*1.5){w=Math.max(2,Math.round(w/2)); h=Math.max(2,Math.round(h/2)); const c=document.createElement("canvas"); c.width=w; c.height=h; const cx=c.getContext("2d"); cx.imageSmoothingQuality="high"; cx.drawImage(cur,0,0,w,h); cur=c; steps.push([w,h])}
+      for(let k=steps.length-2;k>=0;k--){const [w2,h2]=steps[k], c=document.createElement("canvas"); c.width=w2; c.height=h2; const cx=c.getContext("2d"); cx.imageSmoothingQuality="high"; cx.drawImage(cur,0,0,w2,h2); cur=c}
+      x.imageSmoothingQuality="high"; x.drawImage(cur,0,0,W,H)}}
+  S.bgImg=texOf(out); setBg(); chipGroup("bgBlurChips","bgBlur",{"0":"안 흐리게","1":"살짝","2":"많이"},()=>applyBgBlur())}
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":""]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+let standJob=0; $("standSize").addEventListener("input",e=>{S.standSize=(+e.target.value)/100; if(!standJob) standJob=requestAnimationFrame(()=>{standJob=0; rebuild()})});
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":""]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
-    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1});
+    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1,standSize:(o.ss>=70&&o.ss<=170)?o.ss/100:1});
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
   if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],""); S.odd=!!fe[7]; S.eyeColor2=fe[7]==="0"?"":col(fe[7],"#3E6FD8")}
@@ -1441,7 +1463,7 @@ Object.assign(OPT,{
   shine:{many:"반짝반짝",one:"하나",none:"없음"},
   nose:{none:"없음",tri:"분홍 세모",dot:"까만 동글",heart:"하트",bean:"콩",big:"큰 코"},
   mouth:{none:"없음",w:"ω",bunny:"ㅅ",caret:"^",line:"一",smile:"웃는",open:"활짝"},
-  extra:{whisker:"수염",blush:"홍조",freckle:"주근깨",mole:"점",fox:"여우 무늬",muzzle:"동그란 주둥이"}
+  extra:{whisker:"수염",blush:"홍조",freckle:"주근깨",mole:"점",fox:"여우 무늬",muzzle:"동그란 주둥이",rglass:"동그란 안경",sglass:"네모난 안경"}
 });
 const FACE_KEYS=["ears","eyes","shine","nose","mouth"];
 const ANIMALS={
@@ -1528,6 +1550,13 @@ function faceTex(f,dark){ // dark keycap: the lines stay dark and every part get
       if(f.eyes==="sleepy"){x.strokeStyle=ec||ink; x.lineWidth=u*0.02; x.beginPath(); x.arc(px,py-r*0.5,r*1.02,Math.PI*0.15,Math.PI*0.85); x.stroke()}
     }
     x.fillStyle=ink; x.strokeStyle=ink;
+    // glasses: big lenses over the eyes, black frames (a dark keycap gives them the same pale rim as the other parts)
+    const gk=ex2.includes("rglass")?"r":ex2.includes("sglass")?"s":"";
+    if(gk){const R=u*0.107, hw=gk==="r"?R:R*1.12; x.lineWidth=u*0.016; x.strokeStyle=ink;
+      for(const s of [-1,1]){const px=cx+s*ex; x.beginPath();
+        if(gk==="r") x.arc(px,ey,R,0,7); else {const w=R*2.24, h=R*1.7, q=R*0.34, L=px-w/2, T=ey-h/2; x.moveTo(L+q,T); x.arcTo(L+w,T,L+w,T+h,q); x.arcTo(L+w,T+h,L,T+h,q); x.arcTo(L,T+h,L,T,q); x.arcTo(L,T,L+w,T,q); x.closePath()}
+        x.stroke(); x.beginPath(); x.moveTo(px+s*hw,ey-R*0.25); x.lineTo(px+s*(hw+u*0.032),ey-R*0.42); x.stroke()}
+      x.beginPath(); x.moveTo(cx-ex+hw,ey-R*0.12); x.quadraticCurveTo(cx,ey-R*0.5,cx+ex-hw,ey-R*0.12); x.stroke()}
     if(ex2.includes("mole")){x.fillStyle=ink; x.beginPath(); x.arc(cx+ex+r*1.5,ey+r*1.35,u*0.009,0,7); x.fill()}
     // nose
     const nz=f.nose;
@@ -1601,7 +1630,7 @@ function renderFaceUI(){
   swatches("eyeSw","eyeColor",EYE_COLS); swatches("eyeSw2","eyeColor2",EYE_COLS); oddUI();
   const el=$("extraChips"); el.innerHTML="";
   for(const k of Object.keys(OPT.extra)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=OPT.extra[k]; b.setAttribute("aria-pressed",String(S.extra.includes(k)));
-    b.addEventListener("click",()=>{const i=S.extra.indexOf(k); if(i>=0) S.extra.splice(i,1); else S.extra.push(k); b.setAttribute("aria-pressed",String(i<0)); rebuild()}); el.appendChild(b)}
+    b.addEventListener("click",()=>{const i=S.extra.indexOf(k); if(i>=0) S.extra.splice(i,1); else {S.extra.push(k); const other={rglass:"sglass",sglass:"rglass"}[k]; if(other&&S.extra.includes(other)){S.extra.splice(S.extra.indexOf(other),1); renderFaceUI()}} b.setAttribute("aria-pressed",String(i<0)); rebuild()}); el.appendChild(b)}
   $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false}); renderFaceUI(); rebuild()};
   $("oddBtn").onclick=()=>{S.odd=!S.odd; if(S.odd&&S.eyeColor2===S.eyeColor) S.eyeColor2=S.eyeColor==="#3E6FD8"?"#E0A03A":"#3E6FD8"; renderFaceUI(); rebuild()};
 }
@@ -1609,7 +1638,7 @@ function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd
   $("eyeLab").textContent=S.odd?"왼쪽 눈 색":"눈 색"}
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
-readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
+readHash(); if(S.glow&&!S.bgImg) S.bg="glow"; loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
 setTimeout(warmUp,300);
 
 /* ---------- slots & files ---------- */
@@ -1819,6 +1848,7 @@ function showOut(kind,url){const img=$("outImg"), vid=$("outVid");
    page wait for the GPU each frame, and the video dropped to a few frames a second. Each frame is also asked
    for at a fixed time (frame i at i/30 s), and the turn/presses follow the frame number, not the clock. */
 $("makeVid").addEventListener("click",async()=>{
+  const vid=$("outVid"); if($("out").style.display==="block"&&vid.style.display!=="none"){vid.pause(); $("out").style.display="none"; return}   // a second press closes the video
   const mime=pickMime();
   if(!mime||!cv.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";

@@ -136,8 +136,15 @@ vanished edge-on. On a dark cap every kind gets `DARK_GLOW` in its own colour.
 
 ## Glow mode (야광)
 
-`S.glow`: `applyGlow(t)` dims the three lights and gives the cap (in its own colour) and the glitter an
-emissive glow that breathes slowly; turning it on switches the background to night. In the share link as `gl`.
+`S.glow` is the lights going out: `applyGlow(t)` drops the exposure (0.3) and the lights, switches to the dark `glow`
+background (the previous one comes back when it's turned off), and makes the cap, its decorations (`decoGroup.userData.mats`)
+and the glitter glow neon green, breathing slowly. Each material's own emissive is kept in `userData.em0` to restore.
+
+## Other options
+
+Background image blur (`applyBgBlur`, 3 steps, canvas `filter` or a shrink/grow fallback for old Safari), acrylic
+stand size (`S.standSize` 0.7-1.7, share link `ss`; decorations float above the stand's real height), glasses in the
+face extras (`rglass`/`sglass`, one at a time). A second press on 돌아가는 영상 closes the video.
 
 ## Decorations
 

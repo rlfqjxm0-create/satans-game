@@ -68,6 +68,7 @@ function showOut(kind,url){const img=$("outImg"), vid=$("outVid");
    page wait for the GPU each frame, and the video dropped to a few frames a second. Each frame is also asked
    for at a fixed time (frame i at i/30 s), and the turn/presses follow the frame number, not the clock. */
 $("makeVid").addEventListener("click",async()=>{
+  const vid=$("outVid"); if($("out").style.display==="block"&&vid.style.display!=="none"){vid.pause(); $("out").style.display="none"; return}   // a second press closes the video
   const mime=pickMime();
   if(!mime||!cv.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";
