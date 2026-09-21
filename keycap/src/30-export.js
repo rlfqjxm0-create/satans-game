@@ -14,19 +14,36 @@ function snap(W,H){ // render one frame at a given size and hand back a 2D canva
   renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); renderer.render(scene,camera);
   const c=document.createElement("canvas"); c.width=W; c.height=H; c.getContext("2d").drawImage(renderer.domElement,0,0,W,H); return c;
 }
-function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize()}
+function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize(); camApply()}
+/* the card camera (image + video): a little lower and more from the side than the preview, keycap in the middle */
+const CARD_CAM={y:22,d:84,ty:10.5};
+function camCard(){camera.position.set(0,CARD_CAM.ty+CARD_CAM.y,CARD_CAM.d); camera.lookAt(0,CARD_CAM.ty,0)}
+/* a little die-cut sticker, like the ones on handmade goods for sale: white border, soft shadow, the site cat */
+function watermark(x,W,H){
+  const s=W/1080, bw=318*s, bh=92*s, cx=W-60*s-bw/2, cy=H-64*s-bh/2, r=bh/2, col=S.color;
+  const fill=mixHex(col,"#FFFFFF",0.55), ink=mixHex(col,"#2A2230",0.78), edge=mixHex(col,"#FFFFFF",0.2);
+  x.save(); x.translate(cx,cy); x.rotate(-0.07);
+  const pill=(w,h,rr)=>{x.beginPath(); x.moveTo(-w/2+rr,-h/2); x.arcTo(w/2,-h/2,w/2,h/2,rr); x.arcTo(w/2,h/2,-w/2,h/2,rr); x.arcTo(-w/2,h/2,-w/2,-h/2,rr); x.arcTo(-w/2,-h/2,w/2,-h/2,rr); x.closePath()};
+  x.shadowColor="rgba(60,30,70,.28)"; x.shadowBlur=14*s; x.shadowOffsetY=5*s;
+  pill(bw+18*s,bh+18*s,r+9*s); x.fillStyle="#FFFFFF"; x.fill();      // the white die-cut border
+  x.shadowColor="transparent";
+  pill(bw,bh,r); x.fillStyle=fill; x.fill(); x.lineWidth=2.5*s; x.setLineDash([7*s,6*s]); x.strokeStyle=edge; pill(bw-12*s,bh-12*s,r-6*s); x.stroke(); x.setLineDash([]);
+  x.save(); x.translate(-bw/2+20*s,-30*s); x.scale(60*s/64,60*s/64); drawSatanCat(x); x.restore();
+  x.font=`${38*s}px Jua, sans-serif`; x.textAlign="left"; x.textBaseline="middle"; x.fillStyle=ink; x.fillText("사탄의 키캡",-bw/2+90*s,2*s);
+  x.fillStyle="#FFD66B"; for(const [px,py,k] of [[bw/2-4*s,-bh/2+4*s,1],[bw/2+10*s,-bh/2+26*s,0.6]]){x.beginPath(); for(let i=0;i<8;i++){const a=i*Math.PI/4, rr=(i%2?5:13)*s*k; x.lineTo(px+Math.cos(a)*rr,py+Math.sin(a)*rr)} x.closePath(); x.fill()}
+  x.restore();
+}
 function cardOverlay(x,W,H){ // name tag + little title, like a product card
   x.save(); const s=W/1080;
   x.font=`${46*s}px Jua, sans-serif`; x.textAlign="left"; x.fillStyle=S.bg==="night"?"#FFE38A":"#4A3A5A"; x.fillText(S.name?`${S.name}의 키캡`:"나의 아티산 키캡",60*s,110*s);
   x.font=`${24*s}px "Noto Sans KR", sans-serif`; x.fillStyle=S.bg==="night"?"rgba(255,255,255,.7)":"rgba(74,58,90,.65)";
   x.fillText(`${OPT.shape[S.shape]} · ${OPT.mat[S.mat]} · ${OPT.deco[S.deco]} · ${OPT.sw[S.sw].split(" · ")[0]}`,60*s,156*s);
-  x.textAlign="right"; x.fillText("사탄의 키캡",W-60*s,H-60*s);
-  x.restore();
+  x.restore(); watermark(x,W,H);
 }
 $("savePng").addEventListener("click",async()=>{
   busy(true); try{
     try{await document.fonts.load('46px Jua')}catch(e){}
-    PAUSE=true; const c=snap(1080,1350); restoreSize(); PAUSE=false;
+    PAUSE=true; const rx=rotX; rotX=0; camCard(); poseAt(T); const c=snap(1080,1350); rotX=rx; restoreSize(); PAUSE=false;
     cardOverlay(c.getContext("2d"),1080,1350);
     const b=await new Promise(r=>c.toBlob(r,"image/png")); outBlob=b; outExt="png";
     showOut("img",await readURL(b)); saveFile("satan-keycap.png",b);
@@ -40,36 +57,47 @@ function showOut(kind,url){const img=$("outImg"), vid=$("outVid");
   img.style.display=kind==="img"?"block":"none"; vid.style.display=kind==="video"?"block":"none";
   if(kind==="img") img.src=url; else {vid.src=url; vid.play().catch(()=>{})}
   $("out").style.display="block"}
+/* Smoothness: the frames are drawn straight on the WebGL canvas and recorded from it, with the title and
+   sticker as a flat overlay drawn by the GPU in the same frame. Copying every frame into a 2D canvas made the
+   page wait for the GPU each frame, and the video dropped to a few frames a second. Each frame is also asked
+   for at a fixed time (frame i at i/30 s), and the turn/presses follow the frame number, not the clock. */
 $("makeVid").addEventListener("click",async()=>{
-  const mime=pickMime(), probe=document.createElement("canvas");
-  if(!mime||!probe.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
+  const mime=pickMime();
+  if(!mime||!cv.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";
-  const W=720, H=900, DUR=8, presses=[1.0,3.4,5.8], keep=rotY; let dest=null, a=null, c=null;
+  const W=600, H=750, FPS=30, DUR=8, N=FPS*DUR, presses=[1.0,3.4,5.8].map(t=>Math.round(t*FPS)), keep=rotY, rx=rotX;
+  let dest=null, a=null, hud=null, ac0=renderer.autoClear;
   try{
     try{await document.fonts.load('46px Jua')}catch(e){}
     a=ac(); if(a&&a.state!=="running") try{await a.resume()}catch(e){}
     const p=loadPack(S.sw); if(p) await p;                          // the recorded clicks have to be ready first
-    c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
-    c.style.cssText="position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none"; document.body.appendChild(c);
-    x.fillStyle="#000"; x.fillRect(0,0,W,H);
-    const stream=c.captureStream(30);
+    // the overlay: drawn once into a texture, laid over every frame by an orthographic pass
+    const oc=document.createElement("canvas"); oc.width=W; oc.height=H; cardOverlay(oc.getContext("2d"),W,H);
+    const ot=new THREE.CanvasTexture(oc); ot.encoding=THREE.sRGBEncoding;
+    hud={scene:new THREE.Scene(),cam:new THREE.OrthographicCamera(-W/2,W/2,H/2,-H/2,-1,1),tex:ot,
+      mat:new THREE.MeshBasicMaterial({map:ot,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}),geo:new THREE.PlaneGeometry(W,H)};
+    hud.scene.add(new THREE.Mesh(hud.geo,hud.mat));
+    PAUSE=true; rotX=0; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); camCard();
+    const draw=i=>{rotY=keep+Math.min(i,N)/N*Math.PI*2; poseAt(T); renderer.autoClear=true; renderer.render(scene,camera); renderer.autoClear=false; renderer.render(hud.scene,hud.cam); renderer.autoClear=ac0};
+    draw(0); await new Promise(r=>requestAnimationFrame(r));
+    const stream=cv.captureStream(FPS), track=stream.getVideoTracks()[0];
     if(a&&S.sound&&a.createMediaStreamDestination){dest=a.createMediaStreamDestination(); outNode(a).connect(dest); dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t))}
-    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8e6}), chunks=[];
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6e6}), chunks=[];
     rec.ondataavailable=e=>{if(e.data&&e.data.size) chunks.push(e.data)}; const stopped=new Promise(r=>rec.onstop=r);
-    PAUSE=true; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix();
-    rec.start(250); const t0=performance.now(); let next=0;
-    await new Promise(res=>{const loop=()=>{const t=(performance.now()-t0)/1000;
-      if(next<presses.length&&t>=presses[next]){next++; pressKey()}
-      rotY=keep+Math.min(t,DUR)/DUR*Math.PI*2; poseAt(T); renderer.render(scene,camera);
-      x.drawImage(renderer.domElement,0,0,W,H); cardOverlay(x,W,H);
-      prog(Math.min(1,t/DUR),`영상 녹화 중… ${Math.min(100,Math.round(100*t/DUR))}%`);
-      if(t<DUR+0.25) requestAnimationFrame(loop); else res()}; requestAnimationFrame(loop)});
+    rec.start(250); const t0=performance.now(); let i=0;
+    await new Promise(res=>{const loop=()=>{const due=(performance.now()-t0)/1000*FPS;
+      if(due>=i){ // one new frame per 1/30 s; a late frame is still drawn (never skipped), so the turn stays even
+        if(presses.includes(i)) pressKey();
+        draw(i); i++;
+        prog(Math.min(1,i/N),`영상 녹화 중… ${Math.min(100,Math.round(100*i/N))}%`)}
+      if(i<=N+6) requestAnimationFrame(loop); else res()}; requestAnimationFrame(loop)});
     rec.stop(); await stopped;
     outExt=mime.includes("mp4")?"mp4":"webm"; outBlob=new Blob(chunks,{type:mime.split(";")[0]});
     showOut("video",URL.createObjectURL(outBlob));
     prog(1,`영상 완성 · ${W}×${H} · ${DUR}초 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
   }catch(err){console.error(err); $("status").textContent="영상을 만들지 못했어요. 이미지로 저장해 주세요."; $("progress").style.display="none"}
-  finally{if(dest) try{outNode(a).disconnect(dest)}catch(e){} if(c) c.remove(); rotY=keep; PAUSE=false; restoreSize(); busy(false)}
+  finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
+    rotY=keep; rotX=rx; PAUSE=false; restoreSize(); busy(false)}
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};

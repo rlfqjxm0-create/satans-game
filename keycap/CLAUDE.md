@@ -91,7 +91,8 @@ Presets in `OPT.ears/eyes/shine/nose/mouth/extra` plus `S.eyeColor` ("" = the li
 all (and a colour) in one tap. The face is a canvas (`faceTex`) laid on the top like the top print; **its "up" is the
 back of the key (-z)**, so the camera looks from higher up (`camApply`) and the ears (`buildEars`) grow out of the
 **back wall** (`backZ` finds it from the fence table), pointing backwards and tilted up - never stuck into the top
-(rejected) or laid into the outline (rejected). Ears use the cap's own material object; dog ears hang at the sides.
+(rejected) or laid into the outline (rejected). Ears lie flat (level with the top, reaching back); they use the cap's own material object; dog ears hang at the sides.
+`S.decoLie` (가로로 눕히기) lays the top decoration flat at the back edge - the top of the head (`lieDown`).
 Keep every face part within 0.42 of the canvas centre (the top outline clips the rest - whiskers/blush were cut
 before). Lines turn pale on dark keycaps (`faceInk`). The share link carries the face as `fe`. `15-faces.js` also
 runs the start-up (`readHash … rebuild … warmUp`) because it must come after everything it uses.
@@ -116,6 +117,11 @@ outline (`fenceTable/fenceLim`), the top uses the real surface (`capTopY` - dish
 rounded edges) and each flake's reach as it is tilted right now (`hv`). Spin is applied *before* the
 limits, otherwise a flake tips out after being checked (that was the "pokes out when pressed" bug).
 
+## RGB light on an opaque base
+
+The glow sprite always faces the camera, so inside an opaque base it cut the walls in a hard diagonal. With an
+opaque base `applyRGB` moves it just behind the base (away from the camera) so it reads as a soft halo.
+
 ## Glow mode (야광)
 
 `S.glow`: `applyGlow(t)` dims the three lights and gives the cap (in its own colour) and the glitter an
@@ -128,6 +134,11 @@ with small tops (`fit`, SA). Horns grow straight up from a level base ring just 
 clamp their vertices flat again (that shaved the base off). Geometry is cached in `DECO_GEO` via `GEO()`.
 
 ## Video export
+
+**Smooth video:** frames are drawn straight on the WebGL canvas and recorded from it (`cv.captureStream`); the title and
+the die-cut sticker watermark (`watermark()`) are one texture laid on top by an orthographic pass. Copying each frame
+into a 2D canvas made the page wait for the GPU and the video dropped frames - don't go back to that. Frame i is drawn at
+i/30 s and the turn/presses follow i. Image and video use `camCard()` (lower, keycap centred), not the preview camera.
 
 "돌아가는 영상" replaced the silent 360° GIF: the image card's framing (4:5, `cardOverlay`), one slow
 turn over 8 s with three presses, recorded with `MediaRecorder` (mp4 first, else webm). Every sound goes

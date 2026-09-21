@@ -180,6 +180,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
       <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
       <div class="group"><h2>윗면 장식</h2><div class="chips" id="decoChips"></div>
+        <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="decoLie" aria-pressed="false">↩ 가로로 눕히기</button></div><p class="sub" style="margin-top:6px">얼굴 만들기로 얼굴을 그렸다면, 장식이 머리 위(키캡 뒤쪽 끝)에 눕혀져 올라가요.</p>
         <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
         <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요. 무지개 동그라미는 반짝이마다의 기본 색이에요.</p><div class="chips" id="glitChips"></div><div class="swatches" id="glitSw" style="margin-top:12px" aria-label="반짝이 색"></div></div>
@@ -625,7 +626,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:""};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, decoLie:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:""};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -917,15 +918,15 @@ function buildDeco(p,g){
         const ig=GEO("bun.inner"+sd,()=>{const g2=soft(longEarShape(0.72,5.8,sd*0.75,1),0.4,0.2); g2.translate(0,0,0.55); return flatBase(g2)});
         add(eg,main,sd*x,top,z).scale.setScalar(f); add(ig,accentPink,sd*x,top,z).scale.setScalar(f)}
       break;}
-    case "horn":{ // classic little devil horns: chunky at the base, curving up and outward to a point
-      const hm=surfMat(S.decoMat,S.decoColor==="#FFFFFF"?"#26262B":S.decoColor), z=-w*0.15, {f,x}=pair(1.35,1.35,w*0.44,z);
+    case "horn":{ // classic little devil horns: chunky at the base, curving up and inward to a point
+      const hm=surfMat(S.decoMat,S.decoColor==="#FFFFFF"?"#26262B":S.decoColor), z=-w*0.15, {f,x}=pair(1.35,1.35,w*0.5,z);
       for(const sd of [-1,1]){
-        const tg=GEO("horn2.tube"+sd,()=>{const curve=new THREE.CubicBezierCurve3(new THREE.Vector3(0,0,0),new THREE.Vector3(0,1.5,0),new THREE.Vector3(sd*0.7,2.9,0),new THREE.Vector3(sd*1.8,3.9,0));
+        const tg=GEO("horn3.tube"+sd,()=>{const curve=new THREE.CubicBezierCurve3(new THREE.Vector3(0,0,0),new THREE.Vector3(0,1.6,0),new THREE.Vector3(-sd*0.5,3.1,0),new THREE.Vector3(-sd*1.6,3.9,0));
           const t=new THREE.TubeGeometry(curve,40,1.3,20,false), pos=t.attributes.position, v=new THREE.Vector3();
           for(let i=0;i<pos.count;i++){const seg=Math.floor(i/21)/40, pt=curve.getPoint(seg); v.set(pos.getX(i),pos.getY(i),pos.getZ(i)).sub(pt).multiplyScalar(lerp(1,0.07,Math.pow(seg,0.9))).add(pt); pos.setXYZ(i,v.x,v.y,v.z)}
           t.computeVertexNormals(); return t});   // the curve starts straight up, so the base ring lies flat on the top
         const h=add(tg,hm,sd*x,top,z); h.scale.setScalar(f);
-        add(GEO("horn2.tip",()=>new THREE.SphereGeometry(1.3*0.07,10,8)),hm,sd*x+sd*1.8*f,top+3.9*f,z).scale.setScalar(f);
+        add(GEO("horn2.tip",()=>new THREE.SphereGeometry(1.3*0.07,10,8)),hm,sd*x-sd*1.6*f,top+3.9*f,z).scale.setScalar(f);
         add(GEO("horn2.base",()=>new THREE.CircleGeometry(1.3,24)),hm,sd*x,top+0.001,z,Math.PI/2).scale.setScalar(f)}   // closes the tube's bottom
       break;}
     case "bow":{ // two pleated loops, a knot and notched tails, standing upright
@@ -956,9 +957,20 @@ function buildDeco(p,g){
           s2.bezierCurveTo(3.4,5.2,4.9,4.1,4.9,1.9); s2.bezierCurveTo(4.9,-0.9,1.5,-2.7,0,-4.1)}
         const g2=soft(s2,1.4,S.deco==="heart"?0.75:1.2); g2.center(); return g2});
       const mat=S.decoColor==="#FFFFFF"?surfMat(S.decoMat,S.deco==="star"?"#FFD45C":"#FF8FB0"):main;
+      if(S.decoLie&&!stand){add(geo,mat,0,top+4.4,0); break}   // lying on the head: no floating, no spin
       const fy=floatBase+(stand?4.5:5.6); const o=add(geo,mat,0,fy,0,0,0,0); grp.userData.spin=o; o.userData.float=fy; break;}
   }
+  if(S.decoLie&&!stand&&S.deco!=="halo"&&S.deco!=="none") return lieDown(grp,p,top,w);
   return grp;
+}
+/* 가로로 눕히기: the decoration is turned to lie flat and put at the back edge of the top - the top of the head
+   when a face is drawn there (its "up" is the back, -z). Its base stays on the top, the rest reaches back. */
+function lieDown(grp,p,top,w){
+  const kids=[...grp.children]; if(!kids.length) return grp;
+  const zc=kids.reduce((a,o)=>a+o.position.z,0)/kids.length, F=fenceTable(p), edge=-fenceAt(F.R,-Math.PI/2)*w;
+  const pivot=new THREE.Group(); pivot.position.set(0,top+0.55,edge+1.6); pivot.rotation.x=-Math.PI/2;
+  for(const o of kids){grp.remove(o); o.position.y-=top; o.position.z-=zc; pivot.add(o)}
+  const out=new THREE.Group(); out.add(pivot); return out;
 }
 const mixHex=(a,b,t)=>"#"+new THREE.Color(a).lerp(new THREE.Color(b),t).getHexString();
 function nameSticker(txt){ // a die-cut name sticker: white border, a label in the keycap's colour, tiny heart
@@ -1223,7 +1235,7 @@ function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; const p=loa
 function resize(){const r=cv.getBoundingClientRect(); renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(cv); resize();
 let last=performance.now(), T=0;
-const RGB_TMP=new THREE.Color(), RGB_BASE=new THREE.Color(); let rgbHex=null;   // reused every frame (no garbage)
+const RGB_TMP=new THREE.Color(), RGB_BASE=new THREE.Color(), GLOW_P=new THREE.Vector3(), GLOW_D=new THREE.Vector3(); let rgbHex=null;   // reused every frame (no garbage)
 function applyRGB(t){
   if(rgbHex!==S.rgbColor){RGB_BASE.copy(lin(S.rgbColor)); rgbHex=S.rgbColor}
   let on=S.rgb!=="off", col=RGB_BASE, k=1;
@@ -1231,8 +1243,14 @@ function applyRGB(t){
   if(S.rgb==="breath") k=0.35+0.65*(0.5+0.5*Math.sin(t*2.2));
   rgbLight.color.copy(col); rgbLight.intensity=on?2.4*k:0;
   rgbGlow.material.color.copy(col); rgbGlow.material.opacity=on?0.55*k:0;
+  // An opaque base hides the light, and the glow card (which always faces the camera) cut through its walls
+  // in a hard diagonal. There the glow sits right behind the base instead, so it shows as a soft halo around it.
+  const see=S.base==="clear"||S.base==="tint";
+  if(see){rgbGlow.position.set(0,-2,0); rgbGlow.scale.set(34,34,1)}
+  else{root.updateMatrixWorld(); GLOW_P.set(0,-4,0); root.localToWorld(GLOW_P); GLOW_D.copy(GLOW_P).sub(camera.position).normalize(); GLOW_P.addScaledVector(GLOW_D,17); root.worldToLocal(GLOW_P);
+    rgbGlow.position.copy(GLOW_P); rgbGlow.scale.set(48,48,1); rgbGlow.material.opacity=on?0.7*k:0}
   rgbFloor.material.color.copy(col); rgbFloor.material.opacity=on?0.45*k:0;
-  if(clearMat.emissive) clearMat.emissive.copy(col).multiplyScalar(on&&(S.base==='clear'||S.base==='tint')?0.18*k:0);
+  if(clearMat.emissive) clearMat.emissive.copy(col).multiplyScalar(on?(see?0.18:0.05)*k:0);   // opaque: a faint tint, like light bleeding through
 }
 /* 야광 모드: the lights dim and the cap (in its own colour) and the glitter glow from inside, breathing slowly */
 function applyGlow(t){const on=S.glow;
@@ -1325,6 +1343,8 @@ $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); r
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
 function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.textContent=S.glow?"🌙 야광 켜짐":"🌙 야광 모드"}
+function lieLabel(){const b=$("decoLie"); b.setAttribute("aria-pressed",String(S.decoLie)); b.textContent=S.decoLie?"↩ 가로로 눕힘":"↩ 가로로 눕히기"}
+$("decoLie").addEventListener("click",()=>{S.decoLie=!S.decoLie; lieLabel(); rebuild()});
 $("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(S.glow&&!S.bgImg&&S.bg!=="night"){S.bg="night"; setBg(); renderUI()} glowLabel(); writeHash()});
 $("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
 $("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
@@ -1335,12 +1355,12 @@ $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.tar
     const c=document.createElement("canvas"); c.width=800; c.height=1000; const x=c.getContext("2d"); const k=Math.max(800/img.width,1000/img.height); x.drawImage(img,(800-img.width*k)/2,(1000-img.height*k)/2,img.width*k,img.height*k);
     S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,dl:S.decoLie?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
-    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1});
+    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1,decoLie:o.dl===1});
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
   if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],"")}
@@ -1370,16 +1390,16 @@ const ANIMALS={
   bear:{name:"곰",color:"#C8946A",ears:"bear",eyes:"round",shine:"many",nose:"dot",mouth:"w",extra:["muzzle","blush"]}
 };
 
-/* ears: built flat in XY (base on y=0), then turned so they point backwards and tilt up by `tilt` */
+/* ears: built flat in XY (base on y=0), then laid down flat so they reach straight back, level with the top */
 const earPoint=(w,h,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-w,y0); s.quadraticCurveTo(-w*0.8,y0+h*0.58,-0.26,y0+h*0.96); s.quadraticCurveTo(0,y0+h*1.05,0.26,y0+h*0.96); s.quadraticCurveTo(w*0.8,y0+h*0.58,w,y0); s.lineTo(-w,y0); return s};
 const earLong=(w,h,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-w*0.8,y0); s.bezierCurveTo(-w*1.3,y0+h*0.36,-w*1.2,y0+h,0,y0+h); s.bezierCurveTo(w*1.2,y0+h,w*1.3,y0+h*0.36,w*0.8,y0); s.lineTo(-w*0.8,y0); return s};
 const earRound=(r,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-r,y0); s.bezierCurveTo(-r*1.25,y0+r*1.55,r*1.25,y0+r*1.55,r,y0); s.lineTo(-r,y0); return s};
 const EARS={
-  cat:{x:0.52,tilt:0.95,yaw:0.12,outer:()=>earPoint(2.4,5.2),inner:()=>earPoint(1.25,3.7,0.8),innerCol:"#FFB8C9"},
-  fox:{x:0.52,tilt:0.95,yaw:0.14,outer:()=>earPoint(2.8,6),inner:()=>earPoint(1.2,3.8,1.1),innerCol:"#FFE2CC"},
-  wolf:{x:0.5,tilt:1.0,yaw:0.1,outer:()=>earPoint(2.2,6.2),inner:()=>earPoint(0.95,4,1.1),innerCol:"#EDE7F2"},
-  bunny:{x:0.36,tilt:1.15,yaw:0,outer:()=>earLong(1.7,8.4),inner:()=>earLong(0.9,6.4,1),innerCol:"#FFB8C9"},
-  bear:{x:0.56,tilt:0.9,yaw:0.05,outer:()=>earRound(2.1),inner:()=>earRound(1.2,0.35),innerCol:"#FFB8C9"}
+  cat:{x:0.52,yaw:0.12,outer:()=>earPoint(2.4,5.2),inner:()=>earPoint(1.25,3.7,0.8),innerCol:"#FFB8C9"},
+  fox:{x:0.52,yaw:0.14,outer:()=>earPoint(2.8,6),inner:()=>earPoint(1.2,3.8,1.1),innerCol:"#FFE2CC"},
+  wolf:{x:0.5,yaw:0.1,outer:()=>earPoint(2.2,6.2),inner:()=>earPoint(0.95,4,1.1),innerCol:"#EDE7F2"},
+  bunny:{x:0.36,yaw:0,outer:()=>earLong(1.7,8.4),inner:()=>earLong(0.9,6.4,1),innerCol:"#FFB8C9"},
+  bear:{x:0.56,yaw:0.05,outer:()=>earRound(2.1),inner:()=>earRound(1.2,0.35),innerCol:"#FFB8C9"}
 };
 // where the back wall is (unit section coords) at a given x - the ears are seated there
 function backZ(F,xu){let lo=-Math.PI/2, hi=xu>=0?0:-Math.PI; for(let i=0;i<30;i++){const mid=(lo+hi)/2, x=fenceAt(F.R,mid)*Math.cos(mid); if(Math.abs(x)<Math.abs(xu)) lo=mid; else hi=mid} return fenceAt(F.R,lo)*Math.sin(lo)}
@@ -1398,10 +1418,10 @@ function buildEars(p,g,mat){
   const outer=GEO("ear."+kind,()=>{const g2=new THREE.ExtrudeGeometry(E.outer(),{depth:D,bevelEnabled:true,bevelThickness:0.55,bevelSize:0.42,bevelSegments:6,curveSegments:28}); g2.translate(0,0,-D/2); return flatBase(g2)});
   const inner=GEO("ear.in."+kind,()=>{const g2=new THREE.ExtrudeGeometry(E.inner(),{depth:0.3,bevelEnabled:true,bevelThickness:0.14,bevelSize:0.12,bevelSegments:4,curveSegments:24}); g2.translate(0,0,D/2+0.45); return flatBase(g2)});
   const pink=surfMat(S.mat==="matte"?"matte":"gloss",E.innerCol);
-  const y=top-Math.min(p.bev*0.7,1.1), W=wallW(p,y);            // just under the rounded top edge, on the wall
+  const y=top-(D/2+0.55), W=wallW(p,top-p.bev);               // the ear's upper face is level with the top
   for(const sd of [-1,1]){const xu=sd*E.x, pivot=new THREE.Group();
-    pivot.position.set(xu*W,y,backZ(F,xu)*W+0.35);              // a little into the wall, so it's attached everywhere
-    pivot.rotation.order="YXZ"; pivot.rotation.set(-(Math.PI/2-E.tilt),sd*E.yaw,0);   // point backwards, tilt up, turn out a touch
+    pivot.position.set(xu*W,y,backZ(F,xu)*W+p.bev+0.4);           // starts inside the rounded edge, so no dip shows
+    pivot.rotation.order="YXZ"; pivot.rotation.set(-Math.PI/2,sd*E.yaw,0);   // lying flat, pointing back, turned out a touch
     const o=new THREE.Mesh(outer,mat); o.renderOrder=2; pivot.add(o);
     pivot.add(new THREE.Mesh(inner,pink)); grp.add(pivot)}
   return grp;
@@ -1433,8 +1453,11 @@ function faceTex(f,ink){
       if(f.eyes==="sparkle"){const R=r*1.42; x.fillStyle=eye(py,R); x.beginPath(); x.ellipse(px,py,R*0.92,R,0,0,7); x.fill(); ring(); shine(px,py,R)}
       if(f.eyes==="half"){ // cool half-moon: flat top, round bottom
         x.beginPath(); x.moveTo(px-r*1.2,py-r*0.4); x.lineTo(px+r*1.2,py-r*0.4); x.bezierCurveTo(px+r*1.25,py+r*1.45,px-r*1.25,py+r*1.45,px-r*1.2,py-r*0.4); x.fill(); ring(); shine(px,py+r*0.2,r*0.85)}
-      if(f.eyes==="lash"){x.beginPath(); x.arc(px,py,r,0,7); x.fill(); ring(); shine(px,py,r);
-        x.strokeStyle=ink; x.lineWidth=u*0.013; x.beginPath(); x.moveTo(px+s*r*0.62,py-r*0.72); x.quadraticCurveTo(px+s*r*1.25,py-r*1.2,px+s*r*1.55,py-r*1.08); x.stroke()}
+      if(f.eyes==="lash"){const R=r*1.35; x.fillStyle=eye(py,R); x.beginPath(); x.arc(px,py,R,0,7); x.fill(); ring(); shine(px,py,R);
+        // one straight lash growing out of the outline (a flat end on the outline, so nothing pokes into the eye)
+        const a=0.62, dx=s*Math.cos(a), dy=-Math.sin(a), lw=u*0.014, L=R*0.55;
+        x.strokeStyle=ink; x.lineWidth=lw; x.lineCap="butt"; x.beginPath(); x.moveTo(px+dx*R*0.97,py+dy*R*0.97); x.lineTo(px+dx*(R+L),py+dy*(R+L)); x.stroke(); x.lineCap="round";
+        x.fillStyle=ink; x.beginPath(); x.arc(px+dx*(R+L),py+dy*(R+L),lw/2,0,7); x.fill()}
       if(f.eyes==="up"){x.save(); x.translate(px,py); x.rotate(-s*0.38); x.beginPath(); x.ellipse(0,0,r*1.3,r*0.78,0,0,7); x.fill(); ring(); x.restore(); shine(px,py,r*0.85)}
       if(f.eyes==="down"){x.save(); x.translate(px,py); x.rotate(s*0.32); x.beginPath(); x.ellipse(0,0,r*1.18,r*0.9,0,0,7); x.fill(); ring(); x.restore(); shine(px,py,r*0.9)}
       if(f.eyes==="smile"){x.strokeStyle=ec||ink; x.lineWidth=u*0.022; x.beginPath(); x.arc(px,py+r*0.55,r*1.02,Math.PI*1.15,Math.PI*1.85); x.stroke()}
@@ -1490,7 +1513,7 @@ function renderFaceUI(){
 }
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
-readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
+readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); lieLabel(); rebuild();   // sounds start downloading right away (tiny files)
 setTimeout(warmUp,300);
 
 /* ---------- slots & files ---------- */
@@ -1646,19 +1669,36 @@ function snap(W,H){ // render one frame at a given size and hand back a 2D canva
   renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); renderer.render(scene,camera);
   const c=document.createElement("canvas"); c.width=W; c.height=H; c.getContext("2d").drawImage(renderer.domElement,0,0,W,H); return c;
 }
-function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize()}
+function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize(); camApply()}
+/* the card camera (image + video): a little lower and more from the side than the preview, keycap in the middle */
+const CARD_CAM={y:22,d:84,ty:10.5};
+function camCard(){camera.position.set(0,CARD_CAM.ty+CARD_CAM.y,CARD_CAM.d); camera.lookAt(0,CARD_CAM.ty,0)}
+/* a little die-cut sticker, like the ones on handmade goods for sale: white border, soft shadow, the site cat */
+function watermark(x,W,H){
+  const s=W/1080, bw=318*s, bh=92*s, cx=W-60*s-bw/2, cy=H-64*s-bh/2, r=bh/2, col=S.color;
+  const fill=mixHex(col,"#FFFFFF",0.55), ink=mixHex(col,"#2A2230",0.78), edge=mixHex(col,"#FFFFFF",0.2);
+  x.save(); x.translate(cx,cy); x.rotate(-0.07);
+  const pill=(w,h,rr)=>{x.beginPath(); x.moveTo(-w/2+rr,-h/2); x.arcTo(w/2,-h/2,w/2,h/2,rr); x.arcTo(w/2,h/2,-w/2,h/2,rr); x.arcTo(-w/2,h/2,-w/2,-h/2,rr); x.arcTo(-w/2,-h/2,w/2,-h/2,rr); x.closePath()};
+  x.shadowColor="rgba(60,30,70,.28)"; x.shadowBlur=14*s; x.shadowOffsetY=5*s;
+  pill(bw+18*s,bh+18*s,r+9*s); x.fillStyle="#FFFFFF"; x.fill();      // the white die-cut border
+  x.shadowColor="transparent";
+  pill(bw,bh,r); x.fillStyle=fill; x.fill(); x.lineWidth=2.5*s; x.setLineDash([7*s,6*s]); x.strokeStyle=edge; pill(bw-12*s,bh-12*s,r-6*s); x.stroke(); x.setLineDash([]);
+  x.save(); x.translate(-bw/2+20*s,-30*s); x.scale(60*s/64,60*s/64); drawSatanCat(x); x.restore();
+  x.font=`${38*s}px Jua, sans-serif`; x.textAlign="left"; x.textBaseline="middle"; x.fillStyle=ink; x.fillText("사탄의 키캡",-bw/2+90*s,2*s);
+  x.fillStyle="#FFD66B"; for(const [px,py,k] of [[bw/2-4*s,-bh/2+4*s,1],[bw/2+10*s,-bh/2+26*s,0.6]]){x.beginPath(); for(let i=0;i<8;i++){const a=i*Math.PI/4, rr=(i%2?5:13)*s*k; x.lineTo(px+Math.cos(a)*rr,py+Math.sin(a)*rr)} x.closePath(); x.fill()}
+  x.restore();
+}
 function cardOverlay(x,W,H){ // name tag + little title, like a product card
   x.save(); const s=W/1080;
   x.font=`${46*s}px Jua, sans-serif`; x.textAlign="left"; x.fillStyle=S.bg==="night"?"#FFE38A":"#4A3A5A"; x.fillText(S.name?`${S.name}의 키캡`:"나의 아티산 키캡",60*s,110*s);
   x.font=`${24*s}px "Noto Sans KR", sans-serif`; x.fillStyle=S.bg==="night"?"rgba(255,255,255,.7)":"rgba(74,58,90,.65)";
   x.fillText(`${OPT.shape[S.shape]} · ${OPT.mat[S.mat]} · ${OPT.deco[S.deco]} · ${OPT.sw[S.sw].split(" · ")[0]}`,60*s,156*s);
-  x.textAlign="right"; x.fillText("사탄의 키캡",W-60*s,H-60*s);
-  x.restore();
+  x.restore(); watermark(x,W,H);
 }
 $("savePng").addEventListener("click",async()=>{
   busy(true); try{
     try{await document.fonts.load('46px Jua')}catch(e){}
-    PAUSE=true; const c=snap(1080,1350); restoreSize(); PAUSE=false;
+    PAUSE=true; const rx=rotX; rotX=0; camCard(); poseAt(T); const c=snap(1080,1350); rotX=rx; restoreSize(); PAUSE=false;
     cardOverlay(c.getContext("2d"),1080,1350);
     const b=await new Promise(r=>c.toBlob(r,"image/png")); outBlob=b; outExt="png";
     showOut("img",await readURL(b)); saveFile("satan-keycap.png",b);
@@ -1672,36 +1712,47 @@ function showOut(kind,url){const img=$("outImg"), vid=$("outVid");
   img.style.display=kind==="img"?"block":"none"; vid.style.display=kind==="video"?"block":"none";
   if(kind==="img") img.src=url; else {vid.src=url; vid.play().catch(()=>{})}
   $("out").style.display="block"}
+/* Smoothness: the frames are drawn straight on the WebGL canvas and recorded from it, with the title and
+   sticker as a flat overlay drawn by the GPU in the same frame. Copying every frame into a 2D canvas made the
+   page wait for the GPU each frame, and the video dropped to a few frames a second. Each frame is also asked
+   for at a fixed time (frame i at i/30 s), and the turn/presses follow the frame number, not the clock. */
 $("makeVid").addEventListener("click",async()=>{
-  const mime=pickMime(), probe=document.createElement("canvas");
-  if(!mime||!probe.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
+  const mime=pickMime();
+  if(!mime||!cv.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";
-  const W=720, H=900, DUR=8, presses=[1.0,3.4,5.8], keep=rotY; let dest=null, a=null, c=null;
+  const W=600, H=750, FPS=30, DUR=8, N=FPS*DUR, presses=[1.0,3.4,5.8].map(t=>Math.round(t*FPS)), keep=rotY, rx=rotX;
+  let dest=null, a=null, hud=null, ac0=renderer.autoClear;
   try{
     try{await document.fonts.load('46px Jua')}catch(e){}
     a=ac(); if(a&&a.state!=="running") try{await a.resume()}catch(e){}
     const p=loadPack(S.sw); if(p) await p;                          // the recorded clicks have to be ready first
-    c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
-    c.style.cssText="position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none"; document.body.appendChild(c);
-    x.fillStyle="#000"; x.fillRect(0,0,W,H);
-    const stream=c.captureStream(30);
+    // the overlay: drawn once into a texture, laid over every frame by an orthographic pass
+    const oc=document.createElement("canvas"); oc.width=W; oc.height=H; cardOverlay(oc.getContext("2d"),W,H);
+    const ot=new THREE.CanvasTexture(oc); ot.encoding=THREE.sRGBEncoding;
+    hud={scene:new THREE.Scene(),cam:new THREE.OrthographicCamera(-W/2,W/2,H/2,-H/2,-1,1),tex:ot,
+      mat:new THREE.MeshBasicMaterial({map:ot,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}),geo:new THREE.PlaneGeometry(W,H)};
+    hud.scene.add(new THREE.Mesh(hud.geo,hud.mat));
+    PAUSE=true; rotX=0; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); camCard();
+    const draw=i=>{rotY=keep+Math.min(i,N)/N*Math.PI*2; poseAt(T); renderer.autoClear=true; renderer.render(scene,camera); renderer.autoClear=false; renderer.render(hud.scene,hud.cam); renderer.autoClear=ac0};
+    draw(0); await new Promise(r=>requestAnimationFrame(r));
+    const stream=cv.captureStream(FPS), track=stream.getVideoTracks()[0];
     if(a&&S.sound&&a.createMediaStreamDestination){dest=a.createMediaStreamDestination(); outNode(a).connect(dest); dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t))}
-    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8e6}), chunks=[];
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6e6}), chunks=[];
     rec.ondataavailable=e=>{if(e.data&&e.data.size) chunks.push(e.data)}; const stopped=new Promise(r=>rec.onstop=r);
-    PAUSE=true; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix();
-    rec.start(250); const t0=performance.now(); let next=0;
-    await new Promise(res=>{const loop=()=>{const t=(performance.now()-t0)/1000;
-      if(next<presses.length&&t>=presses[next]){next++; pressKey()}
-      rotY=keep+Math.min(t,DUR)/DUR*Math.PI*2; poseAt(T); renderer.render(scene,camera);
-      x.drawImage(renderer.domElement,0,0,W,H); cardOverlay(x,W,H);
-      prog(Math.min(1,t/DUR),`영상 녹화 중… ${Math.min(100,Math.round(100*t/DUR))}%`);
-      if(t<DUR+0.25) requestAnimationFrame(loop); else res()}; requestAnimationFrame(loop)});
+    rec.start(250); const t0=performance.now(); let i=0;
+    await new Promise(res=>{const loop=()=>{const due=(performance.now()-t0)/1000*FPS;
+      if(due>=i){ // one new frame per 1/30 s; a late frame is still drawn (never skipped), so the turn stays even
+        if(presses.includes(i)) pressKey();
+        draw(i); i++;
+        prog(Math.min(1,i/N),`영상 녹화 중… ${Math.min(100,Math.round(100*i/N))}%`)}
+      if(i<=N+6) requestAnimationFrame(loop); else res()}; requestAnimationFrame(loop)});
     rec.stop(); await stopped;
     outExt=mime.includes("mp4")?"mp4":"webm"; outBlob=new Blob(chunks,{type:mime.split(";")[0]});
     showOut("video",URL.createObjectURL(outBlob));
     prog(1,`영상 완성 · ${W}×${H} · ${DUR}초 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
   }catch(err){console.error(err); $("status").textContent="영상을 만들지 못했어요. 이미지로 저장해 주세요."; $("progress").style.display="none"}
-  finally{if(dest) try{outNode(a).disconnect(dest)}catch(e){} if(c) c.remove(); rotY=keep; PAUSE=false; restoreSize(); busy(false)}
+  finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
+    rotY=keep; rotX=rx; PAUSE=false; restoreSize(); busy(false)}
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};

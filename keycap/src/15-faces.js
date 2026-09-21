@@ -20,16 +20,16 @@ const ANIMALS={
   bear:{name:"곰",color:"#C8946A",ears:"bear",eyes:"round",shine:"many",nose:"dot",mouth:"w",extra:["muzzle","blush"]}
 };
 
-/* ears: built flat in XY (base on y=0), then turned so they point backwards and tilt up by `tilt` */
+/* ears: built flat in XY (base on y=0), then laid down flat so they reach straight back, level with the top */
 const earPoint=(w,h,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-w,y0); s.quadraticCurveTo(-w*0.8,y0+h*0.58,-0.26,y0+h*0.96); s.quadraticCurveTo(0,y0+h*1.05,0.26,y0+h*0.96); s.quadraticCurveTo(w*0.8,y0+h*0.58,w,y0); s.lineTo(-w,y0); return s};
 const earLong=(w,h,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-w*0.8,y0); s.bezierCurveTo(-w*1.3,y0+h*0.36,-w*1.2,y0+h,0,y0+h); s.bezierCurveTo(w*1.2,y0+h,w*1.3,y0+h*0.36,w*0.8,y0); s.lineTo(-w*0.8,y0); return s};
 const earRound=(r,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-r,y0); s.bezierCurveTo(-r*1.25,y0+r*1.55,r*1.25,y0+r*1.55,r,y0); s.lineTo(-r,y0); return s};
 const EARS={
-  cat:{x:0.52,tilt:0.95,yaw:0.12,outer:()=>earPoint(2.4,5.2),inner:()=>earPoint(1.25,3.7,0.8),innerCol:"#FFB8C9"},
-  fox:{x:0.52,tilt:0.95,yaw:0.14,outer:()=>earPoint(2.8,6),inner:()=>earPoint(1.2,3.8,1.1),innerCol:"#FFE2CC"},
-  wolf:{x:0.5,tilt:1.0,yaw:0.1,outer:()=>earPoint(2.2,6.2),inner:()=>earPoint(0.95,4,1.1),innerCol:"#EDE7F2"},
-  bunny:{x:0.36,tilt:1.15,yaw:0,outer:()=>earLong(1.7,8.4),inner:()=>earLong(0.9,6.4,1),innerCol:"#FFB8C9"},
-  bear:{x:0.56,tilt:0.9,yaw:0.05,outer:()=>earRound(2.1),inner:()=>earRound(1.2,0.35),innerCol:"#FFB8C9"}
+  cat:{x:0.52,yaw:0.12,outer:()=>earPoint(2.4,5.2),inner:()=>earPoint(1.25,3.7,0.8),innerCol:"#FFB8C9"},
+  fox:{x:0.52,yaw:0.14,outer:()=>earPoint(2.8,6),inner:()=>earPoint(1.2,3.8,1.1),innerCol:"#FFE2CC"},
+  wolf:{x:0.5,yaw:0.1,outer:()=>earPoint(2.2,6.2),inner:()=>earPoint(0.95,4,1.1),innerCol:"#EDE7F2"},
+  bunny:{x:0.36,yaw:0,outer:()=>earLong(1.7,8.4),inner:()=>earLong(0.9,6.4,1),innerCol:"#FFB8C9"},
+  bear:{x:0.56,yaw:0.05,outer:()=>earRound(2.1),inner:()=>earRound(1.2,0.35),innerCol:"#FFB8C9"}
 };
 // where the back wall is (unit section coords) at a given x - the ears are seated there
 function backZ(F,xu){let lo=-Math.PI/2, hi=xu>=0?0:-Math.PI; for(let i=0;i<30;i++){const mid=(lo+hi)/2, x=fenceAt(F.R,mid)*Math.cos(mid); if(Math.abs(x)<Math.abs(xu)) lo=mid; else hi=mid} return fenceAt(F.R,lo)*Math.sin(lo)}
@@ -48,10 +48,10 @@ function buildEars(p,g,mat){
   const outer=GEO("ear."+kind,()=>{const g2=new THREE.ExtrudeGeometry(E.outer(),{depth:D,bevelEnabled:true,bevelThickness:0.55,bevelSize:0.42,bevelSegments:6,curveSegments:28}); g2.translate(0,0,-D/2); return flatBase(g2)});
   const inner=GEO("ear.in."+kind,()=>{const g2=new THREE.ExtrudeGeometry(E.inner(),{depth:0.3,bevelEnabled:true,bevelThickness:0.14,bevelSize:0.12,bevelSegments:4,curveSegments:24}); g2.translate(0,0,D/2+0.45); return flatBase(g2)});
   const pink=surfMat(S.mat==="matte"?"matte":"gloss",E.innerCol);
-  const y=top-Math.min(p.bev*0.7,1.1), W=wallW(p,y);            // just under the rounded top edge, on the wall
+  const y=top-(D/2+0.55), W=wallW(p,top-p.bev);               // the ear's upper face is level with the top
   for(const sd of [-1,1]){const xu=sd*E.x, pivot=new THREE.Group();
-    pivot.position.set(xu*W,y,backZ(F,xu)*W+0.35);              // a little into the wall, so it's attached everywhere
-    pivot.rotation.order="YXZ"; pivot.rotation.set(-(Math.PI/2-E.tilt),sd*E.yaw,0);   // point backwards, tilt up, turn out a touch
+    pivot.position.set(xu*W,y,backZ(F,xu)*W+p.bev+0.4);           // starts inside the rounded edge, so no dip shows
+    pivot.rotation.order="YXZ"; pivot.rotation.set(-Math.PI/2,sd*E.yaw,0);   // lying flat, pointing back, turned out a touch
     const o=new THREE.Mesh(outer,mat); o.renderOrder=2; pivot.add(o);
     pivot.add(new THREE.Mesh(inner,pink)); grp.add(pivot)}
   return grp;
@@ -83,8 +83,11 @@ function faceTex(f,ink){
       if(f.eyes==="sparkle"){const R=r*1.42; x.fillStyle=eye(py,R); x.beginPath(); x.ellipse(px,py,R*0.92,R,0,0,7); x.fill(); ring(); shine(px,py,R)}
       if(f.eyes==="half"){ // cool half-moon: flat top, round bottom
         x.beginPath(); x.moveTo(px-r*1.2,py-r*0.4); x.lineTo(px+r*1.2,py-r*0.4); x.bezierCurveTo(px+r*1.25,py+r*1.45,px-r*1.25,py+r*1.45,px-r*1.2,py-r*0.4); x.fill(); ring(); shine(px,py+r*0.2,r*0.85)}
-      if(f.eyes==="lash"){x.beginPath(); x.arc(px,py,r,0,7); x.fill(); ring(); shine(px,py,r);
-        x.strokeStyle=ink; x.lineWidth=u*0.013; x.beginPath(); x.moveTo(px+s*r*0.62,py-r*0.72); x.quadraticCurveTo(px+s*r*1.25,py-r*1.2,px+s*r*1.55,py-r*1.08); x.stroke()}
+      if(f.eyes==="lash"){const R=r*1.35; x.fillStyle=eye(py,R); x.beginPath(); x.arc(px,py,R,0,7); x.fill(); ring(); shine(px,py,R);
+        // one straight lash growing out of the outline (a flat end on the outline, so nothing pokes into the eye)
+        const a=0.62, dx=s*Math.cos(a), dy=-Math.sin(a), lw=u*0.014, L=R*0.55;
+        x.strokeStyle=ink; x.lineWidth=lw; x.lineCap="butt"; x.beginPath(); x.moveTo(px+dx*R*0.97,py+dy*R*0.97); x.lineTo(px+dx*(R+L),py+dy*(R+L)); x.stroke(); x.lineCap="round";
+        x.fillStyle=ink; x.beginPath(); x.arc(px+dx*(R+L),py+dy*(R+L),lw/2,0,7); x.fill()}
       if(f.eyes==="up"){x.save(); x.translate(px,py); x.rotate(-s*0.38); x.beginPath(); x.ellipse(0,0,r*1.3,r*0.78,0,0,7); x.fill(); ring(); x.restore(); shine(px,py,r*0.85)}
       if(f.eyes==="down"){x.save(); x.translate(px,py); x.rotate(s*0.32); x.beginPath(); x.ellipse(0,0,r*1.18,r*0.9,0,0,7); x.fill(); ring(); x.restore(); shine(px,py,r*0.9)}
       if(f.eyes==="smile"){x.strokeStyle=ec||ink; x.lineWidth=u*0.022; x.beginPath(); x.arc(px,py+r*0.55,r*1.02,Math.PI*1.15,Math.PI*1.85); x.stroke()}
@@ -140,5 +143,5 @@ function renderFaceUI(){
 }
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
-readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
+readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); lieLabel(); rebuild();   // sounds start downloading right away (tiny files)
 setTimeout(warmUp,300);
