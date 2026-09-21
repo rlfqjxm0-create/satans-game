@@ -156,9 +156,9 @@ A new image/video result is scrolled into view (`showOut`).
 
 ## Phones
 
-Below 820 px `.stage` is `display:contents`, so the preview frame is a row of the page grid and docks at the top as a
-full-width bar (`position:sticky`, shadow via `.stuck` once it is stuck); the tabs dock right under it (`--barh`, set from
-the bar's height) with a page-coloured band so nothing shows through the gap. Only the menus scroll. Quick taps must not zoom the page: `maximum-scale=1`, `touch-action:manipulation`,
+Below 820 px the page doesn't scroll either: a thin title row (`header.top`: back + brand) stays on top and only
+`.layout` scrolls. `.stage` is `display:contents`, so the preview frame is a row of that scroll box and docks at its top
+(`position:sticky`, shadow via `.stuck`); the tabs dock right under it (`--barh`) with a page-coloured band. Quick taps must not zoom the page: `maximum-scale=1`, `touch-action:manipulation`,
 `touchend`/`gesture*`/`dblclick` default prevented (pointer events still drive turning and pressing).
 
 "돌아가는 영상" replaced the silent 360° GIF: the image card's framing (4:5, `cardOverlay`), one slow

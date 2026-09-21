@@ -147,6 +147,15 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   #cv{width:auto; height:min(38vh,92vw); max-width:100%; border-radius:22px}
   .tabs{top:var(--barh,0px); box-shadow:0 -14px 0 8px var(--bg),var(--shadow)}   /* docks right under the preview bar; the page-coloured band hides the gap */
   .layout>.hint,.layout>.tools,.layout>.stagebox{justify-self:center; width:100%}
+  /* like the computer: the page never scrolls. A thin title row stays on top and only the area under it scrolls,
+     with the preview bar and the tabs docked at its top - so in practice only the menus move. */
+  html,body{height:100%; overflow:hidden}
+  .wrap{height:100vh; height:100dvh; box-sizing:border-box; display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top,0px) + 8px) 0 0}
+  .top{display:flex; align-items:center; gap:10px; padding:0 16px 8px; flex:none}
+  .top .back{margin:0; padding:5px 12px 5px 10px; font-size:13px} .top h1,.top .lede{display:none} .top .brand{font-size:18px}
+  .layout{flex:1; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:0 16px 24px; align-content:start}
+  .frame{padding-top:10px}
+  footer{flex:none; margin:0; padding:4px 16px calc(env(safe-area-inset-bottom,0px) + 6px); font-size:11.5px}
 }
 .tools .btn{width:auto; font-size:16px; padding:10px 16px}
 .swatches{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
@@ -1196,8 +1205,8 @@ cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture&&cv.setPointerCap
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 // phones: the preview frame docks at the top; the tabs dock under it (--barh) and the bar gets a shadow once stuck
 (function(){const fr=cv.closest(".frame"); if(!fr) return; const set=()=>{const st=getComputedStyle(fr).position==="sticky";
-    document.documentElement.style.setProperty("--barh",st?fr.offsetHeight+"px":"0px"); fr.classList.toggle("stuck",st&&fr.getBoundingClientRect().top<=0.5&&window.scrollY>4)};
-  addEventListener("scroll",set,{passive:true}); addEventListener("resize",set); new ResizeObserver(set).observe(fr); set()})();
+    document.documentElement.style.setProperty("--barh",st?fr.offsetHeight+"px":"0px"); const box=fr.closest(".layout"); fr.classList.toggle("stuck",st&&((box&&box.scrollTop>4)||window.scrollY>4))};
+  addEventListener("scroll",set,{passive:true}); const box0=fr.closest(".layout"); if(box0) box0.addEventListener("scroll",set,{passive:true}); addEventListener("resize",set); new ResizeObserver(set).observe(fr); set()})();
 // quick taps on the keycap must not zoom the page (iOS double-tap zoom, pinch-zoom of the whole page)
 cv.addEventListener("touchend",e=>{if(e.cancelable) e.preventDefault()},{passive:false});
 ["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));

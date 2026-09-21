@@ -543,8 +543,8 @@ cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture&&cv.setPointerCap
 cv.addEventListener("contextmenu",e=>e.preventDefault());
 // phones: the preview frame docks at the top; the tabs dock under it (--barh) and the bar gets a shadow once stuck
 (function(){const fr=cv.closest(".frame"); if(!fr) return; const set=()=>{const st=getComputedStyle(fr).position==="sticky";
-    document.documentElement.style.setProperty("--barh",st?fr.offsetHeight+"px":"0px"); fr.classList.toggle("stuck",st&&fr.getBoundingClientRect().top<=0.5&&window.scrollY>4)};
-  addEventListener("scroll",set,{passive:true}); addEventListener("resize",set); new ResizeObserver(set).observe(fr); set()})();
+    document.documentElement.style.setProperty("--barh",st?fr.offsetHeight+"px":"0px"); const box=fr.closest(".layout"); fr.classList.toggle("stuck",st&&((box&&box.scrollTop>4)||window.scrollY>4))};
+  addEventListener("scroll",set,{passive:true}); const box0=fr.closest(".layout"); if(box0) box0.addEventListener("scroll",set,{passive:true}); addEventListener("resize",set); new ResizeObserver(set).observe(fr); set()})();
 // quick taps on the keycap must not zoom the page (iOS double-tap zoom, pinch-zoom of the whole page)
 cv.addEventListener("touchend",e=>{if(e.cancelable) e.preventDefault()},{passive:false});
 ["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
