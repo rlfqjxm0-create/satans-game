@@ -166,5 +166,5 @@ function renderFaceUI(){
 }
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
-readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); lieLabel(); rebuild();   // sounds start downloading right away (tiny files)
+readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
 setTimeout(warmUp,300);

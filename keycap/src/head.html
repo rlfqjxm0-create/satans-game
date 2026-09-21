@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>사탄의 키캡 · 사탄의 장난감</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -29,7 +29,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px); -webkit-text-size-adjust:1
 }
 :root[data-theme="dark"]{--bg:var(--page-d); --dot:rgba(255,255,255,.05); --ink:#EAF2FA; --ink-soft:#9FB2C6; --card:#1D2833; --line:rgba(234,242,250,.14); --shadow:0 8px 24px rgba(0,0,0,.3); --accent-soft:rgba(255,255,255,.08)}
 body{margin:0; background-color:var(--bg); background-image:radial-gradient(var(--dot) 1.6px, transparent 1.9px), linear-gradient(180deg,#EEF7FE 0,var(--bg) 420px); background-size:26px 26px,100% 100%; background-repeat:repeat,no-repeat; color:var(--ink); font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif; word-break:keep-all; overflow-wrap:break-word; letter-spacing:-.01em; font-size:16px; line-height:1.6; transition:background-color .5s ease; -webkit-tap-highlight-color:transparent}
-button{touch-action:manipulation}
+html,body,button{touch-action:manipulation}
 .wrap{max-width:960px; margin:0 auto; padding:16px 16px 40px}
 .back{display:inline-flex; align-items:center; gap:4px; margin:0 0 12px; padding:7px 14px 7px 12px; border-radius:999px; background:var(--card); box-shadow:var(--shadow); color:var(--ink); text-decoration:none; font-size:14px}
 .back:hover{color:var(--accent)}
@@ -133,6 +133,12 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
 
 #cv{aspect-ratio:4/5; touch-action:none; cursor:grab; background:var(--stage,#FFF6EC)}
 .tools{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+@media (max-width:819px){
+  .stage{display:contents}   /* its parts become rows of the page grid, so the frame can stick for the whole page */
+  .frame{position:sticky; top:calc(env(safe-area-inset-top,0px) + 6px); z-index:20; justify-self:center; width:auto; max-width:100%; padding:6px; border-radius:26px}
+  #cv{width:auto; height:min(42vh,100vw); max-width:100%; border-radius:20px}
+  .layout>.hint,.layout>.tools,.layout>.stagebox{justify-self:center; width:100%}
+}
 .tools .btn{width:auto; font-size:16px; padding:10px 16px}
 .swatches{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
 .sw{width:34px; height:34px; border-radius:50%; border:0; cursor:pointer; box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12); padding:0}
@@ -180,7 +186,6 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
       <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
       <div class="group"><h2>윗면 장식</h2><div class="chips" id="decoChips"></div>
-        <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="decoLie" aria-pressed="false">↩ 가로로 눕히기</button></div><p class="sub" style="margin-top:6px">얼굴 만들기로 얼굴을 그렸다면, 장식이 머리 위(키캡 뒤쪽 끝)에 눕혀져 올라가요.</p>
         <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
         <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요. 무지개 동그라미는 반짝이마다의 기본 색이에요.</p><div class="chips" id="glitChips"></div><div class="swatches" id="glitSw" style="margin-top:12px" aria-label="반짝이 색"></div></div>

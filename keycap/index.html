@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>사탄의 키캡 · 사탄의 장난감</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -29,7 +29,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px); -webkit-text-size-adjust:1
 }
 :root[data-theme="dark"]{--bg:var(--page-d); --dot:rgba(255,255,255,.05); --ink:#EAF2FA; --ink-soft:#9FB2C6; --card:#1D2833; --line:rgba(234,242,250,.14); --shadow:0 8px 24px rgba(0,0,0,.3); --accent-soft:rgba(255,255,255,.08)}
 body{margin:0; background-color:var(--bg); background-image:radial-gradient(var(--dot) 1.6px, transparent 1.9px), linear-gradient(180deg,#EEF7FE 0,var(--bg) 420px); background-size:26px 26px,100% 100%; background-repeat:repeat,no-repeat; color:var(--ink); font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif; word-break:keep-all; overflow-wrap:break-word; letter-spacing:-.01em; font-size:16px; line-height:1.6; transition:background-color .5s ease; -webkit-tap-highlight-color:transparent}
-button{touch-action:manipulation}
+html,body,button{touch-action:manipulation}
 .wrap{max-width:960px; margin:0 auto; padding:16px 16px 40px}
 .back{display:inline-flex; align-items:center; gap:4px; margin:0 0 12px; padding:7px 14px 7px 12px; border-radius:999px; background:var(--card); box-shadow:var(--shadow); color:var(--ink); text-decoration:none; font-size:14px}
 .back:hover{color:var(--accent)}
@@ -133,6 +133,12 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
 
 #cv{aspect-ratio:4/5; touch-action:none; cursor:grab; background:var(--stage,#FFF6EC)}
 .tools{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+@media (max-width:819px){
+  .stage{display:contents}   /* its parts become rows of the page grid, so the frame can stick for the whole page */
+  .frame{position:sticky; top:calc(env(safe-area-inset-top,0px) + 6px); z-index:20; justify-self:center; width:auto; max-width:100%; padding:6px; border-radius:26px}
+  #cv{width:auto; height:min(42vh,100vw); max-width:100%; border-radius:20px}
+  .layout>.hint,.layout>.tools,.layout>.stagebox{justify-self:center; width:100%}
+}
 .tools .btn{width:auto; font-size:16px; padding:10px 16px}
 .swatches{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
 .sw{width:34px; height:34px; border-radius:50%; border:0; cursor:pointer; box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12); padding:0}
@@ -180,7 +186,6 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
       <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
       <div class="group"><h2>윗면 장식</h2><div class="chips" id="decoChips"></div>
-        <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="decoLie" aria-pressed="false">↩ 가로로 눕히기</button></div><p class="sub" style="margin-top:6px">얼굴 만들기로 얼굴을 그렸다면, 장식이 머리 위(키캡 뒤쪽 끝)에 눕혀져 올라가요.</p>
         <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
         <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요. 무지개 동그라미는 반짝이마다의 기본 색이에요.</p><div class="chips" id="glitChips"></div><div class="swatches" id="glitSw" style="margin-top:12px" aria-label="반짝이 색"></div></div>
@@ -626,7 +631,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, decoLie:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:""};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:""};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -957,20 +962,9 @@ function buildDeco(p,g){
           s2.bezierCurveTo(3.4,5.2,4.9,4.1,4.9,1.9); s2.bezierCurveTo(4.9,-0.9,1.5,-2.7,0,-4.1)}
         const g2=soft(s2,1.4,S.deco==="heart"?0.75:1.2); g2.center(); return g2});
       const mat=S.decoColor==="#FFFFFF"?surfMat(S.decoMat,S.deco==="star"?"#FFD45C":"#FF8FB0"):main;
-      if(S.decoLie&&!stand){add(geo,mat,0,top+4.4,0); break}   // lying on the head: no floating, no spin
       const fy=floatBase+(stand?4.5:5.6); const o=add(geo,mat,0,fy,0,0,0,0); grp.userData.spin=o; o.userData.float=fy; break;}
   }
-  if(S.decoLie&&!stand&&S.deco!=="halo"&&S.deco!=="none") return lieDown(grp,p,top,w);
   return grp;
-}
-/* 가로로 눕히기: the decoration is turned to lie flat and put at the back edge of the top - the top of the head
-   when a face is drawn there (its "up" is the back, -z). Its base stays on the top, the rest reaches back. */
-function lieDown(grp,p,top,w){
-  const kids=[...grp.children]; if(!kids.length) return grp;
-  const zc=kids.reduce((a,o)=>a+o.position.z,0)/kids.length, F=fenceTable(p), edge=-fenceAt(F.R,-Math.PI/2)*w;
-  const pivot=new THREE.Group(); pivot.position.set(0,top+0.55,edge+1.6); pivot.rotation.x=-Math.PI/2;
-  for(const o of kids){grp.remove(o); o.position.y-=top; o.position.z-=zc; pivot.add(o)}
-  const out=new THREE.Group(); out.add(pivot); return out;
 }
 const mixHex=(a,b,t)=>"#"+new THREE.Color(a).lerp(new THREE.Color(b),t).getHexString();
 function nameSticker(txt){ // a die-cut name sticker: white border, a label in the keycap's colour, tiny heart
@@ -1169,6 +1163,10 @@ cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture&&cv.setPointerCap
   if(ptrs.size===1) gesture={mode:(e.button===2||e.shiftKey)?"pan":"turn",x0:e.clientX,y0:e.clientY,t:performance.now(),moved:false};
   else if(ptrs.size===2){const [a,b]=[...ptrs.values()]; gesture={mode:"pinch",d0:Math.hypot(a.x-b.x,a.y-b.y),z0:CAM.zoom,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,px:CAM.panX,py:CAM.panY,moved:true}}});
 cv.addEventListener("contextmenu",e=>e.preventDefault());
+// quick taps on the keycap must not zoom the page (iOS double-tap zoom, pinch-zoom of the whole page)
+cv.addEventListener("touchend",e=>{if(e.cancelable) e.preventDefault()},{passive:false});
+["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
 cv.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId)||!gesture) return; const prev=ptrs.get(e.pointerId); const dx=e.clientX-prev.x, dy=e.clientY-prev.y; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); idle=0;
   if(gesture.mode==="pinch"&&ptrs.size===2){const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(!CAM.locked){CAM.zoom=clamp(gesture.z0*gesture.d0/Math.max(20,d),0.45,1.8); const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; CAM.panX=clamp(gesture.px-(mx-gesture.mx)*0.08*CAM.zoom,-25,25); CAM.panY=clamp(gesture.py+(my-gesture.my)*0.08*CAM.zoom,-20,25); camApply()} return}
   if(Math.hypot(e.clientX-gesture.x0,e.clientY-gesture.y0)>6) gesture.moved=true;
@@ -1343,8 +1341,6 @@ $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); r
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
 function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.textContent=S.glow?"🌙 야광 켜짐":"🌙 야광 모드"}
-function lieLabel(){const b=$("decoLie"); b.setAttribute("aria-pressed",String(S.decoLie)); b.textContent=S.decoLie?"↩ 가로로 눕힘":"↩ 가로로 눕히기"}
-$("decoLie").addEventListener("click",()=>{S.decoLie=!S.decoLie; lieLabel(); rebuild()});
 $("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(S.glow&&!S.bgImg&&S.bg!=="night"){S.bg="night"; setBg(); renderUI()} glowLabel(); writeHash()});
 $("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
 $("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
@@ -1355,12 +1351,12 @@ $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.tar
     const c=document.createElement("canvas"); c.width=800; c.height=1000; const x=c.getContext("2d"); const k=Math.max(800/img.width,1000/img.height); x.drawImage(img,(800-img.width*k)/2,(1000-img.height*k)/2,img.width*k,img.height*k);
     S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,dl:S.decoLie?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
-    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1,decoLie:o.dl===1});
+    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1});
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
   if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],"")}
@@ -1536,7 +1532,7 @@ function renderFaceUI(){
 }
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
-readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); lieLabel(); rebuild();   // sounds start downloading right away (tiny files)
+readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
 setTimeout(warmUp,300);
 
 /* ---------- slots & files ---------- */
@@ -1693,9 +1689,6 @@ function snap(W,H){ // render one frame at a given size and hand back a 2D canva
   const c=document.createElement("canvas"); c.width=W; c.height=H; c.getContext("2d").drawImage(renderer.domElement,0,0,W,H); return c;
 }
 function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize(); camApply()}
-/* the card camera (image + video): a little lower and more from the side than the preview, keycap in the middle */
-const CARD_CAM={y:22,d:84,ty:10.5};
-function camCard(){camera.position.set(0,CARD_CAM.ty+CARD_CAM.y,CARD_CAM.d); camera.lookAt(0,CARD_CAM.ty,0)}
 /* a little die-cut sticker, like the ones on handmade goods for sale: white border, soft shadow, the site cat */
 function watermark(x,W,H){
   const s=W/1080, bw=318*s, bh=92*s, cx=W-60*s-bw/2, cy=H-64*s-bh/2, r=bh/2, col=S.color;
@@ -1711,17 +1704,28 @@ function watermark(x,W,H){
   x.fillStyle="#FFD66B"; for(const [px,py,k] of [[bw/2-4*s,-bh/2+4*s,1],[bw/2+10*s,-bh/2+26*s,0.6]]){x.beginPath(); for(let i=0;i<8;i++){const a=i*Math.PI/4, rr=(i%2?5:13)*s*k; x.lineTo(px+Math.cos(a)*rr,py+Math.sin(a)*rr)} x.closePath(); x.fill()}
   x.restore();
 }
-function cardOverlay(x,W,H){ // name tag + little title, like a product card
-  x.save(); const s=W/1080;
-  x.font=`${46*s}px Jua, sans-serif`; x.textAlign="left"; x.fillStyle=S.bg==="night"?"#FFE38A":"#4A3A5A"; x.fillText(S.name?`${S.name}의 키캡`:"나의 아티산 키캡",60*s,110*s);
-  x.font=`${24*s}px "Noto Sans KR", sans-serif`; x.fillStyle=S.bg==="night"?"rgba(255,255,255,.7)":"rgba(74,58,90,.65)";
-  x.fillText(`${OPT.shape[S.shape]} · ${OPT.mat[S.mat]} · ${OPT.deco[S.deco]} · ${OPT.sw[S.sw].split(" · ")[0]}`,60*s,156*s);
+function cardOverlay(x,W,H){ // the title and a little list, as a label sticker at the top left (+ the corner sticker)
+  const s=W/1080, col=S.color, title=S.name?`${S.name}의 키캡`:"나의 아티산 키캡";
+  const sub=`${OPT.shape[S.shape]} · ${OPT.mat[S.mat]} · ${OPT.deco[S.deco]} · ${OPT.sw[S.sw].split(" · ")[0]}`;
+  x.save(); x.font=`${46*s}px Jua, sans-serif`; const tw=x.measureText(title).width; x.font=`${23*s}px "Noto Sans KR", sans-serif`; const sw=x.measureText(sub).width;
+  const bw=Math.max(tw,sw)+64*s, bh=112*s, r=26*s, fill=mixHex(col,"#FFFFFF",0.72), ink=mixHex(col,"#2A2230",0.8), soft=mixHex(col,"#2A2230",0.55), edge=mixHex(col,"#FFFFFF",0.3);
+  x.translate(56*s+bw/2,58*s+bh/2); x.rotate(-0.035);
+  const box=(w,h,rr)=>{x.beginPath(); x.moveTo(-w/2+rr,-h/2); x.arcTo(w/2,-h/2,w/2,h/2,rr); x.arcTo(w/2,h/2,-w/2,h/2,rr); x.arcTo(-w/2,h/2,-w/2,-h/2,rr); x.arcTo(-w/2,-h/2,w/2,-h/2,rr); x.closePath()};
+  x.shadowColor="rgba(60,30,70,.26)"; x.shadowBlur=14*s; x.shadowOffsetY=5*s;
+  box(bw+18*s,bh+18*s,r+9*s); x.fillStyle="#FFFFFF"; x.fill(); x.shadowColor="transparent";   // white die-cut border
+  box(bw,bh,r); x.fillStyle=fill; x.fill();
+  x.setLineDash([7*s,6*s]); x.lineWidth=2.5*s; x.strokeStyle=edge; box(bw-12*s,bh-12*s,r-6*s); x.stroke(); x.setLineDash([]);
+  x.textAlign="left"; x.textBaseline="alphabetic";
+  x.font=`${46*s}px Jua, sans-serif`; x.fillStyle=ink; x.fillText(title,-bw/2+32*s,-bh/2+56*s);
+  x.font=`${23*s}px "Noto Sans KR", sans-serif`; x.fillStyle=soft; x.fillText(sub,-bw/2+32*s,-bh/2+92*s);
+  // a heart doodle on the corner, like a sticker sheet
+  x.fillStyle="#FF8FB0"; x.strokeStyle="#FFFFFF"; x.lineWidth=5*s; heart(x,bw/2-4*s,-bh/2+2*s,17*s); x.stroke(); x.fill();
   x.restore(); watermark(x,W,H);
 }
 $("savePng").addEventListener("click",async()=>{
   busy(true); try{
     try{await document.fonts.load('46px Jua')}catch(e){}
-    PAUSE=true; const rx=rotX; rotX=0; camCard(); poseAt(T); const c=snap(1080,1350); rotX=rx; restoreSize(); PAUSE=false;
+    PAUSE=true; camApply(); poseAt(T); const c=snap(1080,1350); restoreSize(); PAUSE=false;   // exactly the preview's view
     cardOverlay(c.getContext("2d"),1080,1350);
     const b=await new Promise(r=>c.toBlob(r,"image/png")); outBlob=b; outExt="png";
     showOut("img",await readURL(b)); saveFile("satan-keycap.png",b);
@@ -1743,7 +1747,7 @@ $("makeVid").addEventListener("click",async()=>{
   const mime=pickMime();
   if(!mime||!cv.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";
-  const W=600, H=750, FPS=30, DUR=8, N=FPS*DUR, presses=[1.0,3.4,5.8].map(t=>Math.round(t*FPS)), keep=rotY, rx=rotX;
+  const W=600, H=750, FPS=30, DUR=8, N=FPS*DUR, presses=[1.0,3.4,5.8].map(t=>Math.round(t*FPS)), keep=rotY;
   let dest=null, a=null, hud=null, ac0=renderer.autoClear;
   try{
     try{await document.fonts.load('46px Jua')}catch(e){}
@@ -1755,7 +1759,7 @@ $("makeVid").addEventListener("click",async()=>{
     hud={scene:new THREE.Scene(),cam:new THREE.OrthographicCamera(-W/2,W/2,H/2,-H/2,-1,1),tex:ot,
       mat:new THREE.MeshBasicMaterial({map:ot,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}),geo:new THREE.PlaneGeometry(W,H)};
     hud.scene.add(new THREE.Mesh(hud.geo,hud.mat));
-    PAUSE=true; rotX=0; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); camCard();
+    PAUSE=true; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); camApply();   // the preview's own camera and tilt
     const draw=i=>{rotY=keep+Math.min(i,N)/N*Math.PI*2; poseAt(T); renderer.autoClear=true; renderer.render(scene,camera); renderer.autoClear=false; renderer.render(hud.scene,hud.cam); renderer.autoClear=ac0};
     draw(0); await new Promise(r=>requestAnimationFrame(r));
     const stream=cv.captureStream(FPS), track=stream.getVideoTracks()[0];
@@ -1775,7 +1779,7 @@ $("makeVid").addEventListener("click",async()=>{
     prog(1,`영상 완성 · ${W}×${H} · ${DUR}초 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
   }catch(err){console.error(err); $("status").textContent="영상을 만들지 못했어요. 이미지로 저장해 주세요."; $("progress").style.display="none"}
   finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
-    rotY=keep; rotX=rx; PAUSE=false; restoreSize(); busy(false)}
+    rotY=keep; PAUSE=false; restoreSize(); busy(false)}
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};

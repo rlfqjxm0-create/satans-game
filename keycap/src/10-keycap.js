@@ -9,7 +9,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, decoLie:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:""};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:""};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -340,20 +340,9 @@ function buildDeco(p,g){
           s2.bezierCurveTo(3.4,5.2,4.9,4.1,4.9,1.9); s2.bezierCurveTo(4.9,-0.9,1.5,-2.7,0,-4.1)}
         const g2=soft(s2,1.4,S.deco==="heart"?0.75:1.2); g2.center(); return g2});
       const mat=S.decoColor==="#FFFFFF"?surfMat(S.decoMat,S.deco==="star"?"#FFD45C":"#FF8FB0"):main;
-      if(S.decoLie&&!stand){add(geo,mat,0,top+4.4,0); break}   // lying on the head: no floating, no spin
       const fy=floatBase+(stand?4.5:5.6); const o=add(geo,mat,0,fy,0,0,0,0); grp.userData.spin=o; o.userData.float=fy; break;}
   }
-  if(S.decoLie&&!stand&&S.deco!=="halo"&&S.deco!=="none") return lieDown(grp,p,top,w);
   return grp;
-}
-/* 가로로 눕히기: the decoration is turned to lie flat and put at the back edge of the top - the top of the head
-   when a face is drawn there (its "up" is the back, -z). Its base stays on the top, the rest reaches back. */
-function lieDown(grp,p,top,w){
-  const kids=[...grp.children]; if(!kids.length) return grp;
-  const zc=kids.reduce((a,o)=>a+o.position.z,0)/kids.length, F=fenceTable(p), edge=-fenceAt(F.R,-Math.PI/2)*w;
-  const pivot=new THREE.Group(); pivot.position.set(0,top+0.55,edge+1.6); pivot.rotation.x=-Math.PI/2;
-  for(const o of kids){grp.remove(o); o.position.y-=top; o.position.z-=zc; pivot.add(o)}
-  const out=new THREE.Group(); out.add(pivot); return out;
 }
 const mixHex=(a,b,t)=>"#"+new THREE.Color(a).lerp(new THREE.Color(b),t).getHexString();
 function nameSticker(txt){ // a die-cut name sticker: white border, a label in the keycap's colour, tiny heart
@@ -552,6 +541,10 @@ cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture&&cv.setPointerCap
   if(ptrs.size===1) gesture={mode:(e.button===2||e.shiftKey)?"pan":"turn",x0:e.clientX,y0:e.clientY,t:performance.now(),moved:false};
   else if(ptrs.size===2){const [a,b]=[...ptrs.values()]; gesture={mode:"pinch",d0:Math.hypot(a.x-b.x,a.y-b.y),z0:CAM.zoom,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,px:CAM.panX,py:CAM.panY,moved:true}}});
 cv.addEventListener("contextmenu",e=>e.preventDefault());
+// quick taps on the keycap must not zoom the page (iOS double-tap zoom, pinch-zoom of the whole page)
+cv.addEventListener("touchend",e=>{if(e.cancelable) e.preventDefault()},{passive:false});
+["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
 cv.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId)||!gesture) return; const prev=ptrs.get(e.pointerId); const dx=e.clientX-prev.x, dy=e.clientY-prev.y; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); idle=0;
   if(gesture.mode==="pinch"&&ptrs.size===2){const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(!CAM.locked){CAM.zoom=clamp(gesture.z0*gesture.d0/Math.max(20,d),0.45,1.8); const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; CAM.panX=clamp(gesture.px-(mx-gesture.mx)*0.08*CAM.zoom,-25,25); CAM.panY=clamp(gesture.py+(my-gesture.my)*0.08*CAM.zoom,-20,25); camApply()} return}
   if(Math.hypot(e.clientX-gesture.x0,e.clientY-gesture.y0)>6) gesture.moved=true;
@@ -726,8 +719,6 @@ $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); r
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
 function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.textContent=S.glow?"🌙 야광 켜짐":"🌙 야광 모드"}
-function lieLabel(){const b=$("decoLie"); b.setAttribute("aria-pressed",String(S.decoLie)); b.textContent=S.decoLie?"↩ 가로로 눕힘":"↩ 가로로 눕히기"}
-$("decoLie").addEventListener("click",()=>{S.decoLie=!S.decoLie; lieLabel(); rebuild()});
 $("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(S.glow&&!S.bgImg&&S.bg!=="night"){S.bg="night"; setBg(); renderUI()} glowLabel(); writeHash()});
 $("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
 $("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
@@ -738,12 +729,12 @@ $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.tar
     const c=document.createElement("canvas"); c.width=800; c.height=1000; const x=c.getContext("2d"); const k=Math.max(800/img.width,1000/img.height); x.drawImage(img,(800-img.width*k)/2,(1000-img.height*k)/2,img.width*k,img.height*k);
     S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,dl:S.decoLie?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
-    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1,decoLie:o.dl===1});
+    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1});
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
   if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],"")}

@@ -92,7 +92,6 @@ all (and a colour) in one tap. The face is a canvas (`faceTex`) laid on the top 
 back of the key (-z)**, so the camera looks from higher up (`camApply`) and the ears (`buildEars`) grow out of the
 **back wall** (`backZ` finds it from the fence table), pointing backwards and tilted up - never stuck into the top
 (rejected) or laid into the outline (rejected). Ears lie flat (level with the top, reaching back); they use the cap's own material object; dog ears hang at the sides.
-`S.decoLie` (가로로 눕히기) lays the top decoration flat at the back edge - the top of the head (`lieDown`).
 Keep every face part within 0.42 of the canvas centre (the top outline clips the rest - whiskers/blush were cut
 before). Lines turn pale on dark keycaps (`faceInk`). Soft edges: the face texture is a `DataTexture` whose empty pixels take the
 nearest drawn colour (`bleedTex`, alpha stays 0) - canvas transparent-black otherwise filters into a dark jagged rim - and
@@ -141,7 +140,14 @@ clamp their vertices flat again (that shaved the base off). Geometry is cached i
 **Smooth video:** frames are drawn straight on the WebGL canvas and recorded from it (`cv.captureStream`); the title and
 the die-cut sticker watermark (`watermark()`) are one texture laid on top by an orthographic pass. Copying each frame
 into a 2D canvas made the page wait for the GPU and the video dropped frames - don't go back to that. Frame i is drawn at
-i/30 s and the turn/presses follow i. Image and video use `camCard()` (lower, keycap centred), not the preview camera.
+i/30 s and the turn/presses follow i. Image and video use **the preview's own camera** (`camApply()`, the user's zoom/pan and tilt) - a separate card
+camera made the video jump at the start. The title is a die-cut label sticker too (`cardOverlay`).
+
+## Phones
+
+Below 820 px `.stage` is `display:contents`, so the preview frame is a row of the page grid and stays `position:sticky`
+at the top while the menus scroll under it. Quick taps must not zoom the page: `maximum-scale=1`, `touch-action:manipulation`,
+`touchend`/`gesture*`/`dblclick` default prevented (pointer events still drive turning and pressing).
 
 "돌아가는 영상" replaced the silent 360° GIF: the image card's framing (4:5, `cardOverlay`), one slow
 turn over 8 s with three presses, recorded with `MediaRecorder` (mp4 first, else webm). Every sound goes

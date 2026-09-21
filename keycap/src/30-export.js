@@ -15,9 +15,6 @@ function snap(W,H){ // render one frame at a given size and hand back a 2D canva
   const c=document.createElement("canvas"); c.width=W; c.height=H; c.getContext("2d").drawImage(renderer.domElement,0,0,W,H); return c;
 }
 function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize(); camApply()}
-/* the card camera (image + video): a little lower and more from the side than the preview, keycap in the middle */
-const CARD_CAM={y:22,d:84,ty:10.5};
-function camCard(){camera.position.set(0,CARD_CAM.ty+CARD_CAM.y,CARD_CAM.d); camera.lookAt(0,CARD_CAM.ty,0)}
 /* a little die-cut sticker, like the ones on handmade goods for sale: white border, soft shadow, the site cat */
 function watermark(x,W,H){
   const s=W/1080, bw=318*s, bh=92*s, cx=W-60*s-bw/2, cy=H-64*s-bh/2, r=bh/2, col=S.color;
@@ -33,17 +30,28 @@ function watermark(x,W,H){
   x.fillStyle="#FFD66B"; for(const [px,py,k] of [[bw/2-4*s,-bh/2+4*s,1],[bw/2+10*s,-bh/2+26*s,0.6]]){x.beginPath(); for(let i=0;i<8;i++){const a=i*Math.PI/4, rr=(i%2?5:13)*s*k; x.lineTo(px+Math.cos(a)*rr,py+Math.sin(a)*rr)} x.closePath(); x.fill()}
   x.restore();
 }
-function cardOverlay(x,W,H){ // name tag + little title, like a product card
-  x.save(); const s=W/1080;
-  x.font=`${46*s}px Jua, sans-serif`; x.textAlign="left"; x.fillStyle=S.bg==="night"?"#FFE38A":"#4A3A5A"; x.fillText(S.name?`${S.name}의 키캡`:"나의 아티산 키캡",60*s,110*s);
-  x.font=`${24*s}px "Noto Sans KR", sans-serif`; x.fillStyle=S.bg==="night"?"rgba(255,255,255,.7)":"rgba(74,58,90,.65)";
-  x.fillText(`${OPT.shape[S.shape]} · ${OPT.mat[S.mat]} · ${OPT.deco[S.deco]} · ${OPT.sw[S.sw].split(" · ")[0]}`,60*s,156*s);
+function cardOverlay(x,W,H){ // the title and a little list, as a label sticker at the top left (+ the corner sticker)
+  const s=W/1080, col=S.color, title=S.name?`${S.name}의 키캡`:"나의 아티산 키캡";
+  const sub=`${OPT.shape[S.shape]} · ${OPT.mat[S.mat]} · ${OPT.deco[S.deco]} · ${OPT.sw[S.sw].split(" · ")[0]}`;
+  x.save(); x.font=`${46*s}px Jua, sans-serif`; const tw=x.measureText(title).width; x.font=`${23*s}px "Noto Sans KR", sans-serif`; const sw=x.measureText(sub).width;
+  const bw=Math.max(tw,sw)+64*s, bh=112*s, r=26*s, fill=mixHex(col,"#FFFFFF",0.72), ink=mixHex(col,"#2A2230",0.8), soft=mixHex(col,"#2A2230",0.55), edge=mixHex(col,"#FFFFFF",0.3);
+  x.translate(56*s+bw/2,58*s+bh/2); x.rotate(-0.035);
+  const box=(w,h,rr)=>{x.beginPath(); x.moveTo(-w/2+rr,-h/2); x.arcTo(w/2,-h/2,w/2,h/2,rr); x.arcTo(w/2,h/2,-w/2,h/2,rr); x.arcTo(-w/2,h/2,-w/2,-h/2,rr); x.arcTo(-w/2,-h/2,w/2,-h/2,rr); x.closePath()};
+  x.shadowColor="rgba(60,30,70,.26)"; x.shadowBlur=14*s; x.shadowOffsetY=5*s;
+  box(bw+18*s,bh+18*s,r+9*s); x.fillStyle="#FFFFFF"; x.fill(); x.shadowColor="transparent";   // white die-cut border
+  box(bw,bh,r); x.fillStyle=fill; x.fill();
+  x.setLineDash([7*s,6*s]); x.lineWidth=2.5*s; x.strokeStyle=edge; box(bw-12*s,bh-12*s,r-6*s); x.stroke(); x.setLineDash([]);
+  x.textAlign="left"; x.textBaseline="alphabetic";
+  x.font=`${46*s}px Jua, sans-serif`; x.fillStyle=ink; x.fillText(title,-bw/2+32*s,-bh/2+56*s);
+  x.font=`${23*s}px "Noto Sans KR", sans-serif`; x.fillStyle=soft; x.fillText(sub,-bw/2+32*s,-bh/2+92*s);
+  // a heart doodle on the corner, like a sticker sheet
+  x.fillStyle="#FF8FB0"; x.strokeStyle="#FFFFFF"; x.lineWidth=5*s; heart(x,bw/2-4*s,-bh/2+2*s,17*s); x.stroke(); x.fill();
   x.restore(); watermark(x,W,H);
 }
 $("savePng").addEventListener("click",async()=>{
   busy(true); try{
     try{await document.fonts.load('46px Jua')}catch(e){}
-    PAUSE=true; const rx=rotX; rotX=0; camCard(); poseAt(T); const c=snap(1080,1350); rotX=rx; restoreSize(); PAUSE=false;
+    PAUSE=true; camApply(); poseAt(T); const c=snap(1080,1350); restoreSize(); PAUSE=false;   // exactly the preview's view
     cardOverlay(c.getContext("2d"),1080,1350);
     const b=await new Promise(r=>c.toBlob(r,"image/png")); outBlob=b; outExt="png";
     showOut("img",await readURL(b)); saveFile("satan-keycap.png",b);
@@ -65,7 +73,7 @@ $("makeVid").addEventListener("click",async()=>{
   const mime=pickMime();
   if(!mime||!cv.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";
-  const W=600, H=750, FPS=30, DUR=8, N=FPS*DUR, presses=[1.0,3.4,5.8].map(t=>Math.round(t*FPS)), keep=rotY, rx=rotX;
+  const W=600, H=750, FPS=30, DUR=8, N=FPS*DUR, presses=[1.0,3.4,5.8].map(t=>Math.round(t*FPS)), keep=rotY;
   let dest=null, a=null, hud=null, ac0=renderer.autoClear;
   try{
     try{await document.fonts.load('46px Jua')}catch(e){}
@@ -77,7 +85,7 @@ $("makeVid").addEventListener("click",async()=>{
     hud={scene:new THREE.Scene(),cam:new THREE.OrthographicCamera(-W/2,W/2,H/2,-H/2,-1,1),tex:ot,
       mat:new THREE.MeshBasicMaterial({map:ot,transparent:true,depthTest:false,depthWrite:false,toneMapped:false}),geo:new THREE.PlaneGeometry(W,H)};
     hud.scene.add(new THREE.Mesh(hud.geo,hud.mat));
-    PAUSE=true; rotX=0; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); camCard();
+    PAUSE=true; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); camApply();   // the preview's own camera and tilt
     const draw=i=>{rotY=keep+Math.min(i,N)/N*Math.PI*2; poseAt(T); renderer.autoClear=true; renderer.render(scene,camera); renderer.autoClear=false; renderer.render(hud.scene,hud.cam); renderer.autoClear=ac0};
     draw(0); await new Promise(r=>requestAnimationFrame(r));
     const stream=cv.captureStream(FPS), track=stream.getVideoTracks()[0];
@@ -97,7 +105,7 @@ $("makeVid").addEventListener("click",async()=>{
     prog(1,`영상 완성 · ${W}×${H} · ${DUR}초 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
   }catch(err){console.error(err); $("status").textContent="영상을 만들지 못했어요. 이미지로 저장해 주세요."; $("progress").style.display="none"}
   finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
-    rotY=keep; rotX=rx; PAUSE=false; restoreSize(); busy(false)}
+    rotY=keep; PAUSE=false; restoreSize(); busy(false)}
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};
