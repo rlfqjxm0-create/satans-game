@@ -158,14 +158,36 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
 .sw.pick::-webkit-color-swatch{border:none; opacity:0}
 .sw.pick::-moz-color-swatch{border:none; opacity:0}
 .sw:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+/* Computer: the page itself never scrolls. The title is one line at the top, the preview column fits the window,
+   and only the menu column scrolls (its tabs stay at its top). Phones keep the normal page (see above). */
+@media (min-width:820px){
+  html,body{height:100%; overflow:hidden}
+  .wrap{height:100vh; height:100dvh; box-sizing:border-box; display:flex; flex-direction:column; padding:12px 16px 8px}
+  .top{display:flex; align-items:center; gap:14px; margin:0 0 12px; flex:none}
+  .top .back{margin:0} .top h1{font-size:26px; margin:0; white-space:nowrap} .top h1 br{display:none}
+  .top .lede{margin:0 0 0 auto; font-size:13.5px; text-align:right}
+  .layout{flex:1; min-height:0; grid-template-rows:minmax(0,1fr)}
+  .stage{position:static; height:100%; overflow-y:auto; overflow-x:hidden; scrollbar-width:none}
+  .controls{max-height:none; height:100%}
+  /* the buttons under the preview are made compact so the preview itself can be big */
+  .stage{gap:8px} .hint{font-size:12px; line-height:1.4; margin:0}
+  .stage .tools{gap:6px} .stage .tools[style]{margin-bottom:0!important} .stage .chip{font-size:13.5px; padding:6px 12px}
+  .stage .btn.sub{font-size:15px; padding:9px 12px}
+  .stagebox{margin-top:0!important} .resultcard{padding:10px 12px; border-radius:20px}
+  .progress{margin-top:6px} .status{font-size:13px; margin-top:4px; min-height:0}
+  .frame #cv{width:min(100%, max(240px, calc((100vh - 400px) * .8)))}
+  footer{margin-top:6px; flex:none; font-size:12px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <header class="top">
   <a class="back" id="backLink" href="../index.html" hidden>← 목록으로</a>
   <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="7" width="22" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="5" width="14" height="14" rx="4" fill="currentColor" opacity=".35"/></svg>사탄의 키캡</div>
-  <h1>캐릭터 키캡을<br>만들어 보세요</h1>
+  <h1>캐릭터 키캡을<br> 만들어 보세요</h1>
   <p class="lede">돌려 보고, 눌러 보고, 캐릭터를 레진 속에 넣어 보세요.</p>
+  </header>
   <div class="layout">
     <section class="stage" aria-label="키캡 미리보기">
       <div class="frame"><canvas id="cv" aria-label="3D 키캡. 드래그하면 돌아가고 탭하면 눌려요"></canvas></div>

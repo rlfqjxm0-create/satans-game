@@ -149,9 +149,10 @@ camera made the video jump at the start. The title is a die-cut label sticker to
 
 ## Computer layout
 
-From 820 px the menu column (`.controls`) is its own scroll box (`max-height:100vh-100px`, the page's tail below the
-layout is ~87 px), the tabs dock at its top, and the preview column is sized to fit the window. A wheel turn over the
-menus first scrolls the page until the layout is fully on screen, then only the menus move (wheel handler in 15-faces.js).
+From 820 px the page itself never scrolls (`html,body{overflow:hidden}`, `.wrap` is a 100vh flex column): the title
+is a one-line header (`header.top`), the preview column fits the window (compact buttons, canvas sized from 100vh; it
+scrolls on its own only in very short windows) and only the menu column (`.controls`) scrolls, tabs docked at its top.
+A new image/video result is scrolled into view (`showOut`).
 
 ## Phones
 

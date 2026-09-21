@@ -64,7 +64,7 @@ function pickMime(){const list=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/
 function showOut(kind,url){const img=$("outImg"), vid=$("outVid");
   img.style.display=kind==="img"?"block":"none"; vid.style.display=kind==="video"?"block":"none";
   if(kind==="img") img.src=url; else {vid.src=url; vid.play().catch(()=>{})}
-  $("out").style.display="block"}
+  $("out").style.display="block"; setTimeout(()=>{try{$("out").scrollIntoView({behavior:"smooth",block:"nearest"})}catch(e){}},60)}   // it opens under the preview (inside the preview column on a computer)
 /* Smoothness: the frames are drawn straight on the WebGL canvas and recorded from it, with the title and
    sticker as a flat overlay drawn by the GPU in the same frame. Copying every frame into a 2D canvas made the
    page wait for the GPU each frame, and the video dropped to a few frames a second. Each frame is also asked
