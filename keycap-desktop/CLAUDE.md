@@ -18,7 +18,7 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
 - **Clicks on the empty part must reach the desktop behind.** After each frame the pixel under the cursor is read
   (`gl.readPixels` right after `render`, before it is shown) and `kc-hit` tells main, which calls
   `setIgnoreMouseEvents(!solid,{forward:true})` - forward keeps mouse moves coming so it can switch back.
-- The RGB light must fit inside the window (it was cut off): in the desktop the camera steps back (`CAM.zoom=1.22`) and
+- The RGB light must fit inside the window (it was cut off): in the desktop the camera steps back (see Framing below) and
   the floor glow is half size.
 - Frames: 60 while pressing/dragging, 30 while spinning, 10 when settled (`DRAW_GATE`).
 - **One menu design for everything** (keycap right-click, tray icon, home window): drawn like the owner's desktop-timer
