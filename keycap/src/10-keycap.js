@@ -1,0 +1,479 @@
+/* ================= 사탄의 키캡 공방 v2 ================= */
+const $=id=>document.getElementById(id);
+function toast(m){const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2600)}
+const INK="#4E5F73";
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"blue", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true};
+const OPT={
+  shape:{cherry:"체리",sa:"SA",round:"동글",heart:"하트"},
+  mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
+  charPos:{inside:"레진 속에",top:"윗면 프린트",stand:"아크릴 스탠드",none:"안 넣기"},
+  deco:{none:"없음",cat:"고양이 귀",horn:"사탄 뿔",bow:"리본",halo:"헤일로",star:"별",heart:"하트"},
+  base:{clear:"투명",tint:"컬러 투명",gloss:"유광",matte:"무광",holo:"홀로그램"},
+  decoMat:{gloss:"유광",matte:"무광",holo:"홀로그램"},
+  glitter:{none:"없음",star:"별가루",snow:"눈송이",heart:"하트",aurora:"오로라"},
+  sw:{red:"적축 · 도각",brown:"갈축 · 보글",blue:"청축 · 딸깍"},
+  rgb:{off:"끄기",solid:"고정",breath:"숨쉬기",rainbow:"무지개"},
+  bg:{peach:"피치 노을",lilac:"라일락",soda:"소다",sunset:"핑크 선셋",night:"밤하늘"}
+};
+const BASE_COLORS=["#FFB8D0","#FFD9A0","#FFF1A8","#BDEBD2","#A8D8FF","#C9B8FF","#FFFFFF","#3A3F4B"];
+const DECO_COLORS=["#FFFFFF","#FF8FB0","#FFD45C","#7FC8F0","#9BE39A","#B28CFF","#2C2F36","#E3344B"];
+const BGS={peach:["#FFE3D3","#FFC9DE","#E7D3FF"],lilac:["#F3E8FF","#D9CCFF","#BFD5FF"],soda:["#E4FFF6","#BFEFFF","#D8D3FF"],sunset:["#FFD6E7","#FFB4C8","#B9A4FF"],night:["#12143A","#2E2766","#6A4C9C"]};
+const SWC={red:"#E8455B",brown:"#A0704E",blue:"#2F8FE8"};
+const lin=(h)=>new THREE.Color(h).convertSRGBToLinear();
+
+/* ---------- renderer / scene ---------- */
+const cv=$("cv");
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,preserveDrawingBuffer:true});
+renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92;
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(31,4/5,1,600);
+camera.position.set(0,32,90); camera.lookAt(0,6,0); camera.fov=31;
+(function(){ // soft studio environment built from panels (no image files)
+  const pm=new THREE.PMREMGenerator(renderer), es=new THREE.Scene();
+  const g=new THREE.SphereGeometry(80,32,16), cols=[], pos=g.attributes.position;
+  for(let i=0;i<pos.count;i++){const y=pos.getY(i)/80; const c=new THREE.Color().setHSL(0.8,0.25,0.36+0.3*Math.max(0,y)); cols.push(c.r,c.g,c.b)}
+  g.setAttribute("color",new THREE.Float32BufferAttribute(cols,3));
+  es.add(new THREE.Mesh(g,new THREE.MeshBasicMaterial({side:THREE.BackSide,vertexColors:true})));
+  const panel=(x,y,z,w,h,s,col)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:new THREE.Color(col||0xffffff).multiplyScalar(s),side:THREE.DoubleSide})); m.position.set(x,y,z); m.lookAt(0,0,0); es.add(m)};
+  panel(-40,50,30,50,30,3.4); panel(46,26,24,26,50,1.6,0xffe6f2); panel(0,60,-40,60,20,1.4); panel(-50,10,-20,20,40,1.2,0xdde8ff); panel(0,-30,50,80,10,0.45);
+  scene.environment=pm.fromScene(es,0.04).texture;
+})();
+scene.add(new THREE.HemisphereLight(0xffffff,0xd6c8ee,0.35));
+const keyL=new THREE.DirectionalLight(0xffffff,0.95); keyL.position.set(-30,60,40); scene.add(keyL);
+const rimL=new THREE.DirectionalLight(0xffd9f0,0.55); rimL.position.set(40,20,-40); scene.add(rimL);
+
+/* ---------- procedural textures ---------- */
+function canvasTex(w,h,fn,srgb){const c=document.createElement("canvas"); c.width=w; c.height=h; fn(c.getContext("2d"),w,h); const t=new THREE.CanvasTexture(c); if(srgb) t.encoding=THREE.sRGBEncoding; return t}
+const NOISE=canvasTex(256,256,(x,w,h)=>{const im=x.createImageData(w,h), r=mulberry32(11); for(let i=0;i<im.data.length;i+=4){const v=110+r()*70; im.data[i]=im.data[i+1]=im.data[i+2]=v; im.data[i+3]=255} x.putImageData(im,0,0)});
+NOISE.wrapS=NOISE.wrapT=THREE.RepeatWrapping; NOISE.repeat.set(3,3);
+function spriteTex(kind){return canvasTex(64,64,(x)=>{x.translate(32,32);
+  const glow=x.createRadialGradient(0,0,0,0,0,30); glow.addColorStop(0,"rgba(255,255,255,.9)"); glow.addColorStop(0.35,"rgba(255,255,255,.35)"); glow.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle=glow; x.fillRect(-32,-32,64,64);
+  x.fillStyle="#FFFFFF";
+  if(kind==="snow"){x.strokeStyle="#FFFFFF"; x.lineWidth=4; x.lineCap="round"; for(let i=0;i<3;i++){x.save(); x.rotate(i*Math.PI/3); x.beginPath(); x.moveTo(0,-22); x.lineTo(0,22); x.moveTo(0,-14); x.lineTo(-6,-20); x.moveTo(0,-14); x.lineTo(6,-20); x.moveTo(0,14); x.lineTo(-6,20); x.moveTo(0,14); x.lineTo(6,20); x.stroke(); x.restore()}}
+  else if(kind==="heart"){heart(x,0,4,20); x.fill()}
+  else {star4(x,0,0,26); x.fill()}
+})}
+const SPRITES={star:spriteTex("star"),aurora:spriteTex("star"),snow:spriteTex("snow"),heart:spriteTex("heart")};
+
+/* hologram: view-dependent rainbow sheen injected into the standard shader */
+function holoize(mat){
+  mat.onBeforeCompile=(sh)=>{sh.fragmentShader=sh.fragmentShader.replace("#include <tonemapping_fragment>",`
+    { vec3 vd=normalize(vViewPosition); float f=1.0-abs(dot(normalize(normal),vd));
+      vec3 rb=0.55+0.45*cos(6.2831*(f*1.3+vec3(0.0,0.33,0.67)+vViewPosition.y*0.02));
+      gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*0.35+rb*0.8,0.55*f+0.22); }
+    #include <tonemapping_fragment>`)};
+  mat.customProgramCacheKey=()=>"holo"; return mat;
+}
+function surfMat(kind,hex,extra){
+  const col=lin(hex), o=Object.assign({color:col},extra||{});
+  if(kind==="matte") return new THREE.MeshStandardMaterial(Object.assign(o,{roughness:0.78,metalness:0,bumpMap:NOISE,bumpScale:0.035}));
+  if(kind==="holo") return holoize(new THREE.MeshPhysicalMaterial(Object.assign(o,{roughness:0.18,metalness:0.25,clearcoat:1,clearcoatRoughness:0.08})));
+  return new THREE.MeshPhysicalMaterial(Object.assign(o,{roughness:0.2,clearcoat:1,clearcoatRoughness:0.06}));
+}
+
+/* ---------- background ---------- */
+function setBg(){
+  if(S.bgImg){scene.background=S.bgImg; document.documentElement.style.setProperty("--stage","#EEE"); return}
+  const st=BGS[S.bg]; scene.background=canvasTex(8,640,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h); st.forEach((c,i)=>g.addColorStop(i/(st.length-1),c)); x.fillStyle=g; x.fillRect(0,0,w,h)},true);
+  document.documentElement.style.setProperty("--stage",st[0]);
+}
+
+/* ---------- geometry helpers ---------- */
+function roundedBox(w,h,d,r){const s=new THREE.Shape(); const x=-w/2,y=-d/2; s.moveTo(x+r,y); s.lineTo(x+w-r,y); s.quadraticCurveTo(x+w,y,x+w,y+r); s.lineTo(x+w,y+d-r); s.quadraticCurveTo(x+w,y+d,x+w-r,y+d); s.lineTo(x+r,y+d); s.quadraticCurveTo(x,y+d,x,y+d-r); s.lineTo(x,y+r); s.quadraticCurveTo(x,y,x+r,y);
+  const b=Math.min(0.8,r*0.4); const g=new THREE.ExtrudeGeometry(s,{depth:h-b*2,bevelEnabled:true,bevelThickness:b,bevelSize:b,bevelSegments:4,curveSegments:10}); g.rotateX(-Math.PI/2); g.translate(0,-h/2+b,0); return g}
+// unit cross-section of a keycap shape (max |x|,|z| = 1)
+function section(kind,n,M){
+  const pts=[];
+  if(kind==="heart"){const raw=[]; for(let i=0;i<M;i++){const t=i/M*Math.PI*2; raw.push([16*Math.pow(Math.sin(t),3),-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))])}
+    let mx=0,mz=0,cz=0; raw.forEach(p=>{mx=Math.max(mx,Math.abs(p[0])); cz+=p[1]}); cz/=raw.length; raw.forEach(p=>mz=Math.max(mz,Math.abs(p[1]-cz))); const s=Math.max(mx,mz);
+    // blend toward a circle so the heart reads soft and chubby
+    return raw.map((p,i)=>{const t=i/M*Math.PI*2, hx=p[0]/s, hz=(p[1]-cz)/s, cx=Math.sin(t), czz=-Math.cos(t)*0.95; return [lerp(hx,cx,0.3),lerp(hz,czz,0.22)]})}
+  for(let i=0;i<M;i++){const a=i/M*Math.PI*2, c=Math.cos(a), s=Math.sin(a); pts.push([Math.sign(c)*Math.pow(Math.abs(c),2/n),Math.sign(s)*Math.pow(Math.abs(s),2/n)])}
+  return pts;
+}
+const PROFILES={
+  cherry:{sec:"sq",bw:18,tw:13.6,h:9,n0:9,n1:7,dish:0,dome:0,bev:0.7,tilt:0},
+  sa:{sec:"sq",bw:18,tw:12.4,h:12,n0:5.5,n1:3.4,dish:1.1,dome:0,bev:2.6,tilt:0},
+  round:{sec:"circle",bw:17.5,tw:14.5,h:9.5,n0:2,n1:2,dish:0.7,dome:0,bev:2.2,tilt:0},
+  heart:{sec:"heart",bw:19,tw:16,h:9,n0:0,n1:0,dish:0,dome:1.2,bev:2.2,tilt:0}
+};
+function capGeometry(p,flat){
+  const M=96, L=22, K=12, verts=[], idx=[], rings=[];
+  const secAt=(v)=>p.sec==="heart"?section("heart",0,M):section("se",lerp(p.n0,p.n1,v),M);
+  const ring=(sec,hw,y,tilt)=>{const r=[]; for(const [ux,uz] of sec){r.push(verts.length/3); verts.push(ux*hw,y+(tilt?-uz*hw*tilt:0),uz*hw)} return r};
+  for(let l=0;l<=L;l++){const v=l/L; const w=lerp(p.bw,p.tw,Math.pow(v,1.2))/2, y=v*(p.h-p.bev); rings.push(ring(secAt(v),w,y,p.tilt*v))}
+  for(let l=1;l<=7;l++){const a=l/7*Math.PI/2; const w=p.tw/2-p.bev*(1-Math.cos(a)); const y=p.h-p.bev+Math.sin(a)*p.bev; rings.push(ring(secAt(1),w,y,p.tilt))}
+  const topW=p.tw/2-p.bev, dish=flat?0:p.dish, dome=flat?Math.min(p.dome,0.6):p.dome;
+  for(let k=1;k<K;k++){const f=1-k/K; const y=p.h+dome*(1-f*f)-dish*(1-f*f); rings.push(ring(secAt(1),topW*f,y,p.tilt))}
+  const center=verts.length/3; verts.push(0,p.h+dome-dish,0);
+  for(let r=0;r<rings.length-1;r++){const A=rings[r],B=rings[r+1]; for(let i=0;i<M;i++){const i2=(i+1)%M; idx.push(A[i],B[i],A[i2]); idx.push(A[i2],B[i],B[i2])}}
+  const last=rings[rings.length-1]; for(let i=0;i<M;i++) idx.push(last[i],center,last[(i+1)%M]);
+  const bc=verts.length/3; verts.push(0,0,0); const first=rings[0]; for(let i=0;i<M;i++) idx.push(first[(i+1)%M],bc,first[i]);
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.Float32BufferAttribute(verts,3)); g.setIndex(idx); g.computeVertexNormals();
+  g.userData={topY:p.h+dome-dish, topW, sec:secAt(1)}; return g;
+}
+
+/* ---------- the keychain switch tester (after the reference photos) ---------- */
+const root=new THREE.Group(); scene.add(root);
+const shadowTex=canvasTex(128,128,(x)=>{const g=x.createRadialGradient(64,64,4,64,64,64); g.addColorStop(0,"rgba(40,20,60,.32)"); g.addColorStop(1,"rgba(40,20,60,0)"); x.fillStyle=g; x.fillRect(0,0,128,128)});
+const shadow=new THREE.Mesh(new THREE.PlaneGeometry(52,52),new THREE.MeshBasicMaterial({map:shadowTex,transparent:true,depthWrite:false})); shadow.rotation.x=-Math.PI/2; shadow.position.y=-14.4; scene.add(shadow);
+let clearMat=new THREE.MeshPhysicalMaterial({color:lin("#EEF4FF"),roughness:0.04,transmission:0.95,transparent:true,clearcoat:1,clearcoatRoughness:0.03,envMapIntensity:1.6,depthWrite:false,side:THREE.DoubleSide});
+const acrylicMat=clearMat;
+const block=new THREE.Mesh(roundedBox(21,14,21,2.4),clearMat); block.position.y=-7; block.renderOrder=3; root.add(block);
+// inner edges of the acrylic (a slightly tinted inner cavity makes the thickness read)
+const cavity=new THREE.Mesh(roundedBox(16.2,9.2,16.2,1.2),new THREE.MeshPhysicalMaterial({color:lin("#DDE8FF"),roughness:0.1,transmission:0.9,transparent:true,opacity:0.9,depthWrite:false})); cavity.position.y=-4.8; root.add(cavity);
+const metal=new THREE.MeshStandardMaterial({color:0xDADFE8,metalness:1,roughness:0.22});
+const gold=new THREE.MeshStandardMaterial({color:0xE8C27A,metalness:1,roughness:0.25});
+const sw=new THREE.Group(); root.add(sw);
+const whiteP=new THREE.MeshStandardMaterial({color:lin("#F6F4F2"),roughness:0.55,bumpMap:NOISE,bumpScale:0.02});
+const bot=new THREE.Mesh(roundedBox(14.6,4.4,14.6,0.8),new THREE.MeshPhysicalMaterial({color:lin("#FBF8F4"),roughness:0.45,transmission:0.35,transparent:true,bumpMap:NOISE,bumpScale:0.02})); bot.position.y=-2.9; sw.add(bot);
+for(const sd of [-1,1]){const clip=new THREE.Mesh(new THREE.BoxGeometry(1.2,2.4,5),whiteP); clip.position.set(sd*8,-2,0); sw.add(clip)}
+for(const [x,z] of [[-3.2,-2.2],[1.6,-3.8]]){const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.35,0.35,4,8),gold); pin.position.set(x,-6.4,z); sw.add(pin)}
+const topHousingGeo=(()=>{const p={sec:"sq",bw:15,tw:11.4,h:4.2,n0:8,n1:6,dish:0,dome:0,bev:0.8,tilt:0}; return capGeometry(p,true)})();
+const topHousing=new THREE.Mesh(topHousingGeo,new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.08,transmission:0.9,transparent:true,clearcoat:1,depthWrite:false})); topHousing.position.y=0; topHousing.scale.y=0.82; topHousing.renderOrder=2; sw.add(topHousing);
+const spring=(()=>{const pts=[]; for(let i=0;i<=120;i++){const a=i/120*Math.PI*2*6; pts.push(new THREE.Vector3(Math.cos(a)*1.6,-3.6+i/120*5.4,Math.sin(a)*1.6))} return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),240,0.18,6,false),metal)})(); sw.add(spring);
+const stemMat=new THREE.MeshPhysicalMaterial({color:lin(SWC.blue),roughness:0.35,clearcoat:0.5});
+const stem=new THREE.Group(); const stemBase=new THREE.Mesh(roundedBox(6,2.4,6,0.8),stemMat); stemBase.position.y=2.6; stem.add(stemBase);
+{const s1=new THREE.Mesh(new THREE.BoxGeometry(4.2,3.2,1.25),stemMat); s1.position.set(0,4.6,0); stem.add(s1); const s2=new THREE.Mesh(new THREE.BoxGeometry(1.25,3.2,4.2),stemMat); s2.position.set(0,4.6,0); stem.add(s2)}
+sw.add(stem);
+// keychain: jump ring, a few links and a clasp hanging off the side
+const chain=new THREE.Group(); root.add(chain);
+(function(){ // jump ring -> hanging chain of interlocking links -> lobster clasp -> key ring
+  const jr=new THREE.Mesh(new THREE.TorusGeometry(1.5,0.34,12,28),metal); jr.position.set(11.9,-2.6,0); jr.rotation.y=Math.PI/2; chain.add(jr);
+  const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(12.6,-3.6,0),new THREE.Vector3(15.2,-8.2,1.2),new THREE.Vector3(17.2,-11.6,2.6),new THREE.Vector3(18.4,-13.2,3.6)]);
+  const L=curve.getLength(), linkLen=2.0, step=linkLen*0.78, n=Math.floor(L/step), linkGeo=new THREE.TorusGeometry(0.62,0.2,10,20); linkGeo.scale(1,1.55,1);
+  const up=new THREE.Vector3(0,1,0), q=new THREE.Quaternion(), q2=new THREE.Quaternion();
+  for(let i=0;i<=n;i++){const u=Math.min(1,i*step/L), p=curve.getPointAt(u), t=curve.getTangentAt(u);
+    const m=new THREE.Mesh(linkGeo,metal); m.position.copy(p); q.setFromUnitVectors(up,t); q2.setFromAxisAngle(t,i%2?Math.PI/2:0); m.quaternion.copy(q2.multiply(q)); chain.add(m)}
+  const end=curve.getPointAt(1);
+  const clasp=new THREE.Group(); const body=new THREE.Mesh(new THREE.TorusGeometry(1.3,0.42,12,28,Math.PI*1.75),metal); body.scale.set(1,1.5,1); clasp.add(body);
+  const gate=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,1.8,10),metal); gate.position.set(1.05,-0.4,0); gate.rotation.z=0.3; clasp.add(gate);
+  clasp.position.set(end.x+0.4,end.y-2.4,end.z); clasp.rotation.z=-0.3; chain.add(clasp);
+  const kr=new THREE.Mesh(new THREE.TorusGeometry(3.8,0.4,14,44),metal); kr.position.set(end.x+1.6,end.y-7.6,end.z+0.4); kr.rotation.set(0.25,0.6,0.2); chain.add(kr)})();
+// RGB light under the switch
+const rgbLight=new THREE.PointLight(0xff66cc,0,40,1.6); rgbLight.position.set(0,-3,0); root.add(rgbLight);
+const glowTex=canvasTex(128,128,(x)=>{const g=x.createRadialGradient(64,64,6,64,64,64); g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.4,"rgba(255,255,255,.4)"); g.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle=g; x.fillRect(0,0,128,128)});
+const rgbGlow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xff66cc,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0})); rgbGlow.scale.set(34,34,1); rgbGlow.position.set(0,-2,0); root.add(rgbGlow);
+const rgbFloor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.MeshBasicMaterial({map:glowTex,color:0xff66cc,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false,opacity:0})); rgbFloor.rotation.x=-Math.PI/2; rgbFloor.position.y=-14.3; scene.add(rgbFloor);
+
+/* ---------- keycap ---------- */
+const capGroup=new THREE.Group(); capGroup.position.y=5.2; root.add(capGroup);
+let capMesh=null, charGroup=null, decoGroup=null, parts=null, partSys=null, capGeo=null;
+function capMaterial(){
+  const col=lin(S.color);
+  switch(S.mat){
+    case "resin": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.04,transmission:0.62,transparent:true,clearcoat:1,clearcoatRoughness:0.03,side:THREE.DoubleSide,envMapIntensity:1.6,depthWrite:false});
+    case "jelly": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.3,transmission:0.45,transparent:true,clearcoat:0.8,clearcoatRoughness:0.2,side:THREE.DoubleSide,envMapIntensity:1.3,depthWrite:false});
+    case "holo": return surfMat("holo",S.color);
+    case "matte": return surfMat("matte",S.color);
+    default: return surfMat("gloss",S.color);
+  }
+}
+function charCanvas(sq){ // character drawn into a square canvas ("contain"), for textures
+  const it=S.items[0]||PLACEHOLDER, src=it.canvas; if(!sq) return src;
+  const s=Math.max(src.width,src.height), c=document.createElement("canvas"); c.width=c.height=Math.min(1024,s); const k=c.width/s; c.getContext("2d").drawImage(src,(c.width-src.width*k)/2,(c.height-src.height*k)/2,src.width*k,src.height*k); return c;
+}
+function texOf(c){const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=8; return t}
+function buildChar(p,g){
+  const grp=new THREE.Group(); const see=S.mat==="resin"||S.mat==="jelly";
+  const it=S.items[0]||PLACEHOLDER, ar=it.canvas.width/it.canvas.height;
+  if(S.charPos==="inside"&&see){const h=p.h*0.74, w=Math.min(p.tw*0.92,h*ar), hh=w/ar;
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,hh),new THREE.MeshBasicMaterial({map:texOf(it.canvas),alphaTest:0.35,side:THREE.DoubleSide})); m.position.y=p.h*0.48; grp.add(m)}
+  if(S.charPos==="top"){ // printed onto the flat top, clipped to the cap's outline
+    const sec=g.userData.sec, w=g.userData.topW*0.96, shape=new THREE.Shape(); sec.forEach(([ux,uz],i)=>{const x=ux*w, y=-uz*w; i?shape.lineTo(x,y):shape.moveTo(x,y)});
+    const sg=new THREE.ShapeGeometry(shape,1), pos=sg.attributes.position, uv=[]; for(let i=0;i<pos.count;i++) uv.push(pos.getX(i)/(2*w)+0.5,pos.getY(i)/(2*w)+0.5); sg.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); sg.rotateX(-Math.PI/2);
+    const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:texOf(charCanvas(true)),transparent:true,alphaTest:0.2,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-4})); m.position.y=g.userData.topY+0.04; grp.add(m)}
+  if(S.charPos==="stand"){ // one solid piece of clear acrylic cut around the character, print on the front
+    const H=12.5, cut=acrylicOutline(it), W=H*cut.ar, topY=g.userData.topY, T=1.3;
+    const shape=new THREE.Shape(); cut.pts.forEach(([u,v],i)=>{const x=(u-0.5)*W, y=(1-v)*H; i?shape.lineTo(x,y):shape.moveTo(x,y)}); shape.closePath();
+    const body=new THREE.ExtrudeGeometry(shape,{depth:T,bevelEnabled:true,bevelThickness:0.18,bevelSize:0.18,bevelSegments:3,curveSegments:6}); body.translate(0,0,-T/2);
+    const acr=new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.03,transmission:0.9,transparent:true,clearcoat:1,clearcoatRoughness:0.02,envMapIntensity:2.2,depthWrite:false});
+    const m=new THREE.Mesh(body,acr); m.position.y=topY; m.renderOrder=5; grp.add(m);
+    // printed layer just behind the front face: glossy so it catches light as the camera turns
+    const printMat=new THREE.MeshPhysicalMaterial({map:texOf(cut.img),transparent:true,alphaTest:0.3,roughness:0.12,clearcoat:1,clearcoatRoughness:0.04,envMapIntensity:1.1,side:THREE.FrontSide});
+    const front=new THREE.Mesh(new THREE.PlaneGeometry(W,H),printMat); front.position.set(0,topY+H/2,T/2-0.06); grp.add(front);
+    const backMat=printMat.clone(); backMat.side=THREE.BackSide; backMat.color=lin("#E9EEF6"); const back=new THREE.Mesh(new THREE.PlaneGeometry(W,H),backMat); back.position.set(0,topY+H/2,-T/2+0.06); grp.add(back);
+    grp.userData.standTop=topY+H}
+  return grp;
+}
+/* trace the character's silhouette (with a clear margin) the way an acrylic cutter would */
+const CUTS=new WeakMap();
+function acrylicOutline(it){
+  if(CUTS.has(it)) return CUTS.get(it);
+  const src=it.canvas, pad=0.06, G=120, s=G/Math.max(src.width,src.height)/(1+pad*2);
+  const gw=Math.round(src.width*s+G*pad*2*(src.width/Math.max(src.width,src.height)))+4, gh=Math.round(src.height*s+G*pad*2*(src.height/Math.max(src.width,src.height)))+4;
+  const c=document.createElement("canvas"); c.width=gw; c.height=gh; const x=c.getContext("2d"); const ox=(gw-src.width*s)/2, oy=(gh-src.height*s)/2; x.drawImage(src,ox,oy,src.width*s,src.height*s);
+  const a=x.getImageData(0,0,gw,gh).data, R=Math.max(2,Math.round(G*pad)), B=new Uint8Array(gw*gh);
+  for(let y=0;y<gh;y++) for(let xx=0;xx<gw;xx++){ if(a[(y*gw+xx)*4+3]<60) continue; for(let dy=-R;dy<=R;dy++) for(let dx=-R;dx<=R;dx++){ if(dx*dx+dy*dy>R*R) continue; const X=xx+dx, Y=y+dy; if(X>=0&&Y>=0&&X<gw&&Y<gh) B[Y*gw+X]=1}}
+  // Moore-neighbour boundary trace starting from the top-most filled cell
+  let start=-1; for(let i=0;i<B.length;i++) if(B[i]){start=i; break}
+  const at=(X,Y)=>X>=0&&Y>=0&&X<gw&&Y<gh&&B[Y*gw+X];
+  const dirs=[[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+  let cx=start%gw, cy=(start-cx)/gw, d=0; const pts=[[cx,cy]];
+  for(let step=0;step<gw*gh*2;step++){let found=false; for(let k2=0;k2<8;k2++){const nd=(d+6+k2)%8, nx=cx+dirs[nd][0], ny=cy+dirs[nd][1]; if(at(nx,ny)){cx=nx; cy=ny; d=nd; found=true; break}} if(!found) break; if(cx===pts[0][0]&&cy===pts[0][1]) break; pts.push([cx,cy])}
+  // simplify + round the corners like a laser-cut edge
+  const rdp=(P,eps)=>{if(P.length<3) return P; let dmax=0,idx=0; const [x1,y1]=P[0],[x2,y2]=P[P.length-1], L=Math.hypot(x2-x1,y2-y1)||1; for(let i=1;i<P.length-1;i++){const dd=Math.abs((y2-y1)*P[i][0]-(x2-x1)*P[i][1]+x2*y1-y2*x1)/L; if(dd>dmax){dmax=dd; idx=i}} if(dmax>eps){const l=rdp(P.slice(0,idx+1),eps), r=rdp(P.slice(idx),eps); return l.slice(0,-1).concat(r)} return [P[0],P[P.length-1]]};
+  let poly=rdp(pts,0.8); for(let it2=0;it2<2;it2++){const o=[]; for(let i=0;i<poly.length;i++){const p=poly[i], q=poly[(i+1)%poly.length]; o.push([p[0]*0.75+q[0]*0.25,p[1]*0.75+q[1]*0.25],[p[0]*0.25+q[0]*0.75,p[1]*0.25+q[1]*0.75])} poly=o}
+  // texture: the character centred in the same frame as the outline
+  const img=document.createElement("canvas"); const K=Math.min(8,1024/Math.max(gw,gh)); img.width=Math.round(gw*K); img.height=Math.round(gh*K); img.getContext("2d").drawImage(src,ox*K,oy*K,src.width*s*K,src.height*s*K);
+  const out={pts:poly.map(([X,Y])=>[X/gw,Y/gh]),ar:gw/gh,img}; CUTS.set(it,out); return out;
+}
+function lathe(points,seg){return new THREE.LatheGeometry(points.map(([x,y])=>new THREE.Vector2(x,y)),seg||32)}
+function sitOn(geo){geo.computeBoundingBox(); const b=geo.boundingBox; geo.translate(-(b.min.x+b.max.x)/2,-b.min.y,-(b.min.z+b.max.z)/2); return geo}
+function buildDeco(p,g){
+  const grp=new THREE.Group(), top=g.userData.topY, w=g.userData.topW;
+  const main=surfMat(S.decoMat,S.decoColor), accentPink=surfMat(S.decoMat==="holo"?"holo":"gloss","#FFB8C9");
+  const add=(geo,mat,x,y,z,rx,ry,rz)=>{const o=new THREE.Mesh(geo,mat); o.position.set(x,y,z); o.rotation.set(rx||0,ry||0,rz||0); grp.add(o); return o};
+  const soft=(shape,depth,bev)=>new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:6,curveSegments:28});
+  const stand=S.charPos==="stand";
+  const floatBase=stand?(top+13.5):top;
+  switch(S.deco){
+    case "cat":{
+      const ear=new THREE.Shape(); ear.moveTo(-2.4,0); ear.quadraticCurveTo(-2.6,3.2,-0.4,4.6); ear.quadraticCurveTo(0,4.9,0.4,4.6); ear.quadraticCurveTo(2.6,3.2,2.4,0); ear.lineTo(-2.4,0);
+      const inner=new THREE.Shape(); inner.moveTo(-1.3,0.6); inner.quadraticCurveTo(-1.4,2.6,0,3.5); inner.quadraticCurveTo(1.4,2.6,1.3,0.6); inner.lineTo(-1.3,0.6);
+      for(const sd of [-1,1]){const eg=soft(ear,0.9,0.5); eg.translate(0,0.5,-0.45); const o=add(eg,main,sd*w*0.58,top,-w*0.2,0,0,-sd*0.22);
+        const ig=soft(inner,0.4,0.2); ig.translate(0,0.5,0.55); add(ig,accentPink,sd*w*0.58,top,-w*0.2,0,0,-sd*0.22)}
+      break;}
+    case "horn":{ // short, chubby, softly curled devil horns with round tips
+      const hm=surfMat(S.decoMat,S.decoColor==="#FFFFFF"?"#FF5C7A":S.decoColor);
+      for(const sd of [-1,1]){const curve=new THREE.CubicBezierCurve3(new THREE.Vector3(0,0,0),new THREE.Vector3(sd*0.9,1.6,0),new THREE.Vector3(sd*1.3,3.2,-0.1),new THREE.Vector3(sd*0.5,4.4,-0.2));
+        const tg=new THREE.TubeGeometry(curve,32,1.55,20,false), pos=tg.attributes.position, v=new THREE.Vector3();
+        for(let i=0;i<pos.count;i++){const seg=Math.floor(i/21)/32, pt=curve.getPoint(seg); v.set(pos.getX(i),pos.getY(i),pos.getZ(i)).sub(pt).multiplyScalar(lerp(1,0.32,Math.pow(seg,1.4))).add(pt); pos.setXYZ(i,v.x,Math.max(0,v.y),v.z)} tg.computeVertexNormals();
+        const o=new THREE.Mesh(tg,hm); o.position.set(sd*w*0.46,top,-w*0.15); grp.add(o);
+        const tip=new THREE.Mesh(new THREE.SphereGeometry(1.55*0.32,16,12),hm); tip.position.set(sd*w*0.46+sd*0.5,top+4.4,-w*0.15-0.2); grp.add(tip);
+        const cap=new THREE.Mesh(new THREE.CircleGeometry(1.55,24),hm); cap.rotation.x=-Math.PI/2; cap.position.set(sd*w*0.46,top+0.01,-w*0.15); grp.add(cap)}
+      break;}
+    case "bow":{ // two pleated loops, a knot and notched tails, standing upright
+      const loop=new THREE.Shape(); loop.moveTo(0,0.8); loop.bezierCurveTo(1.6,2.6,4.2,3.6,5.2,2.6); loop.bezierCurveTo(6,1.6,5.8,-1.2,5,-2); loop.bezierCurveTo(3.9,-2.9,1.6,-1.8,0,-0.8); loop.lineTo(0,0.8);
+      const fold=new THREE.Shape(); fold.moveTo(0.6,0.3); fold.bezierCurveTo(2,1.2,3.6,1.5,4.3,0.9); fold.lineTo(4.1,0.3); fold.bezierCurveTo(3.2,0.6,2,0.3,0.6,-0.2); fold.lineTo(0.6,0.3);
+      const bowG=new THREE.Group();
+      for(const sd of [-1,1]){const lg=soft(loop,0.9,0.45); lg.translate(0,0,-0.45); const o=new THREE.Mesh(lg,main); o.scale.x=sd; bowG.add(o);
+        const fg=soft(fold,0.2,0.12); const f=new THREE.Mesh(fg,accentPink.clone()); f.material.opacity=0.35; f.material.transparent=true; f.scale.x=sd; f.position.z=0.62; bowG.add(f)}
+      const tail=new THREE.Shape(); tail.moveTo(-0.7,0); tail.lineTo(0.7,0); tail.lineTo(2.2,-4.2); tail.lineTo(1.2,-3.6); tail.lineTo(0.6,-4.4); tail.lineTo(-0.4,-0.6); tail.lineTo(-0.7,0);
+      for(const sd of [-1,1]){const tgm=soft(tail,0.5,0.25); tgm.translate(0,0,-0.6); const o=new THREE.Mesh(tgm,main); o.scale.x=sd; o.position.set(sd*0.3,-0.4,-0.2); o.rotation.z=sd*0.1; bowG.add(o)}
+      const knot=new THREE.Mesh(new THREE.SphereGeometry(1.3,24,16),main); knot.scale.set(1.05,1.25,0.8); bowG.add(knot);
+      const bb=new THREE.Box3().setFromObject(bowG); bowG.position.set(0,top-bb.min.y,-w*0.1); grp.add(bowG);
+      break;}
+    case "halo":{
+      const col=lin(S.decoColor==="#FFFFFF"?"#FFE38A":S.decoColor);
+      const hm=S.decoMat==="holo"?surfMat("holo","#FFF3B0",{emissive:col,emissiveIntensity:0.5}):new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:S.decoMat==="matte"?0.45:0.75,roughness:S.decoMat==="matte"?0.6:0.25,metalness:0.2});
+      const R=Math.max(4.2,w*0.62), y=floatBase+6;
+      const ring=add(new THREE.TorusGeometry(R,0.5,20,64),hm,0,y,0,Math.PI/2); ring.userData.float=y;
+      const glow=new THREE.Mesh(new THREE.TorusGeometry(R,1.3,16,64),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.16,blending:THREE.AdditiveBlending,depthWrite:false})); glow.rotation.x=Math.PI/2; glow.position.y=y; grp.add(glow); glow.userData.float=y;
+      const gs=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col,transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false})); gs.scale.set(R*2.6,R*0.9,1); gs.position.y=y; grp.add(gs); gs.userData.float=y;
+      grp.userData.halo=[ring,glow,gs]; break;}
+    case "star": case "heart":{const s2=new THREE.Shape();
+      if(S.deco==="star"){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2, r=i%2?2:4.2; const x=Math.cos(a)*r, y=-Math.sin(a)*r; i?s2.lineTo(x,y):s2.moveTo(x,y)} s2.closePath()}
+      else {s2.moveTo(0,-3.4); s2.bezierCurveTo(-1.6,-2.2,-4.6,-0.6,-4.6,1.6); s2.bezierCurveTo(-4.6,3.6,-2.9,4.6,-1.7,4.6); s2.bezierCurveTo(-0.8,4.6,-0.2,4.1,0,3.3); s2.bezierCurveTo(0.2,4.1,0.8,4.6,1.7,4.6); s2.bezierCurveTo(2.9,4.6,4.6,3.6,4.6,1.6); s2.bezierCurveTo(4.6,-0.6,1.6,-2.2,0,-3.4)}
+      const mat=S.decoColor==="#FFFFFF"?surfMat(S.decoMat,S.deco==="star"?"#FFD45C":"#FF8FB0"):main;
+      const geo=soft(s2,1.4,1.2); geo.center(); const fy=floatBase+(stand?4.5:5.6); const o=add(geo,mat,0,fy,0,0,0,0); grp.userData.spin=o; o.userData.float=fy; break;}
+  }
+  return grp;
+}
+function nameSticker(txt){ // a die-cut name sticker: white border, pastel label, tiny heart
+  return canvasTex(512,192,(x,w,h)=>{x.font='64px Jua, sans-serif'; const tw=Math.min(x.measureText(txt).width,300); const bw=tw+150, bh=112, bx=(w-bw)/2, by=(h-bh)/2;
+    x.shadowColor="rgba(60,40,90,.25)"; x.shadowBlur=10; x.shadowOffsetY=4; rrect(x,bx-10,by-10,bw+20,bh+20,(bh+20)/2); x.fillStyle="#FFFFFF"; x.fill(); x.shadowColor="transparent";
+    rrect(x,bx,by,bw,bh,bh/2); const g=x.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,"#FFE3EE"); g.addColorStop(1,"#FFC9DE"); x.fillStyle=g; x.fill();
+    x.setLineDash([8,6]); x.lineWidth=3; x.strokeStyle="rgba(255,255,255,.9)"; rrect(x,bx+10,by+10,bw-20,bh-20,(bh-20)/2); x.stroke(); x.setLineDash([]);
+    x.fillStyle="#FF6F91"; heart(x,bx+48,h/2+2,15); x.fill(); x.fillStyle="#FFFFFF"; x.beginPath(); x.arc(bx+42,h/2-6,4,0,7); x.fill();
+    x.fillStyle="#5A2E40"; x.textAlign="left"; x.textBaseline="middle"; x.fillText(txt,bx+84,h/2+4,300);
+    x.fillStyle="#FFD45C"; star4(x,bx+bw-24,by+22,12); x.fill()},true)}
+let nameMesh=null;
+function baseMaterial(){
+  const c=lin(S.baseColor);
+  switch(S.base){
+    case "tint": return new THREE.MeshPhysicalMaterial({color:c,roughness:0.05,transmission:0.8,transparent:true,clearcoat:1,envMapIntensity:1.5,depthWrite:false,side:THREE.DoubleSide});
+    case "gloss": return surfMat("gloss",S.baseColor);
+    case "matte": return surfMat("matte",S.baseColor);
+    case "holo": return surfMat("holo",S.baseColor);
+    default: return new THREE.MeshPhysicalMaterial({color:lin("#EEF4FF"),roughness:0.04,transmission:0.95,transparent:true,clearcoat:1,clearcoatRoughness:0.03,envMapIntensity:1.6,depthWrite:false,side:THREE.DoubleSide});
+  }
+}
+function applyBase(){
+  clearMat=baseMaterial(); block.material=clearMat; const see=S.base==="clear"||S.base==="tint"; cavity.visible=see; bot.visible=see||true;
+  if(nameMesh){root.remove(nameMesh); nameMesh=null}
+  if(S.name){nameMesh=new THREE.Mesh(new THREE.PlaneGeometry(18,6.75),new THREE.MeshPhysicalMaterial({map:nameSticker(S.name),transparent:true,alphaTest:0.05,roughness:0.35,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-3}));
+    nameMesh.position.set(0,-7.4,11.36); nameMesh.rotation.z=0; nameMesh.renderOrder=6; root.add(nameMesh)}
+}
+
+/* ---------- glitter: real little 3D flakes that tumble like a snow globe ---------- */
+const GLIT_GEO={}, GLIT_MAT={};
+function glitterGeo(kind){
+  if(GLIT_GEO[kind]) return GLIT_GEO[kind];
+  const s=new THREE.Shape();
+  if(kind==="star"){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2, r=i%2?0.42:0.95; i?s.lineTo(Math.cos(a)*r,Math.sin(a)*r):s.moveTo(Math.cos(a)*r,Math.sin(a)*r)} s.closePath()}
+  else if(kind==="snow"){for(let i=0;i<24;i++){const a=i/24*Math.PI*2, r=[1,0.35,0.62,0.35][i%4]; i?s.lineTo(Math.cos(a)*r,Math.sin(a)*r):s.moveTo(Math.cos(a)*r,Math.sin(a)*r)} s.closePath()}
+  else if(kind==="heart"){const k2=0.24; s.moveTo(0,-3.4*k2); s.bezierCurveTo(-1.6*k2,-2.2*k2,-4.6*k2,-0.6*k2,-4.6*k2,1.6*k2); s.bezierCurveTo(-4.6*k2,3.6*k2,-2.9*k2,4.6*k2,-1.7*k2,4.6*k2); s.bezierCurveTo(-0.8*k2,4.6*k2,-0.2*k2,4.1*k2,0,3.3*k2); s.bezierCurveTo(0.2*k2,4.1*k2,0.8*k2,4.6*k2,1.7*k2,4.6*k2); s.bezierCurveTo(2.9*k2,4.6*k2,4.6*k2,3.6*k2,4.6*k2,1.6*k2); s.bezierCurveTo(4.6*k2,-0.6*k2,1.6*k2,-2.2*k2,0,-3.4*k2)}
+  else {for(let i=0;i<6;i++){const a=i/6*Math.PI*2; i?s.lineTo(Math.cos(a)*0.7,Math.sin(a)*0.7):s.moveTo(Math.cos(a)*0.7,Math.sin(a)*0.7)} s.closePath()}
+  const g=new THREE.ExtrudeGeometry(s,{depth:0.14,bevelEnabled:true,bevelThickness:0.07,bevelSize:0.07,bevelSegments:2,curveSegments:10}); g.center(); GLIT_GEO[kind]=g; return g;
+}
+function glitterMat(kind){
+  if(GLIT_MAT[kind]) return GLIT_MAT[kind];
+  let m;
+  if(kind==="star") m=new THREE.MeshStandardMaterial({color:lin("#FFD45C"),metalness:1,roughness:0.16,emissive:lin("#FFB830"),emissiveIntensity:0.35});
+  else if(kind==="snow") m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FFFFFF"),metalness:0.35,roughness:0.12,clearcoat:1,emissive:lin("#DDEBFF"),emissiveIntensity:0.25}));
+  else if(kind==="heart") m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FF8FB8"),metalness:0.25,roughness:0.14,clearcoat:1,emissive:lin("#FF6F9E"),emissiveIntensity:0.2}));
+  else m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FFFFFF"),metalness:0.7,roughness:0.1,clearcoat:1}));
+  GLIT_MAT[kind]=m; return m;
+}
+function makeParticles(p,g){
+  if(S.glitter==="none"||!(S.mat==="resin"||S.mat==="jelly")) return null;
+  const kind=S.glitter, N={star:38,snow:30,heart:28,aurora:46}[kind], scale={star:1.05,snow:1.1,heart:1.0,aurora:0.8}[kind];
+  const mesh=new THREE.InstancedMesh(glitterGeo(kind),glitterMat(kind),N); mesh.renderOrder=1;
+  const pos=new Float32Array(N*3), vel=new Float32Array(N*3), rot=new Float32Array(N*3), spin=new Float32Array(N*3), r=mulberry32(9);
+  for(let i=0;i<N;i++){const v=r()*0.3; const hw=lerp(p.bw,p.tw,v)/2*0.66; pos[i*3]=(r()*2-1)*hw; pos[i*3+1]=0.9+v*p.h*0.6; pos[i*3+2]=(r()*2-1)*hw;
+    for(let a=0;a<3;a++){rot[i*3+a]=r()*6.28; spin[i*3+a]=(r()*2-1)*0.4}}
+  return {mesh,pos,vel,rot,spin,N,p,scale,dummy:new THREE.Object3D()};
+}
+function stirParticles(){if(!partSys) return; const {vel,spin,N}=partSys; for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2; vel[i*3]+=Math.cos(a)*(5+Math.random()*9); vel[i*3+1]+=9+Math.random()*14; vel[i*3+2]+=Math.sin(a)*(5+Math.random()*9); for(let k2=0;k2<3;k2++) spin[i*3+k2]+=(Math.random()*2-1)*9}}
+function stepParticles(dt,t){
+  if(!partSys) return; const {mesh,pos,vel,rot,spin,N,p,scale,dummy}=partSys, grav=S.glitter==="snow"?2.6:4.2;
+  for(let i=0;i<N;i++){const ix=i*3;
+    vel[ix+1]-=grav*dt; const d=1-2.4*dt; vel[ix]*=d; vel[ix+1]*=d; vel[ix+2]*=d;
+    pos[ix]+=vel[ix]*dt; pos[ix+1]+=vel[ix+1]*dt; pos[ix+2]+=vel[ix+2]*dt;
+    const floor=0.9, y=pos[ix+1], v=clamp((y-floor)/(p.h*0.85)), hw=lerp(p.bw,p.tw,v)/2*0.68;
+    if(y<floor){pos[ix+1]=floor; vel[ix+1]=0; for(let k2=0;k2<3;k2++) spin[ix+k2]*=0.9}
+    if(y>p.h*0.9){pos[ix+1]=p.h*0.9; vel[ix+1]*=-0.3}
+    if(Math.abs(pos[ix])>hw){pos[ix]=Math.sign(pos[ix])*hw; vel[ix]*=-0.4} if(Math.abs(pos[ix+2])>hw){pos[ix+2]=Math.sign(pos[ix+2])*hw; vel[ix+2]*=-0.4}
+    const sd=1-1.5*dt; for(let k2=0;k2<3;k2++){rot[ix+k2]+=spin[ix+k2]*dt; spin[ix+k2]*=sd}
+    // resting flakes lie flat-ish, like glitter settled at the bottom
+    if(pos[ix+1]<=floor+0.01){rot[ix]=lerp(rot[ix],Math.round(rot[ix]/Math.PI)*Math.PI+Math.PI/2,dt*3)}
+    dummy.position.set(pos[ix],pos[ix+1],pos[ix+2]); dummy.rotation.set(rot[ix],rot[ix+1],rot[ix+2]); dummy.scale.setScalar(scale*(0.85+0.3*hash(i+40))); dummy.updateMatrix(); mesh.setMatrixAt(i,dummy.matrix);
+  }
+  mesh.instanceMatrix.needsUpdate=true;
+}
+
+function rebuild(){
+  const p=PROFILES[S.shape], flat=S.charPos==="top"||S.charPos==="stand";
+  while(capGroup.children.length) capGroup.remove(capGroup.children[0]);
+  capGeo=capGeometry(p,flat);
+  capMesh=new THREE.Mesh(capGeo,capMaterial()); capMesh.renderOrder=2; capGroup.add(capMesh);
+  if(S.charPos!=="none"){charGroup=buildChar(p,capGeo); capGroup.add(charGroup)}
+  partSys=makeParticles(p,capGeo); if(partSys){capGroup.add(partSys.mesh); stepParticles(0.001,0)}
+  decoGroup=buildDeco(p,capGeo); capGroup.add(decoGroup);
+  applyBase();
+  stemMat.color.copy(lin(SWC[S.sw]));
+  writeHash();
+}
+
+/* ---------- interaction: turn, pinch/scroll zoom, two-finger / right-drag pan, tap to press ---------- */
+let rotY=-0.55, rotX=0.0, velY=0, idle=0, press=0, pressV=0, pressed=false, PAUSE=false;
+const CAM={zoom:1,panX:0,panY:0,locked:false}, HOME={rotY:-0.55,rotX:0};
+const ptrs=new Map(); let gesture=null;
+function camApply(){const d=90*CAM.zoom, tgt=new THREE.Vector3(CAM.panX,6+CAM.panY,0); camera.position.set(CAM.panX,tgt.y+26*CAM.zoom,d); camera.lookAt(tgt)}
+cv.addEventListener("pointerdown",e=>{try{cv.setPointerCapture&&cv.setPointerCapture(e.pointerId)}catch(err){} ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1) gesture={mode:(e.button===2||e.shiftKey)?"pan":"turn",x0:e.clientX,y0:e.clientY,t:performance.now(),moved:false};
+  else if(ptrs.size===2){const [a,b]=[...ptrs.values()]; gesture={mode:"pinch",d0:Math.hypot(a.x-b.x,a.y-b.y),z0:CAM.zoom,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,px:CAM.panX,py:CAM.panY,moved:true}}});
+cv.addEventListener("contextmenu",e=>e.preventDefault());
+cv.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId)||!gesture) return; const prev=ptrs.get(e.pointerId); const dx=e.clientX-prev.x, dy=e.clientY-prev.y; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); idle=0;
+  if(gesture.mode==="pinch"&&ptrs.size===2){const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(!CAM.locked){CAM.zoom=clamp(gesture.z0*gesture.d0/Math.max(20,d),0.45,1.8); const mx=(a.x+b.x)/2, my=(a.y+b.y)/2; CAM.panX=clamp(gesture.px-(mx-gesture.mx)*0.08*CAM.zoom,-25,25); CAM.panY=clamp(gesture.py+(my-gesture.my)*0.08*CAM.zoom,-20,25); camApply()} return}
+  if(Math.hypot(e.clientX-gesture.x0,e.clientY-gesture.y0)>6) gesture.moved=true;
+  if(CAM.locked) return;
+  if(gesture.mode==="pan"){CAM.panX=clamp(CAM.panX-dx*0.08*CAM.zoom,-25,25); CAM.panY=clamp(CAM.panY+dy*0.08*CAM.zoom,-20,25); camApply()}
+  else{rotY+=dx*0.012; velY=dx*0.012; rotX=clamp(rotX+dy*0.006,-0.3,0.45)}});
+function up(e){const g=gesture; ptrs.delete(e.pointerId); if(g&&ptrs.size===0){if(!g.moved&&g.mode==="turn"&&performance.now()-g.t<350) pressKey(); gesture=null}}
+cv.addEventListener("pointerup",up); cv.addEventListener("pointercancel",up);
+cv.addEventListener("wheel",e=>{e.preventDefault(); if(CAM.locked) return; CAM.zoom=clamp(CAM.zoom*(1+Math.sign(e.deltaY)*0.08),0.45,1.8); camApply()},{passive:false});
+function pressKey(){pressed=true; sfx("down"); stirParticles(); try{navigator.vibrate&&navigator.vibrate(12)}catch(e){} setTimeout(()=>{pressed=false; sfx("up")},130); idle=0}
+function resetView(){CAM.zoom=1; CAM.panX=0; CAM.panY=0; rotY=HOME.rotY; rotX=HOME.rotX; velY=0; camApply()}
+camApply();
+
+/* switch sounds */
+let AC=null;
+function ac(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); return AC}catch(e){return null}}
+let NB=null; function noiseBuf(a){if(NB) return NB; const b=a.createBuffer(1,a.sampleRate*0.2,a.sampleRate), d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; NB=b; return b}
+function burst(a,t0,lo,hi,vol,dec){const s=a.createBufferSource(); s.buffer=noiseBuf(a); const bp=a.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=Math.sqrt(lo*hi); bp.Q.value=Math.max(0.3,Math.sqrt(lo*hi)/(hi-lo)); const g=a.createGain(); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); s.connect(bp).connect(g).connect(a.destination); s.start(t0); s.stop(t0+dec+0.02)}
+function thump(a,t0,f,vol,dec){const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.setValueAtTime(f,t0); o.frequency.exponentialRampToValueAtTime(f*0.6,t0+dec); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); o.connect(g).connect(a.destination); o.start(t0); o.stop(t0+dec+0.02)}
+function chime(a,t0){[1568,2093,2637].forEach((f,i)=>{const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t0+i*0.05); g.gain.linearRampToValueAtTime(0.035,t0+i*0.05+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.05+0.5); o.connect(g).connect(a.destination); o.start(t0+i*0.05); o.stop(t0+i*0.05+0.55)})}
+/* Your own recorded switch sounds: drop files into ./sounds/ (see sounds/README.md).
+   When a file is found it is used; otherwise the built-in synthesized sound plays. */
+const SOUND_EXTS=[".mp3",".wav",".ogg",".m4a"], SOUND_BUF={}; let soundsTried=false;
+async function loadSoundFiles(){
+  if(soundsTried) return; soundsTried=true; const a=ac(); if(!a) return;
+  for(const sw of Object.keys(OPT.sw)) for(const kind of ["down","up"]){
+    for(const ext of SOUND_EXTS){try{const r=await fetch(`sounds/${sw}_${kind}${ext}`); if(!r.ok) continue; const buf=await a.decodeAudioData(await r.arrayBuffer()); (SOUND_BUF[`${sw}_${kind}`]=SOUND_BUF[`${sw}_${kind}`]||[]).push(buf); break}catch(e){}}
+    // optional variations: red_down_2.mp3, red_down_3.mp3 ... are picked at random for a livelier sound
+    for(let v=2;v<=6;v++){let got=false; for(const ext of SOUND_EXTS){try{const r=await fetch(`sounds/${sw}_${kind}_${v}${ext}`); if(!r.ok) continue; const buf=await a.decodeAudioData(await r.arrayBuffer()); (SOUND_BUF[`${sw}_${kind}`]=SOUND_BUF[`${sw}_${kind}`]||[]).push(buf); got=true; break}catch(e){}} if(!got) break}
+  }
+}
+function playFile(a,kind){const list=SOUND_BUF[`${S.sw}_${kind}`]; if(!list||!list.length) return false;
+  const src=a.createBufferSource(); src.buffer=list[Math.floor(Math.random()*list.length)]; src.playbackRate.value=0.96+Math.random()*0.08; const g=a.createGain(); g.gain.value=0.9; src.connect(g).connect(a.destination); src.start(); return true}
+function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; loadSoundFiles(); if(playFile(a,kind)) return; const t=a.currentTime; const deep=S.mat==="resin"||S.mat==="jelly"?0.9:1.1;
+  if(kind==="down"){if(S.sw==="blue"){burst(a,t,2800,7000,0.55,0.025); burst(a,t+0.012,3500,8000,0.35,0.02)} if(S.sw==="brown") burst(a,t,900,2400,0.25,0.03);
+    burst(a,t+0.02,500*deep,2200*deep,0.7,0.06); thump(a,t+0.02,170*deep,0.45,0.09)}
+  else{if(S.sw==="blue") burst(a,t,3000,7500,0.4,0.02); burst(a,t,700*deep,2600*deep,0.3,0.04); thump(a,t,230*deep,0.18,0.05)}}
+
+/* ---------- loop ---------- */
+function resize(){const r=cv.getBoundingClientRect(); renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
+new ResizeObserver(resize).observe(cv); resize();
+let last=performance.now(), T=0;
+function applyRGB(t){
+  let on=S.rgb!=="off", col=lin(S.rgbColor), k=1;
+  if(S.rgb==="rainbow") col=new THREE.Color().setHSL((t*0.12)%1,0.9,0.6).convertSRGBToLinear();
+  if(S.rgb==="breath") k=0.35+0.65*(0.5+0.5*Math.sin(t*2.2));
+  rgbLight.color.copy(col); rgbLight.intensity=on?2.4*k:0;
+  rgbGlow.material.color.copy(col); rgbGlow.material.opacity=on?0.55*k:0;
+  rgbFloor.material.color.copy(col); rgbFloor.material.opacity=on?0.45*k:0;
+  if(clearMat.emissive) clearMat.emissive.copy(col).multiplyScalar(on&&(S.base==='clear'||S.base==='tint')?0.18*k:0);
+}
+function poseAt(t){
+  root.rotation.set(rotX,rotY,0);
+  capGroup.position.y=5.2-press*2.4; stem.position.y=-press*2.4;
+  if(decoGroup&&decoGroup.userData.halo){decoGroup.userData.halo.forEach(o=>o.position.y=o.userData.float+Math.sin(t*2)*0.45)}
+  if(decoGroup&&decoGroup.userData.spin){const o=decoGroup.userData.spin; o.rotation.set(0,Math.sin(t*1.1)*0.6,0); o.position.y=o.userData.float+Math.sin(t*1.8)*0.5}
+  applyRGB(t);
+}
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now; T+=dt; idle+=dt;
+  if(!gesture&&!CAM.locked){rotY+=velY; velY*=0.92; if(idle>2.5) rotY+=dt*0.35}
+  const target=pressed?1:0; pressV+=(target-press)*dt*260; pressV*=0.72; press+=pressV*dt*8; press=clamp(press,-0.2,1.1);
+  stepParticles(dt,T);
+  if(!PAUSE){poseAt(T); renderer.render(scene,camera)}
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- palette from the character ---------- */
+function extractPalette(it){
+  const c=it.canvas, w=Math.min(120,c.width), h=Math.round(c.height*w/c.width), t=document.createElement("canvas"); t.width=w; t.height=h; const x=t.getContext("2d"); x.drawImage(c,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data, bins=new Map();
+  for(let i=0;i<d.length;i+=4){if(d[i+3]<200) continue; const k=((d[i]>>4)<<8)|((d[i+1]>>4)<<4)|(d[i+2]>>4); bins.set(k,(bins.get(k)||0)+1)}
+  const out=[]; for(const [k] of [...bins.entries()].sort((a,b)=>b[1]-a[1])){const r=((k>>8)&15)*17, g=((k>>4)&15)*17, b=(k&15)*17; if(out.every(o=>Math.abs(o[0]-r)+Math.abs(o[1]-g)+Math.abs(o[2]-b)>90)) out.push([r,g,b]); if(out.length>=5) break}
+  return out.map(([r,g,b])=>"#"+[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("").toUpperCase());
+}
+
+/* ---------- UI ---------- */
+function chipGroup(id,key,labels,after){const el=$(id); el.innerHTML="";
+  for(const k of Object.keys(labels)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=labels[k]; b.setAttribute("aria-pressed",String(S[key]===k));
+    b.addEventListener("click",()=>{S[key]=k; if(key==="bg") S.bgImg=null; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(after) after(k); else rebuild(); if(key==="sw") pressKey()}); el.appendChild(b)}}
+function swatches(id,key,list){const el=$(id); el.innerHTML="";
+  const all=[...S.palette,...list].filter((c,i,a)=>a.indexOf(c)===i);
+  all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); b.style.background=col; b.setAttribute("aria-label",col); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
+  const pick=document.createElement("input"); pick.type="color"; pick.className="sw pick"; pick.value=S[key]; pick.setAttribute("aria-label","직접 고르기"); pick.addEventListener("input",()=>{S[key]=pick.value.toUpperCase(); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(pick);
+}
+function renderUI(){
+  chipGroup("shapeChips","shape",OPT.shape); chipGroup("matChips","mat",OPT.mat); chipGroup("posChips","charPos",OPT.charPos); chipGroup("decoChips","deco",OPT.deco); chipGroup("decoMatChips","decoMat",OPT.decoMat);
+  chipGroup("glitChips","glitter",OPT.glitter,()=>{rebuild(); pressKey()}); chipGroup("baseChips","base",OPT.base,()=>applyBase()); swatches("baseSw","baseColor",["#CFE3FF","#FFD1E3","#FFF1B8","#CDEFE0","#DCCBFF","#FFFFFF","#2C2F36"]); chipGroup("swChips","sw",OPT.sw); chipGroup("rgbChips","rgb",OPT.rgb,()=>{}); chipGroup("bgChips","bg",OPT.bg,()=>setBg());
+  swatches("colSw","color",BASE_COLORS); swatches("decoSw","decoColor",DECO_COLORS); swatches("rgbSw","rgbColor",["#FF6FB5","#FF4D4D","#FFB547","#6BFF9E","#4DC3FF","#8C6BFF","#FFFFFF"]);
+}
+$("name").addEventListener("input",e=>{S.name=e.target.value.trim(); $("count").textContent=`${[...e.target.value].length}/6`; rebuild()});
+$("lookalike").addEventListener("click",()=>{const it=S.items[0]; if(!it){toast("먼저 캐릭터 그림을 넣어 주세요"); return} S.palette=extractPalette(it); if(!S.palette.length) return; S.color=S.palette[0]; S.decoColor=S.palette[1]||S.palette[0]; S.rgbColor=S.palette[2]||S.palette[0]; renderUI(); rebuild(); pressKey(); toast("캐릭터 색으로 칠했어요")});
+$("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); return k[Math.floor(Math.random()*k.length)]};
+  S.shape=pk(OPT.shape); S.mat=pk(OPT.mat); S.deco=pk(OPT.deco); S.decoMat=pk(OPT.decoMat); S.glitter=pk(OPT.glitter); S.sw=pk(OPT.sw); S.rgb=pk(OPT.rgb);
+  const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
+  renderUI(); rebuild(); pressKey()});
+$("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
+$("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
+$("camLock").addEventListener("click",e=>{CAM.locked=!CAM.locked; velY=0; e.currentTarget.setAttribute("aria-pressed",String(CAM.locked)); e.currentTarget.textContent=CAM.locked?"🔒 카메라 고정됨":"🔓 카메라 고정"});
+$("camReset").addEventListener("click",()=>{resetView(); toast("원래 위치로 돌아왔어요")});
+$("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.target.value=""; if(!f) return;
+  try{const img=await new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=r.result}; r.onerror=rej; r.readAsDataURL(f)});
+    const c=document.createElement("canvas"); c.width=800; c.height=1000; const x=c.getContext("2d"); const k=Math.max(800/img.width,1000/img.height); x.drawImage(img,(800-img.width*k)/2,(1000-img.height*k)/2,img.width*k,img.height*k);
+    S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
+$("bgPick").addEventListener("click",()=>$("bgFile").click());
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1]))))); Object.assign(S,{base:o.bs||S.base,baseColor:o.bc||S.baseColor,shape:PROFILES[o.s]?o.s:S.shape,mat:o.m||S.mat,color:o.c||S.color,charPos:o.p||S.charPos,deco:OPT.deco[o.d]?o.d:S.deco,decoMat:o.dm||S.decoMat,decoColor:o.dc||S.decoColor,glitter:o.g||S.glitter,sw:o.w||S.sw,rgb:o.r||S.rgb,rgbColor:o.rc||S.rgbColor,bg:o.b||S.bg,name:o.n||""}); $("name").value=S.name}catch(e){}}
+$("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
+function resetRun(){rebuild()}
+readHash(); setBg(); renderUI(); rebuild();

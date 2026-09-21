@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사탄의 키캡 공방 · 사탄의 게임</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --page:#FFFFFF; --page-d:#121A22; --dot:rgba(120,180,230,.18);
+  --ink:#2E4153; --ink-soft:#7489A0;
+  --card:#FFFFFF; --line:rgba(46,65,83,.12); --shadow:0 8px 24px rgba(60,120,180,.10), 0 1px 2px rgba(60,120,180,.08);
+  --accent:#3E95DA; --accent-soft:#E6F2FC; --accent-ink:#FFFFFF;
+  --bg:var(--page);
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{max-width:100%; overflow-x:hidden}
+@supports (overflow:clip){html,body{overflow-x:clip}}
+html{scroll-padding-top:env(safe-area-inset-top,0px); -webkit-text-size-adjust:100%}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:var(--page-d); --dot:rgba(255,255,255,.05); --ink:#EAF2FA; --ink-soft:#9FB2C6; --card:#1D2833; --line:rgba(234,242,250,.14); --shadow:0 8px 24px rgba(0,0,0,.3); --accent-soft:rgba(255,255,255,.08)}
+}
+:root[data-theme="dark"]{--bg:var(--page-d); --dot:rgba(255,255,255,.05); --ink:#EAF2FA; --ink-soft:#9FB2C6; --card:#1D2833; --line:rgba(234,242,250,.14); --shadow:0 8px 24px rgba(0,0,0,.3); --accent-soft:rgba(255,255,255,.08)}
+body{margin:0; background-color:var(--bg); background-image:radial-gradient(var(--dot) 1.6px, transparent 1.9px), linear-gradient(180deg,#EEF7FE 0,var(--bg) 420px); background-size:26px 26px,100% 100%; background-repeat:repeat,no-repeat; color:var(--ink); font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif; word-break:keep-all; overflow-wrap:break-word; letter-spacing:-.01em; font-size:16px; line-height:1.6; transition:background-color .5s ease; -webkit-tap-highlight-color:transparent}
+button{touch-action:manipulation}
+.wrap{max-width:960px; margin:0 auto; padding:16px 16px 40px}
+.back{display:inline-flex; align-items:center; gap:4px; margin:0 0 12px; padding:7px 14px 7px 12px; border-radius:999px; background:var(--card); box-shadow:var(--shadow); color:var(--ink); text-decoration:none; font-size:14px}
+.back:hover{color:var(--accent)}
+.back:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.brand{display:flex; align-items:center; gap:8px; font-family:"Jua",sans-serif; font-size:16px; color:var(--accent)}
+.brand svg{width:26px; height:26px}
+h1{font-family:"Jua",sans-serif; font-weight:400; font-size:clamp(30px,8.4vw,46px); line-height:1.14; margin:8px 0 4px; letter-spacing:-.01em}
+.lede{color:var(--ink-soft); margin:0 0 16px; font-size:15px}
+.layout{display:grid; gap:18px}
+.layout>*{min-width:0}
+@media (min-width:820px){.layout{grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:32px; align-items:start} .stage{position:sticky; top:calc(env(safe-area-inset-top,0px) + 14px)}}
+.stage{display:flex; flex-direction:column; align-items:center; gap:12px; min-width:0}
+.frame{width:100%; max-width:420px; background:var(--card); border:1.5px solid rgba(62,149,218,.14); border-radius:32px; padding:8px; box-shadow:var(--shadow)}
+#cv{width:100%; aspect-ratio:3/4; display:block; border-radius:25px; touch-action:pan-y}
+#cv.touchable{touch-action:none; cursor:grab}
+.hint{font-size:13px; color:var(--ink-soft); text-align:center; min-height:1.4em; margin:-4px 0 0}
+.stagebox{width:100%; max-width:420px; display:flex; flex-direction:column; gap:10px}
+.btn{border:0; font-family:"Jua",sans-serif; font-size:22px; padding:15px 20px; border-radius:999px; cursor:pointer; width:100%; background:var(--accent); color:var(--accent-ink); transition:transform .12s ease, opacity .2s, filter .2s; box-shadow:0 5px 0 rgba(0,0,0,.12), inset 0 2px 0 rgba(255,255,255,.35)}
+.btn:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.12), inset 0 2px 0 rgba(255,255,255,.35)}
+.btn[disabled]{opacity:.6; cursor:progress}
+.btn.ghost{background:var(--card); color:var(--ink); box-shadow:inset 0 0 0 1.5px var(--line); font-size:17px; padding:12px}
+.btn.sub{font-size:18px; padding:12px}
+.btn:focus-visible,.chip:focus-visible,.add:focus-visible,input:focus-visible,.slot button:focus-visible,.dexpill:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.dexpill{align-self:center; display:inline-flex; align-items:center; gap:8px; border:0; background:var(--card); color:var(--ink); font:inherit; font-size:13px; padding:6px 12px 6px 10px; border-radius:999px; box-shadow:var(--shadow); cursor:pointer}
+.dexpill .bar{width:64px; height:6px; border-radius:6px; background:var(--accent-soft); overflow:hidden}
+.dexpill .bar i{display:block; height:100%; background:var(--accent); border-radius:6px}
+.dex{display:none; background:var(--card); border-radius:22px; padding:12px; box-shadow:var(--shadow)}
+.dex.open{display:block}
+.dexgrid{display:grid; grid-template-columns:repeat(6,1fr); gap:6px}
+.dexcell{aspect-ratio:1; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:11px; line-height:1.2; text-align:center; background:var(--accent-soft); color:var(--ink); padding:2px}
+.dexcell b{font-family:"Jua",sans-serif; font-weight:400; font-size:13px}
+.dexcell.locked{background:transparent; box-shadow:inset 0 0 0 1.5px var(--line); color:var(--ink-soft)}
+.dexcell.rare:not(.locked){background:linear-gradient(135deg,#FFE9A8,#FFD1E3)}
+.dexcell.hidden{background:#2B2230; color:#FFFFFF}
+.dexcell.hidden.locked{background:transparent; color:#E3344B; box-shadow:inset 0 0 0 1.5px #E3344B}
+.dexcell.hidden .st{color:#FF6F7F; letter-spacing:0}
+.dexcell .st{font-size:9px; color:#E7A500; letter-spacing:-1px}
+.dex p{margin:8px 2px 0; font-size:12px; color:var(--ink-soft); text-align:center}
+.resultcard{display:none; background:var(--card); border-radius:24px; padding:14px 16px; box-shadow:var(--shadow)}
+.resultcard .rt{font-family:"Jua",sans-serif; font-size:22px; line-height:1.3}
+.resultcard .rs{font-size:14px; color:var(--ink-soft)}
+.resultcard .new{display:inline-block; font-family:"Jua",sans-serif; font-size:13px; background:#FF6F91; color:#fff; border-radius:999px; padding:0 9px; margin-left:6px; vertical-align:3px}
+.progress{height:8px; background:var(--accent-soft); border-radius:8px; overflow:hidden; margin-top:10px; display:none}
+.progress i{display:block; height:100%; width:0; background:var(--accent)}
+.status{font-size:14px; color:var(--ink-soft); margin-top:6px; min-height:1.2em}
+#out{display:none; margin-top:8px}
+#out img{width:100%; max-width:340px; display:block; margin:0 auto 10px; border-radius:20px}
+.row{display:flex; gap:8px}
+.note{font-size:13px; color:var(--ink-soft); text-align:center; margin:8px 0 0}
+.controls{display:flex; flex-direction:column; gap:12px; min-width:0}
+.group{background:var(--card); border-radius:24px; padding:16px 16px 18px; box-shadow:var(--shadow)}
+.group h2{font-family:"Jua",sans-serif; font-weight:400; font-size:19px; margin:0 0 2px}
+.group p.sub{margin:0 0 12px; font-size:13.5px; color:var(--ink-soft)}
+.slots{display:flex; gap:10px; flex-wrap:wrap}
+.slot{position:relative; width:76px; height:76px; border-radius:18px; overflow:hidden; box-shadow:inset 0 0 0 1.5px var(--line); background:#fff conic-gradient(#EFEFEF 25%,#fff 0 50%,#EFEFEF 0 75%,#fff 0) 0 0/12px 12px}
+.slot .pick{all:unset; cursor:pointer; position:absolute; inset:0; display:grid; place-items:center}
+.slot img{max-width:100%; max-height:100%; object-fit:contain}
+.slot .x{position:absolute; top:4px; right:4px; width:24px; height:24px; border-radius:50%; border:0; background:rgba(0,0,0,.5); color:#fff; font-size:15px; line-height:1; cursor:pointer}
+.slot .edit{position:absolute; left:4px; bottom:4px; font-size:11px; background:rgba(0,0,0,.5); color:#fff; padding:0 6px; border-radius:8px; line-height:18px; pointer-events:none}
+.add{width:96px; height:76px; border-radius:18px; border:2px dashed var(--line); background:transparent; color:var(--ink-soft); font:inherit; font-size:13px; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center}
+.add .plus{font-size:26px; line-height:1; color:var(--accent)}
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{border:0; background:var(--accent-soft); color:var(--ink); font:inherit; font-size:15px; padding:8px 15px; border-radius:999px; cursor:pointer; display:inline-flex; align-items:center; gap:7px}
+.chip[aria-pressed="true"]{background:var(--accent); color:#fff}
+.chip .dot{width:15px; height:15px; border-radius:50%; box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.18)}
+.chip small{font-size:12px; opacity:.8}
+.textrow{display:flex; align-items:center; gap:10px}
+input[type=text]{flex:1; min-width:0; font:inherit; font-size:16px; color:var(--ink); background:var(--accent-soft); border:0; border-radius:14px; padding:11px 13px}
+.count{font-size:13px; color:var(--ink-soft); min-width:2.6em; text-align:right}
+footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center}
+.hint b{color:var(--accent); font-weight:400; font-family:"Jua",sans-serif}
+.toast{position:fixed; left:50%; bottom:calc(env(safe-area-inset-bottom,0px) + 22px); transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--bg); padding:10px 18px; border-radius:999px; font-size:14px; opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; width:max-content; max-width:88vw; text-align:center; z-index:60}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.sr{position:absolute; left:0; top:0; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); opacity:0}
+.modal{position:fixed; inset:0; z-index:50; background:rgba(20,14,12,.5); display:flex; align-items:flex-end; justify-content:center}
+.modal[hidden]{display:none}
+.sheet{background:var(--bg); color:var(--ink); width:100%; max-width:560px; max-height:100%; overflow:auto; border-radius:28px 28px 0 0; padding:18px 16px calc(18px + env(safe-area-inset-bottom,0px))}
+@media (min-width:620px){.modal{align-items:center} .sheet{border-radius:28px}}
+.sheet h2{font-family:"Jua",sans-serif; font-weight:400; font-size:22px; margin:0}
+.sheet .sub{margin:2px 0 10px; font-size:14px; color:var(--ink-soft)}
+.edstage{display:flex; justify-content:center; border-radius:18px; overflow:hidden; background:#fff conic-gradient(#E6E6E6 25%,#fff 0 50%,#E6E6E6 0 75%,#fff 0) 0 0/18px 18px; touch-action:none}
+.edstage.dark{background:#2E4153}
+.slider .lbl{min-width:6.2em}
+#edCv{display:block; max-width:100%; max-height:50vh; cursor:crosshair}
+.edtools{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 8px}
+.seg{display:inline-flex; background:var(--accent-soft); border-radius:999px; overflow:hidden}
+.seg button{border:0; background:transparent; color:var(--ink); font:inherit; font-size:15px; padding:8px 15px; cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+.slider{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-soft); margin:4px 0 14px}
+.slider input{flex:1; min-width:0; accent-color:var(--accent)}
+.sheet .btn:not(.ghost){color:#FFFFFF}
+@media (prefers-reduced-motion: reduce){body,.toast{transition:none}}
+
+#cv{aspect-ratio:4/5; touch-action:none; cursor:grab; background:var(--stage,#FFF6EC)}
+.tools{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+.tools .btn{width:auto; font-size:16px; padding:10px 16px}
+.swatches{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.sw{width:34px; height:34px; border-radius:50%; border:0; cursor:pointer; box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.12); padding:0}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--accent)}
+.sw.mine{position:relative}
+.sw.mine::after{content:"★"; position:absolute; right:-4px; top:-6px; font-size:12px; color:#FF6F91}
+.sw.pick{appearance:none; -webkit-appearance:none; background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red); overflow:hidden}
+.sw.pick::-webkit-color-swatch{border:none; opacity:0}
+.sw.pick::-moz-color-swatch{border:none; opacity:0}
+.sw:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" id="backLink" href="../index.html" hidden>← 목록으로</a>
+  <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="7" width="22" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="5" width="14" height="14" rx="4" fill="currentColor" opacity=".35"/></svg>사탄의 키캡 공방</div>
+  <h1>캐릭터 키캡을<br>만들어 보세요</h1>
+  <p class="lede">돌려 보고, 눌러 보고, 캐릭터를 레진 속에 넣어 보세요.</p>
+  <div class="layout">
+    <section class="stage" aria-label="키캡 미리보기">
+      <div class="frame"><canvas id="cv" aria-label="3D 키캡. 드래그하면 돌아가고 탭하면 눌려요"></canvas></div>
+      <p class="hint">드래그로 돌리기 · 두 손가락(또는 휠)로 확대 · 두 손가락 이동(또는 우클릭 드래그)으로 위치 옮기기 · 톡 누르면 딸깍!</p>
+      <div class="tools" style="margin-bottom:6px"><button type="button" class="chip" id="camLock" aria-pressed="false">🔓 카메라 고정</button><button type="button" class="chip" id="camReset">↺ 원래 위치로</button></div>
+      <div class="tools">
+        <button class="btn sub" id="pressBtn">딸깍 눌러 보기</button>
+        <button class="btn sub ghost" id="lookalike">캐릭터 색으로 칠하기</button>
+        <button class="btn sub ghost" id="dice">🎲 랜덤</button>
+      </div>
+      <div class="stagebox" style="margin-top:6px">
+        <div class="resultcard" style="display:block">
+          <div class="row"><button class="btn sub" id="savePng">이미지 저장</button><button class="btn sub ghost" id="makeGif">360° 움짤</button></div>
+          <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
+          <div class="progress" id="progress"><i></i></div>
+          <div class="status" id="status"></div>
+          <div id="out"><img id="outImg" alt="키캡 결과"><div class="row"><button class="btn sub" id="saveOut">저장하기</button></div><p class="note">저장 버튼이 안 되면 길게 눌러 저장해 주세요.</p></div>
+        </div>
+      </div>
+    </section>
+    <section class="controls">
+      <div class="group"><h2>캐릭터 넣기</h2><p class="sub">배경이 있는 그림은 넣자마자 배경 지우기 창이 열려요.</p><div class="slots" id="slots"></div><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr" aria-label="그림 파일 고르기"></div>
+      <div class="group"><h2>캐릭터 위치</h2><p class="sub">아크릴 스탠드는 캐릭터 모양대로 잘린 투명 아크릴로 키캡 위에 세워져요.</p><div class="chips" id="posChips"></div></div>
+      <div class="group"><h2>키캡 모양</h2><div class="chips" id="shapeChips"></div></div>
+      <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
+      <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
+      <div class="group"><h2>윗면 장식</h2><div class="chips" id="decoChips"></div>
+        <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
+        <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
+      <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요.</p><div class="chips" id="glitChips"></div></div>
+      <div class="group"><h2>스위치</h2><p class="sub">스위치마다 타건음이 달라요.</p><div class="chips" id="swChips"></div></div>
+      <div class="group"><h2>RGB 조명</h2><div class="chips" id="rgbChips"></div><div class="swatches" id="rgbSw" style="margin-top:12px"></div></div>
+      <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div></div>
+      <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
+      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div>
+        <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
+        <input type="file" id="bgFile" accept="image/*" class="sr" aria-label="배경 이미지 고르기"></div>
+    </section>
+  </div>
+  <footer>그림은 이 기기 안에서만 쓰여요. 어디에도 올라가지 않아요.</footer>
+</div>
+<div class="modal" id="editor" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="edTitle">
+    <h2 id="edTitle">배경 지우기</h2>
+    <p class="sub" id="edHint">지우고 싶은 배경을 톡 누르세요. 여러 번 눌러도 돼요.</p>
+    <div class="edstage"><canvas id="edCv" aria-label="배경을 누르면 지워지는 그림"></canvas></div>
+    <div class="edtools">
+      <div class="seg" role="group" aria-label="누르면"><button type="button" id="mErase" aria-pressed="true">지우기</button><button type="button" id="mRestore" aria-pressed="false">되살리기</button></div>
+      <button type="button" class="chip" id="edAuto">테두리 자동 지우기</button>
+      <button type="button" class="chip" id="edUndo">되돌리기</button>
+      <button type="button" class="chip" id="edReset">처음으로</button>
+      <button type="button" class="chip" id="edDark" aria-pressed="false">어두운 배경으로 보기</button>
+    </div>
+    <label class="slider"><span class="lbl">지우는 범위</span><input type="range" id="edTol" min="8" max="110" value="42" aria-label="지우는 범위"></label>
+    <label class="slider"><span class="lbl">가장자리 깎기</span><input type="range" id="edEdge" min="0" max="3" step="1" value="1" aria-label="가장자리 깎기"></label>
+    <p class="sub" style="margin:-6px 0 12px">흰 테두리가 남으면 '가장자리 깎기'를 올려 보세요. 어두운 배경에서 보면 잘 보여요.</p>
+    <div class="row"><button type="button" class="btn ghost" id="edSkip">배경째 쓰기</button><button type="button" class="btn sub" id="edDone">완료</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
