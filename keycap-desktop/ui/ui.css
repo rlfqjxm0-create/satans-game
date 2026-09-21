@@ -1,0 +1,24 @@
+/* 사탄의 키캡 (desktop) - the little windows (menu, home). Same colours and fonts as the website. */
+@font-face{font-family:"Jua"; src:url("kc://app/fonts/Jua.ttf") format("truetype"); font-display:swap}
+:root{--ink:#2E4153; --ink-soft:#7489A0; --card:#FFFFFF; --line:rgba(46,65,83,.10); --accent:#3E95DA; --accent-soft:#E6F2FC;
+  --pink:#FF8FB8; --pink-soft:#FFE6F0; --shadow:0 10px 30px rgba(60,100,160,.22),0 2px 6px rgba(60,100,160,.12)}
+*{box-sizing:border-box}
+html,body{margin:0; background:transparent; color:var(--ink); font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  font-size:14px; user-select:none; -webkit-user-select:none; overflow:hidden}
+button{font:inherit; color:inherit; border:0; background:none; cursor:pointer}
+.card{background:var(--card); border-radius:22px; box-shadow:var(--shadow); border:2px solid #fff;
+  background-image:radial-gradient(rgba(120,180,230,.14) 1.4px,transparent 1.7px); background-size:18px 18px}
+.jua{font-family:"Jua",sans-serif; font-weight:400}
+.cat{width:30px; height:30px; flex:none}
+.row{display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border-radius:14px; text-align:left; transition:background .12s}
+.row:hover{background:var(--accent-soft)}
+.row .ic{width:28px; height:28px; border-radius:10px; display:grid; place-items:center; background:var(--pink-soft); font-size:15px; flex:none}
+.row .t{flex:1}
+.row.danger:hover{background:var(--pink-soft)}
+.sw{width:36px; height:21px; border-radius:99px; background:#DCE6F0; position:relative; flex:none; transition:background .15s}
+.sw::after{content:""; position:absolute; left:3px; top:3px; width:15px; height:15px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.2); transition:left .15s}
+.sw.on{background:var(--accent)} .sw.on::after{left:18px}
+.chips{display:flex; gap:6px; flex-wrap:wrap; padding:4px 10px 8px 48px}
+.chip{padding:4px 11px; border-radius:99px; background:var(--accent-soft); font-size:12.5px}
+.chip.on{background:var(--accent); color:#fff}
+.sep{height:0; border-top:2px dashed var(--line); margin:6px 8px}

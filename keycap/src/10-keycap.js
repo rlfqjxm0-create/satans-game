@@ -1,5 +1,9 @@
 /* ================= 사탄의 키캡 v3 ================= */
 const $=id=>document.getElementById(id);
+/* 바탕화면 키캡 (keycap-desktop): the same page, opened by the desktop program with ?desktop=1 - a transparent
+   background, no menus, only the keycap. 40-desktop.js does the rest. */
+const DESK=/[?&]desktop=1/.test(location.search); if(DESK) document.documentElement.classList.add("desk");
+let DRAW_GATE=null;   // desktop: draws fewer frames while nothing moves
 function toast(m){const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2600)}
 const INK="#4E5F73";
 /* GPU clean-up. rebuild() runs on every option click, so the meshes it throws away must give their
@@ -31,7 +35,7 @@ const lin=(h)=>new THREE.Color(h).convertSRGBToLinear();
 
 /* ---------- renderer / scene ---------- */
 const cv=$("cv");
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:DESK}); if(DESK) renderer.setClearColor(0x000000,0);
 renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 /* r128 asks the GPU "did this shader link?" right after every compile, which makes the page wait for
@@ -89,6 +93,7 @@ function setBg(){
   const prev=scene.background; setBgNow(); if(prev&&prev!==scene.background&&prev.isTexture&&!KEEP.has(prev)) prev.dispose();
 }
 function setBgNow(){
+  if(DESK){scene.background=null; return}   // the desktop shows through
   $("bgBlurRow").hidden=!S.bgImg;
   if(S.bgImg){scene.background=S.bgImg; document.documentElement.style.setProperty("--stage","#EEE"); return}
   const st=BGS[S.bg]; scene.background=canvasTex(8,640,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h); st.forEach((c,i)=>g.addColorStop(i/(st.length-1),c)); x.fillStyle=g; x.fillRect(0,0,w,h)},true);
@@ -682,7 +687,7 @@ function frame(now){
   if(!gesture&&!CAM.locked){rotY+=velY; velY*=0.92; if(idle>2.5&&(warmDone||idle>12)) rotY+=dt*0.35}
   const target=pressed?1:0; pressV+=(target-press)*dt*260; pressV*=0.72; press+=pressV*dt*8; press=clamp(press,-0.2,1.1);
   stepParticles(dt,T);
-  if(!PAUSE&&ONSCREEN){poseAt(T); renderer.render(scene,camera)}
+  if(!PAUSE&&ONSCREEN&&(!DRAW_GATE||DRAW_GATE(now))){poseAt(T); renderer.render(scene,camera)}
   requestAnimationFrame(frame);
 }
 let ONSCREEN=true; try{new IntersectionObserver(es=>{ONSCREEN=es[es.length-1].isIntersecting},{rootMargin:"80px"}).observe(cv)}catch(e){}
@@ -783,7 +788,7 @@ function applyBgBlur(){if(!S.bgSrc) return; const src=S.bgSrc, W=src.width, H=sr
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
 let standJob=0; $("standSize").addEventListener("input",e=>{S.standSize=(+e.target.value)/100; if(!standJob) standJob=requestAnimationFrame(()=>{standJob=0; rebuild()})});
 function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":""]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
-function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+function readHash(){try{const m=((window.KEYCAP_FILE&&window.KEYCAP_FILE.hash)||location.hash).match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),

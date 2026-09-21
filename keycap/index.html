@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>사탄의 키캡 · 사탄의 장난감</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3C/svg%3E">
+<link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="%232A2C33" stroke="%232A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="%234B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="%232A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="%23FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="%23FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="%23121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="%23121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="%23FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="%23FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="%23FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="%23FFFFFF"/%3E%3C/svg%3E'>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -190,6 +190,15 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   .frame #cv{width:min(100%, max(240px, calc((100vh - 400px) * .8)))}
   footer{margin-top:6px; flex:none; font-size:12px}
 }
+.deskNote{font-size:12.5px; color:var(--ink-soft); margin:8px 2px 0; text-align:center} .deskNote a{color:var(--accent)}
+/* 바탕화면 키캡: only the keycap on a transparent window */
+html.desk,html.desk body{background:transparent!important; background-image:none!important; height:100%!important; overflow:hidden!important; margin:0}
+html.desk .wrap{padding:0!important; margin:0!important; max-width:none!important; height:100vh!important; display:block!important}
+html.desk .top,html.desk .controls,html.desk footer,html.desk .hint,html.desk .tools,html.desk .stagebox,html.desk .toast,html.desk .modal{display:none!important}
+html.desk .layout{display:block!important; height:100vh!important; padding:0!important; margin:0!important; overflow:hidden!important}
+html.desk .stage{display:block!important; position:static!important; height:100vh!important; overflow:hidden!important}
+html.desk .frame{position:static!important; margin:0!important; padding:0!important; border:0!important; background:transparent!important; box-shadow:none!important; border-radius:0!important; display:block!important; width:100vw!important; height:100vh!important}
+html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important; max-width:none!important; border-radius:0!important; background:transparent!important; cursor:pointer}
 </style>
 </head>
 <body>
@@ -213,7 +222,8 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="stagebox" style="margin-top:6px">
         <div class="resultcard" style="display:block">
           <div class="row"><button class="btn sub" id="savePng">이미지 저장</button><button class="btn sub ghost" id="makeVid">돌아가는 영상</button></div>
-          <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
+          <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="deskFile">🖥 바탕화면 키캡</button><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
+          <p class="note deskNote">'바탕화면 키캡'으로 받은 파일을 <a href="https://github.com/rlfqjxm0-create/satans-game/releases/latest/download/SatanKeycap-Setup.exe">사탄의 키캡 프로그램(윈도우)</a>으로 열면 바탕화면에 키캡이 떠요.</p>
           <div class="progress" id="progress"><i></i></div>
           <div class="status" id="status"></div>
           <div id="out"><img id="outImg" alt="키캡 결과"><video id="outVid" playsinline controls loop style="display:none;width:100%;border-radius:18px;margin-bottom:10px"></video><div class="row"><button class="btn sub" id="saveOut">저장하기</button></div><p class="note">저장 버튼이 안 되면 길게 눌러 저장해 주세요.</p></div>
@@ -669,6 +679,10 @@ function motion(res,t,k){ // returns offsets
 
 /* ================= 사탄의 키캡 v3 ================= */
 const $=id=>document.getElementById(id);
+/* 바탕화면 키캡 (keycap-desktop): the same page, opened by the desktop program with ?desktop=1 - a transparent
+   background, no menus, only the keycap. 40-desktop.js does the rest. */
+const DESK=/[?&]desktop=1/.test(location.search); if(DESK) document.documentElement.classList.add("desk");
+let DRAW_GATE=null;   // desktop: draws fewer frames while nothing moves
 function toast(m){const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2600)}
 const INK="#4E5F73";
 /* GPU clean-up. rebuild() runs on every option click, so the meshes it throws away must give their
@@ -700,7 +714,7 @@ const lin=(h)=>new THREE.Color(h).convertSRGBToLinear();
 
 /* ---------- renderer / scene ---------- */
 const cv=$("cv");
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:DESK}); if(DESK) renderer.setClearColor(0x000000,0);
 renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 /* r128 asks the GPU "did this shader link?" right after every compile, which makes the page wait for
@@ -758,6 +772,7 @@ function setBg(){
   const prev=scene.background; setBgNow(); if(prev&&prev!==scene.background&&prev.isTexture&&!KEEP.has(prev)) prev.dispose();
 }
 function setBgNow(){
+  if(DESK){scene.background=null; return}   // the desktop shows through
   $("bgBlurRow").hidden=!S.bgImg;
   if(S.bgImg){scene.background=S.bgImg; document.documentElement.style.setProperty("--stage","#EEE"); return}
   const st=BGS[S.bg]; scene.background=canvasTex(8,640,(x,w,h)=>{const g=x.createLinearGradient(0,0,0,h); st.forEach((c,i)=>g.addColorStop(i/(st.length-1),c)); x.fillStyle=g; x.fillRect(0,0,w,h)},true);
@@ -1351,7 +1366,7 @@ function frame(now){
   if(!gesture&&!CAM.locked){rotY+=velY; velY*=0.92; if(idle>2.5&&(warmDone||idle>12)) rotY+=dt*0.35}
   const target=pressed?1:0; pressV+=(target-press)*dt*260; pressV*=0.72; press+=pressV*dt*8; press=clamp(press,-0.2,1.1);
   stepParticles(dt,T);
-  if(!PAUSE&&ONSCREEN){poseAt(T); renderer.render(scene,camera)}
+  if(!PAUSE&&ONSCREEN&&(!DRAW_GATE||DRAW_GATE(now))){poseAt(T); renderer.render(scene,camera)}
   requestAnimationFrame(frame);
 }
 let ONSCREEN=true; try{new IntersectionObserver(es=>{ONSCREEN=es[es.length-1].isIntersecting},{rootMargin:"80px"}).observe(cv)}catch(e){}
@@ -1452,7 +1467,7 @@ function applyBgBlur(){if(!S.bgSrc) return; const src=S.bgSrc, W=src.width, H=sr
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
 let standJob=0; $("standSize").addEventListener("input",e=>{S.standSize=(+e.target.value)/100; if(!standJob) standJob=requestAnimationFrame(()=>{standJob=0; rebuild()})});
 function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":""]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
-function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
+function readHash(){try{const m=((window.KEYCAP_FILE&&window.KEYCAP_FILE.hash)||location.hash).match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
@@ -1907,11 +1922,66 @@ $("makeVid").addEventListener("click",async()=>{
   finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(bed) try{bed.stop(); bed.disconnect()}catch(e){} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
     rotY=keep; PAUSE=false; restoreSize(); busy(false)}
 });
+/* 바탕화면 키캡: the options (the same as the share link) and the character picture in one small file, which the
+   desktop program opens. The picture goes into the file on this computer only - nothing is uploaded. */
+$("deskFile").addEventListener("click",async()=>{
+  writeHash(); const it=S.items[0];
+  const data={app:"satan-keycap",v:1,hash:location.hash,image:it&&it.canvas?it.canvas.toDataURL("image/png"):null};
+  const blob=new Blob([JSON.stringify(data)],{type:"application/octet-stream"});
+  saveFile(`${(S.name||"나의").replace(/[\\/:*?"<>|]/g,"")}-키캡.keycap`,blob);
+  toast("받은 파일을 사탄의 키캡 프로그램으로 열면 바탕화면에 떠요");
+});
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};
 
 /* back to the game list: only inside the "사탄의 장난감" site, not inside the Claude viewer (same rule as laundry) */
 (function(){try{const host=location.hostname||""; const inClaude=/claude\.ai$|claudeusercontent|anthropic/.test(host)||window.top!==window; if(!inClaude) document.getElementById("backLink").hidden=false}catch(e){}})();
+
+/* ---------- 바탕화면 키캡: the page inside the desktop program (keycap-desktop/) ----------
+   Only with ?desktop=1. The program's preload gives us window.KEYCAP_FILE ({hash, image} from a .keycap file) and
+   window.deskAPI (move / zoom / hit / menu / on). Here:
+   - left click presses the key, left drag moves the window, right drag turns the keycap, right click opens the menu,
+     the wheel resizes (these listeners run first, in the capture phase, so the page's own turn/pinch never sees them);
+   - clicks on the empty (transparent) part of the window must reach whatever is behind it: after each frame the pixel
+     under the cursor is read, and the program is told when it changes between "keycap" and "empty";
+   - fewer frames while nothing moves (DRAW_GATE), so a keycap sitting on the desktop costs almost nothing. */
+if(DESK){(function(){
+  const D=window.deskAPI||{move(){},zoom(){},hit(){},menu(){},on(){}}, F=window.KEYCAP_FILE;
+  if(F&&F.image){fetch(F.image).then(r=>r.blob()).then(b=>processFile(new File([b],"keycap.png",{type:"image/png"})))
+    .then(({it})=>{S.items=[it]; rebuild()}).catch(e=>console.error("keycap picture",e))}
+
+  // the RGB light must fit in the window (it was cut off at the edges): the camera steps back a little and the floor
+  // glow is made smaller, so the whole soft light fades out before the window's edge (the empty part lets clicks through)
+  CAM.zoom=1.22; camApply(); rgbFloor.scale.set(0.5,0.5,1);
+  let down=null, mouse=null, need=false, solid=true;
+  const stop=e=>{e.stopImmediatePropagation(); e.preventDefault()};
+  addEventListener("pointerdown",e=>{stop(e); down={b:e.button,x:e.screenX,y:e.screenY,lx:e.screenX,ly:e.screenY,moved:false}; idle=0;
+    try{cv.setPointerCapture(e.pointerId)}catch(err){}},true);
+  addEventListener("pointermove",e=>{mouse=[e.clientX,e.clientY]; need=true; if(!down) return; stop(e);
+    if(Math.hypot(e.screenX-down.x,e.screenY-down.y)>4) down.moved=true; if(!down.moved) return;
+    const dx=e.screenX-down.lx, dy=e.screenY-down.ly; down.lx=e.screenX; down.ly=e.screenY; idle=0;
+    if(down.b===0) D.move(dx,dy); else if(down.b===2){rotY+=dx*0.012; rotX=clamp(rotX+dy*0.006,-0.3,0.45)}},true);
+  addEventListener("pointerup",e=>{if(!down) return; stop(e); const d=down; down=null; idle=0;
+    if(!d.moved){if(d.b===0){ac(); pressKey()} else if(d.b===2) D.menu({spin:!CAM.locked,sound:S.sound})}},true);
+  addEventListener("pointerleave",()=>{mouse=null},true);
+  addEventListener("contextmenu",stop,true);
+  addEventListener("dblclick",stop,true);
+  addEventListener("wheel",e=>{stop(e); D.zoom(e.deltaY<0?1:-1)},{capture:true,passive:false});
+  D.on(c=>{if(c==="spin"){CAM.locked=!CAM.locked; velY=0} if(c==="sound") S.sound=!S.sound; if(c==="press"){ac(); pressKey()} idle=0});
+
+  // is the pixel under the cursor part of the keycap? (read right after the frame is drawn, before it is shown)
+  const gl=renderer.getContext(), px=new Uint8Array(4), render0=renderer.render.bind(renderer);
+  renderer.render=(s,c)=>{render0(s,c);
+    if(mouse&&need&&!down&&!PAUSE){need=false; const k=cv.width/Math.max(1,cv.clientWidth);
+      gl.readPixels(Math.round(mouse[0]*k),Math.round(cv.height-mouse[1]*k),1,1,gl.RGBA,gl.UNSIGNED_BYTE,px);
+      const on=px[3]>70; if(on!==solid){solid=on; D.hit(on)}}};
+  window.__deskHit=()=>solid;   // for tests
+
+  // frames: 60 while pressing / dragging, 30 while it turns by itself, 10 when everything has settled
+  let lastDraw=0;
+  DRAW_GATE=now=>{const busy=down||press>0.01||Math.abs(pressV)>0.02||idle<3, gap=busy?16:CAM.locked?100:33;
+    if(now-lastDraw>=gap-1){lastDraw=now; return true} return false};
+})()}
 
 })();
 </script>

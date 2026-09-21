@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>키캡 메뉴</title>
+<link rel="stylesheet" href="kc://app/ui/ui.css">
+<style>
+body{padding:10px}
+.card{padding:8px; width:236px}
+.head{display:flex; align-items:center; gap:8px; padding:6px 8px 8px; font-size:16px}
+.head small{margin-left:auto; font-family:"Noto Sans KR",sans-serif; font-size:11px; color:var(--ink-soft); max-width:92px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.card{animation:pop .14s ease-out}
+@keyframes pop{from{transform:scale(.94); opacity:0}}
+</style></head>
+<body>
+<div class="card" id="card">
+  <div class="head jua"><svg class="cat" viewBox="0 0 64 64"><use href="#c"/></svg>사탄의 키캡<small id="name"></small></div>
+  <button class="row" data-a="press"><span class="ic">👆</span><span class="t">딸깍 누르기</span></button>
+  <button class="row" data-a="spin"><span class="ic">🌀</span><span class="t">천천히 돌기</span><span class="sw" id="sw-spin"></span></button>
+  <button class="row" data-a="sound"><span class="ic">🔊</span><span class="t">타건음</span><span class="sw" id="sw-sound"></span></button>
+  <button class="row" data-a="top"><span class="ic">📌</span><span class="t">항상 위에 두기</span><span class="sw" id="sw-top"></span></button>
+  <div class="row" style="cursor:default; background:none"><span class="ic">📏</span><span class="t">크기</span></div>
+  <div class="chips" id="sizes"></div>
+  <div class="sep"></div>
+  <button class="row" data-a="open"><span class="ic">📂</span><span class="t">다른 키캡 열기</span></button>
+  <button class="row" data-a="site"><span class="ic">🎨</span><span class="t">새 키캡 만들러 가기</span></button>
+  <button class="row" data-a="home"><span class="ic">🏠</span><span class="t">홈 열기</span></button>
+  <div class="sep"></div>
+  <button class="row danger" data-a="close"><span class="ic">🫥</span><span class="t">이 키캡 닫기</span></button>
+  <button class="row danger" data-a="quit"><span class="ic">👋</span><span class="t">모두 끝내기</span></button>
+</div>
+<svg width="0" height="0" style="position:absolute"><defs><g id="c">
+  <g fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"><path d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/><path d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/></g>
+  <path d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/><ellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/>
+  <circle cx="22.5" cy="37" r="7" fill="#FFD45C"/><circle cx="41.5" cy="37" r="7" fill="#FFD45C"/><circle cx="22.8" cy="37.8" r="5.6" fill="#121317"/><circle cx="41.8" cy="37.8" r="5.6" fill="#121317"/>
+  <circle cx="20.6" cy="35.2" r="1.9" fill="#fff"/><circle cx="39.6" cy="35.2" r="1.9" fill="#fff"/></g></defs></svg>
+<script>
+const st=window.ui.state();
+document.getElementById("name").textContent=st.name||"";
+for(const k of ["spin","sound","top"]) document.getElementById("sw-"+k).classList.toggle("on",!!st[k]);
+const sz=document.getElementById("sizes");
+for(const [k,v] of st.sizes){const b=document.createElement("button"); b.className="chip"+(Math.abs(st.width-v)<12?" on":""); b.textContent=k; b.onclick=()=>window.ui.act("size",v); sz.appendChild(b)}
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>window.ui.act(b.dataset.a));
+addEventListener("keydown",e=>{if(e.key==="Escape") window.ui.act("dismiss")});
+const c=document.getElementById("card"); requestAnimationFrame(()=>window.ui.size(c.offsetWidth+20,c.offsetHeight+20));
+</script>
+</body></html>

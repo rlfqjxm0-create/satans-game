@@ -18,6 +18,7 @@ MODULES = [
     "20-files.js",       # file upload -> character item (+ background cleanup)
     "21-eraser.js",      # background-eraser modal
     "30-export.js",      # PNG card, video with sound, save/download
+    "40-desktop.js",     # 바탕화면 키캡: only inside the desktop program (?desktop=1)
 ]
 THREE_CDN = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
 

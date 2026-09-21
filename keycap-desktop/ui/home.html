@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>사탄의 키캡</title>
+<link rel="stylesheet" href="kc://app/ui/ui.css">
+<style>
+body{padding:12px}
+.card{height:calc(100vh - 24px); padding:14px 14px 12px; display:flex; flex-direction:column; gap:10px; -webkit-app-region:drag}
+button,.drop,.list,.sw{-webkit-app-region:no-drag}
+.top{display:flex; align-items:center; gap:10px}
+.top h1{margin:0; font-size:22px}
+.top .x{margin-left:auto; width:30px; height:30px; border-radius:50%; background:var(--pink-soft); font-size:14px}
+.top .x:hover{background:var(--pink); color:#fff}
+.sub{margin:-4px 0 0; color:var(--ink-soft); font-size:12.5px}
+.drop{border:2.5px dashed #B9D6F0; border-radius:18px; padding:18px 12px; text-align:center; background:rgba(230,242,252,.6); transition:all .15s; cursor:pointer}
+.drop.over{border-color:var(--pink); background:var(--pink-soft); transform:scale(1.02)}
+.drop .big{font-size:30px; line-height:1}
+.drop b{display:block; font-family:"Jua",sans-serif; font-weight:400; font-size:17px; margin:6px 0 2px}
+.drop span{font-size:12px; color:var(--ink-soft)}
+h2{margin:2px 2px 0; font-family:"Jua",sans-serif; font-weight:400; font-size:15px}
+.list{flex:1; overflow:auto; display:flex; flex-direction:column; gap:4px; min-height:40px}
+.item{display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:12px; background:#fff; border:1.5px solid var(--line)}
+.item .n{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.item button{padding:3px 9px; border-radius:99px; background:var(--accent-soft); font-size:12px}
+.item button.c{background:var(--pink-soft)}
+.empty{color:var(--ink-soft); font-size:12.5px; text-align:center; padding:8px}
+.opts{display:flex; flex-direction:column; gap:2px}
+.opts .row{padding:5px 8px}
+.btns{display:flex; gap:8px}
+.btns button{flex:1; padding:10px; border-radius:99px; font-family:"Jua",sans-serif; font-size:15px; background:var(--accent); color:#fff; box-shadow:0 3px 0 #2F7BBB}
+.btns button.g{background:#fff; color:var(--ink); box-shadow:0 3px 0 #D5E3F0; border:1.5px solid var(--line)}
+.btns button:active{transform:translateY(2px); box-shadow:none}
+.tip{font-size:11.5px; color:var(--ink-soft); text-align:center; line-height:1.5}
+</style></head>
+<body>
+<div class="card">
+  <div class="top"><svg class="cat" viewBox="0 0 64 64" style="width:40px;height:40px"><use href="#c"/></svg><h1 class="jua">사탄의 키캡</h1><button class="x" id="x" title="닫기">✕</button></div>
+  <p class="sub">바탕화면에 내 키캡을 띄워 두고 딸깍딸깍 눌러 보세요.</p>
+  <div class="drop" id="drop"><div class="big">⌨️</div><b>키캡 파일을 여기에 놓기</b><span>눌러서 골라도 돼요 · 사이트에서 '바탕화면 키캡'으로 받아요</span></div>
+  <h2>🧁 떠 있는 키캡</h2>
+  <div class="list" id="list"></div>
+  <div class="opts">
+    <button class="row" data-t="login"><span class="ic">🌅</span><span class="t">윈도우를 켤 때 같이 켜기</span><span class="sw" id="sw-login"></span></button>
+    <button class="row" data-t="top"><span class="ic">📌</span><span class="t">키캡을 항상 위에 두기</span><span class="sw" id="sw-top"></span></button>
+  </div>
+  <div class="btns"><button id="site">🎨 새 키캡 만들기</button><button class="g" id="quit">👋 끝내기</button></div>
+  <div class="tip">톡 누르면 딸깍 · 끌면 옮겨져요 · 오른쪽 버튼으로 끌면 돌아가요<br>휠로 크기 조절 · 우클릭하면 메뉴</div>
+</div>
+<svg width="0" height="0" style="position:absolute"><defs><g id="c">
+  <g fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"><path d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/><path d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/></g>
+  <path d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/><ellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/>
+  <circle cx="22.5" cy="37" r="7" fill="#FFD45C"/><circle cx="41.5" cy="37" r="7" fill="#FFD45C"/><circle cx="22.8" cy="37.8" r="5.6" fill="#121317"/><circle cx="41.8" cy="37.8" r="5.6" fill="#121317"/>
+  <circle cx="20.6" cy="35.2" r="1.9" fill="#fff"/><circle cx="39.6" cy="35.2" r="1.9" fill="#fff"/></g></defs></svg>
+<script>
+const $=id=>document.getElementById(id);
+function paint(){const st=window.ui.state();
+  $("sw-login").classList.toggle("on",!!st.login); $("sw-top").classList.toggle("on",!!st.top);
+  const L=$("list"); L.innerHTML="";
+  if(!st.open.length){L.innerHTML='<div class="empty">아직 떠 있는 키캡이 없어요 🫧</div>'}
+  for(const it of st.open){const d=document.createElement("div"); d.className="item";
+    d.innerHTML='<span>⌨️</span><span class="n"></span><button>보이기</button><button class="c">닫기</button>'; d.querySelector(".n").textContent=it.name;
+    const [s,c]=d.querySelectorAll("button"); s.onclick=()=>window.ui.act("show",it.id); c.onclick=()=>window.ui.act("closeOne",it.id); L.appendChild(d)}}
+paint(); window.ui.onRefresh(paint);
+document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>window.ui.act(b.dataset.t));
+$("x").onclick=()=>window.ui.act("hideHome"); $("site").onclick=()=>window.ui.act("site"); $("quit").onclick=()=>window.ui.act("quit");
+const drop=$("drop"); drop.onclick=()=>window.ui.act("open");
+["dragenter","dragover"].forEach(t=>addEventListener(t,e=>{e.preventDefault(); drop.classList.add("over")}));
+["dragleave","drop"].forEach(t=>addEventListener(t,e=>{e.preventDefault(); if(t==="dragleave"&&e.relatedTarget) return; drop.classList.remove("over")}));
+addEventListener("drop",e=>{const paths=[...e.dataTransfer.files].map(f=>window.ui.pathOf(f)).filter(p=>/\.keycap$/i.test(p)); if(paths.length) window.ui.act("openPaths",paths)});
+</script>
+</body></html>

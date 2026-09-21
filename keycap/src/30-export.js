@@ -110,6 +110,15 @@ $("makeVid").addEventListener("click",async()=>{
   finally{renderer.autoClear=ac0; if(hud){hud.tex.dispose(); hud.mat.dispose(); hud.geo.dispose()} if(bed) try{bed.stop(); bed.disconnect()}catch(e){} if(dest) try{outNode(a).disconnect(dest)}catch(e){}
     rotY=keep; PAUSE=false; restoreSize(); busy(false)}
 });
+/* 바탕화면 키캡: the options (the same as the share link) and the character picture in one small file, which the
+   desktop program opens. The picture goes into the file on this computer only - nothing is uploaded. */
+$("deskFile").addEventListener("click",async()=>{
+  writeHash(); const it=S.items[0];
+  const data={app:"satan-keycap",v:1,hash:location.hash,image:it&&it.canvas?it.canvas.toDataURL("image/png"):null};
+  const blob=new Blob([JSON.stringify(data)],{type:"application/octet-stream"});
+  saveFile(`${(S.name||"나의").replace(/[\\/:*?"<>|]/g,"")}-키캡.keycap`,blob);
+  toast("받은 파일을 사탄의 키캡 프로그램으로 열면 바탕화면에 떠요");
+});
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};
 

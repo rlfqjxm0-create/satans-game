@@ -1,0 +1,53 @@
+{
+  "name": "satan-keycap",
+  "productName": "사탄의 키캡",
+  "version": "1.0.0",
+  "description": "사탄의 키캡 - 바탕화면에 띄우는 키캡",
+  "main": "main.js",
+  "author": "rlfqjxm0",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "sync": "node sync.js",
+    "start": "node sync.js && electron .",
+    "dist": "node sync.js && electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.satansgame.keycap",
+    "productName": "사탄의 키캡",
+    "artifactName": "SatanKeycap-Setup.${ext}",
+    "files": [
+      "main.js",
+      "preload.js",
+      "page/**/*",
+      "ui/**/*",
+      "build/icon.png"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "사탄의 키캡"
+    },
+    "fileAssociations": [
+      {
+        "ext": "keycap",
+        "name": "SatanKeycap",
+        "description": "사탄의 키캡 파일",
+        "icon": "build/icon.ico"
+      }
+    ]
+  },
+  "devDependencies": {
+    "electron": "^33.4.11",
+    "electron-builder": "^25.1.8"
+  }
+}

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>사탄의 키캡 · 사탄의 장난감</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3C/svg%3E">
+<link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="%232A2C33" stroke="%232A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="%234B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="%232A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="%23FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="%23FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="%23121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="%23121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="%23FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="%23FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="%23FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="%23FFFFFF"/%3E%3C/svg%3E'>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -190,6 +190,15 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   .frame #cv{width:min(100%, max(240px, calc((100vh - 400px) * .8)))}
   footer{margin-top:6px; flex:none; font-size:12px}
 }
+.deskNote{font-size:12.5px; color:var(--ink-soft); margin:8px 2px 0; text-align:center} .deskNote a{color:var(--accent)}
+/* 바탕화면 키캡: only the keycap on a transparent window */
+html.desk,html.desk body{background:transparent!important; background-image:none!important; height:100%!important; overflow:hidden!important; margin:0}
+html.desk .wrap{padding:0!important; margin:0!important; max-width:none!important; height:100vh!important; display:block!important}
+html.desk .top,html.desk .controls,html.desk footer,html.desk .hint,html.desk .tools,html.desk .stagebox,html.desk .toast,html.desk .modal{display:none!important}
+html.desk .layout{display:block!important; height:100vh!important; padding:0!important; margin:0!important; overflow:hidden!important}
+html.desk .stage{display:block!important; position:static!important; height:100vh!important; overflow:hidden!important}
+html.desk .frame{position:static!important; margin:0!important; padding:0!important; border:0!important; background:transparent!important; box-shadow:none!important; border-radius:0!important; display:block!important; width:100vw!important; height:100vh!important}
+html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important; max-width:none!important; border-radius:0!important; background:transparent!important; cursor:pointer}
 </style>
 </head>
 <body>
@@ -213,7 +222,8 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="stagebox" style="margin-top:6px">
         <div class="resultcard" style="display:block">
           <div class="row"><button class="btn sub" id="savePng">이미지 저장</button><button class="btn sub ghost" id="makeVid">돌아가는 영상</button></div>
-          <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
+          <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="deskFile">🖥 바탕화면 키캡</button><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
+          <p class="note deskNote">'바탕화면 키캡'으로 받은 파일을 <a href="https://github.com/rlfqjxm0-create/satans-game/releases/latest/download/SatanKeycap-Setup.exe">사탄의 키캡 프로그램(윈도우)</a>으로 열면 바탕화면에 키캡이 떠요.</p>
           <div class="progress" id="progress"><i></i></div>
           <div class="status" id="status"></div>
           <div id="out"><img id="outImg" alt="키캡 결과"><video id="outVid" playsinline controls loop style="display:none;width:100%;border-radius:18px;margin-bottom:10px"></video><div class="row"><button class="btn sub" id="saveOut">저장하기</button></div><p class="note">저장 버튼이 안 되면 길게 눌러 저장해 주세요.</p></div>

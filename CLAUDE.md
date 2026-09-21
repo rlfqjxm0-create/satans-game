@@ -12,6 +12,7 @@
 | `index.html` | 게임 목록(메인). 카드 그리드 + 진행도 표시 | 129 |
 | `laundry/index.html` | 게임 ①「사탄의 세탁」. 전체 게임이 이 한 파일 | 2440 |
 | `keycap/` | 게임 ②「사탄의 키캡」(3D 키캡 만들기). **`src/`를 고치고 `build.py`로 `index.html`을 만든다** — 자세한 건 `keycap/CLAUDE.md` | — |
+| `keycap-desktop/` | 키캡을 바탕화면에 띄우는 윈도우 프로그램(Electron). 사이트 키캡 페이지를 그대로 복사해 쓴다 — 자세한 건 `keycap-desktop/CLAUDE.md` | — |
 
 이미지 파일은 없다(**모든 그림은 인라인 SVG, 캔버스, 아니면 three.js로 코드가 그린다**).
 laundry 는 손으로 고치는 한 파일이고, keycap 은 원본이 `src/`에 나뉘어 있어 **빌드 결과인
@@ -25,7 +26,9 @@ laundry 는 손으로 고치는 한 파일이고, keycap 은 원본이 `src/`에
 테두리 없는 까만 고양이, 동공이 크고 둥글고 코·입·홍조가 없다. 같은 모양이 세 곳에 있으니 **고칠 때는 셋 다**:
 - 메인 `index.html`의 `<symbol id="satanCat">`(로고·두 썸네일이 `<use>`로 쓴다)와 각 페이지의 파비콘(`<link rel="icon">`)
 - `laundry/index.html`의 `drawSatanCat()`, `keycap/src/02-characters.js`의 `drawSatanCat()` — 그림을 안 넣었을 때 나오는 캐릭터
-모두 64단위 상자의 같은 좌표를 쓴다. 다크 모드에서는 로고에 은은한 빛(drop-shadow)만 더한다(테두리는 없음).
+모두 64단위 상자의 같은 좌표를 쓴다.
+파비콘의 data URI 는 **작은따옴표로 감싸고 `#`은 `%23`으로** 적는다 — 큰따옴표면 속의 `xmlns="` 에서 주소가 끊기고,
+`#`은 조각(fragment)으로 읽혀 색부터 뒤가 잘린다(셋 다 그래서 아이콘이 안 나왔다). 다크 모드에서는 로고에 은은한 빛(drop-shadow)만 더한다(테두리는 없음).
 
 ## 움짤(GIF)은 워커에서 (세탁) / 키캡은 영상
 
