@@ -3,10 +3,10 @@
    (-z), so the ears grow out of the BACK WALL there, pointing backwards and tilted up - not stuck into the
    top. Every part is a preset (OPT.ears/eyes/shine/nose/mouth/extra); ANIMALS fills them all in one tap. */
 Object.assign(OPT,{
-  ears:{none:"없음",cat:"고양이",bunny:"토끼",fox:"여우",wolf:"늑대",bear:"곰",dog:"강아지"},
+  ears:{none:"없음",cat:"고양이",bunny:"토끼",fox:"여우",wolf:"늑대",bear:"곰",dog:"강아지",pig:"돼지"},
   eyes:{none:"없음",round:"동글",sparkle:"초롱",half:"반달",lash:"속눈썹",up:"올라간",down:"내려간",smile:"웃는",sleepy:"졸린"},
   shine:{many:"반짝반짝",one:"하나",none:"없음"},
-  nose:{none:"없음",tri:"분홍 세모",dot:"까만 동글",heart:"하트",bean:"콩",big:"큰 코"},
+  nose:{none:"없음",tri:"분홍 세모",dot:"까만 동글",heart:"하트",bean:"콩",big:"큰 코",pig:"돼지 코"},
   mouth:{none:"없음",w:"ω",bunny:"ㅅ",caret:"^",line:"一",smile:"웃는",open:"활짝"},
   extra:{whisker:"수염",blush:"홍조",freckle:"주근깨",mole:"점",fox:"여우 무늬",muzzle:"동그란 주둥이",rglass:"동그란 안경",sglass:"네모난 안경"}
 });
@@ -17,18 +17,21 @@ const ANIMALS={
   fox:{name:"여우",color:"#FFA25C",ears:"fox",eyes:"up",shine:"one",nose:"dot",mouth:"caret",extra:["fox"]},
   dog:{name:"강아지",color:"#F2D2A9",ears:"dog",eyes:"sparkle",shine:"many",nose:"big",mouth:"open",extra:["muzzle","blush"]},
   wolf:{name:"늑대",color:"#B8C0CC",ears:"wolf",eyes:"half",shine:"one",nose:"dot",mouth:"line",extra:["fox"]},
-  bear:{name:"곰",color:"#C8946A",ears:"bear",eyes:"round",shine:"many",nose:"dot",mouth:"w",extra:["muzzle","blush"]}
+  bear:{name:"곰",color:"#C8946A",ears:"bear",eyes:"round",shine:"many",nose:"dot",mouth:"w",extra:["muzzle","blush"]},
+  pig:{name:"돼지",color:"#FFC9D6",ears:"pig",eyes:"round",shine:"many",nose:"pig",mouth:"w",extra:["blush"]}
 };
 
 /* ears: built flat in XY (base on y=0), then laid down flat so they reach straight back, level with the top */
 const earPoint=(w,h,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-w,y0); s.quadraticCurveTo(-w*0.8,y0+h*0.58,-0.26,y0+h*0.96); s.quadraticCurveTo(0,y0+h*1.05,0.26,y0+h*0.96); s.quadraticCurveTo(w*0.8,y0+h*0.58,w,y0); s.lineTo(-w,y0); return s};
 const earLong=(w,h,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-w*0.8,y0); s.bezierCurveTo(-w*1.3,y0+h*0.36,-w*1.2,y0+h,0,y0+h); s.bezierCurveTo(w*1.2,y0+h,w*1.3,y0+h*0.36,w*0.8,y0); s.lineTo(-w*0.8,y0); return s};
 const earRound=(r,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-r,y0); s.bezierCurveTo(-r*1.25,y0+r*1.55,r*1.25,y0+r*1.55,r,y0); s.lineTo(-r,y0); return s};
+const earPig=(w,h,y0)=>{const s=new THREE.Shape(); y0=y0||0; s.moveTo(-w,y0); s.quadraticCurveTo(-w*0.95,y0+h*0.55,-w*0.3,y0+h*0.92); s.quadraticCurveTo(0,y0+h*1.08,w*0.3,y0+h*0.92); s.quadraticCurveTo(w*0.95,y0+h*0.55,w,y0); s.lineTo(-w,y0); return s};
 const EARS={
   cat:{x:0.52,yaw:0.12,outer:()=>earPoint(2.4,5.2),inner:()=>earPoint(1.25,3.7,0.8),innerCol:"#FFB8C9"},
   fox:{x:0.52,yaw:0.14,outer:()=>earPoint(2.8,6),inner:()=>earPoint(1.2,3.8,1.1),innerCol:"#FFE2CC"},
   wolf:{x:0.5,yaw:0.1,outer:()=>earPoint(2.2,6.2),inner:()=>earPoint(0.95,4,1.1),innerCol:"#EDE7F2"},
   bunny:{x:0.36,yaw:0,outer:()=>earLong(1.7,8.4),inner:()=>earLong(0.9,6.4,1),innerCol:"#FFB8C9"},
+  pig:{x:0.52,yaw:0.2,outer:()=>earPig(2.8,4.4),inner:()=>earPig(1.6,3,0.7),innerCol:"#FF9DB6"},
   bear:{x:0.56,yaw:0.05,outer:()=>earRound(2.1),inner:()=>earRound(1.2,0.35),innerCol:"#FFB8C9"}
 };
 // where the back wall is (unit section coords) at a given x - the ears are seated there
@@ -108,10 +111,13 @@ function faceTex(f,dark){ // dark keycap: the lines stay dark and every part get
     if(nz==="tri"){x.fillStyle="#FF8FA8"; x.beginPath(); x.moveTo(cx-u*0.03,ny-u*0.012); x.quadraticCurveTo(cx,ny-u*0.022,cx+u*0.03,ny-u*0.012); x.quadraticCurveTo(cx+u*0.004,ny+u*0.024,cx,ny+u*0.026); x.quadraticCurveTo(cx-u*0.004,ny+u*0.024,cx-u*0.03,ny-u*0.012); x.fill()}
     if(nz==="dot"||nz==="big"){const k=nz==="big"?1.45:1; x.fillStyle=ink; x.beginPath(); x.ellipse(cx,ny,u*0.034*k,u*0.024*k,0,0,7); x.fill(); x.fillStyle="rgba(255,255,255,.8)"; x.beginPath(); x.ellipse(cx-u*0.01*k,ny-u*0.009*k,u*0.01*k,u*0.006*k,0,0,7); x.fill()}
     if(nz==="heart"){x.fillStyle="#FF8FA8"; heart(x,cx,ny+u*0.004,u*0.026); x.fill()}
+    if(nz==="pig"){const W=u*0.09, Hh=u*0.064, py=ny+u*0.014; x.fillStyle="#FF9FB6"; x.strokeStyle="#E0708F"; x.lineWidth=u*0.008;
+      x.beginPath(); x.ellipse(cx,py,W,Hh,0,0,7); x.fill(); x.stroke(); x.fillStyle="#C24E72";
+      for(const s2 of [-1,1]){x.beginPath(); x.ellipse(cx+s2*W*0.38,py,W*0.16,Hh*0.36,0,0,7); x.fill()} x.strokeStyle=ink}
     if(nz==="bean"){x.fillStyle=ink; x.beginPath(); x.ellipse(cx,ny,u*0.013,u*0.01,0,0,7); x.fill()}
     // mouth: its top joins the nose
     x.lineWidth=u*0.014; x.strokeStyle=ink; x.fillStyle=ink;
-    const m=f.mouth, top=ny+(nz==="big"?u*0.04:u*0.028);
+    const m=f.mouth, top=ny+(nz==="pig"?u*0.084:nz==="big"?u*0.04:u*0.028);   // the mouth sits under the snout
     const omega=()=>{x.beginPath(); x.arc(cx-u*0.028,top+u*0.004,u*0.028,Math.PI*0.05,Math.PI*0.95); x.stroke(); x.beginPath(); x.arc(cx+u*0.028,top+u*0.004,u*0.028,Math.PI*0.05,Math.PI*0.95); x.stroke()};
     if(m==="w") omega();
     if(m==="bunny"){x.beginPath(); x.moveTo(cx,top-u*0.004); x.lineTo(cx,top+u*0.02); x.moveTo(cx,top+u*0.02); x.quadraticCurveTo(cx-u*0.02,top+u*0.045,cx-u*0.045,top+u*0.035); x.moveTo(cx,top+u*0.02); x.quadraticCurveTo(cx+u*0.02,top+u*0.045,cx+u*0.045,top+u*0.035); x.stroke()}
