@@ -9,9 +9,9 @@ const pre=`const lerp=(a,b,t)=>a+(b-a)*t; const clamp=(v,a=0,b=1)=>Math.max(a,Ma
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 const hash=i=>mulberry32(i*9973+17)(); const lin=h=>h; const keep=o=>o;
 function Col(){this.setScalar=()=>this; this.copy=()=>this} const THREE={Color:Col,
-  InstancedMesh:function(){this.setMatrixAt=()=>{}; this.setColorAt=()=>{this.instanceColor=this.instanceColor||{}}; this.instanceMatrix={}},
+  InstancedMesh:function(g,m){this.material=m; this.setMatrixAt=()=>{}; this.setColorAt=()=>{this.instanceColor=this.instanceColor||{}}; this.instanceMatrix={}},
   Object3D:function(){const v={set(){}};this.position=v;this.rotation=v;this.quaternion={copy(){}};this.scale={setScalar(){}};this.updateMatrix=()=>{}}};
-const glitterGeo=()=>0, glitterMat=()=>0, glowMat=()=>0, GLOW_PLANE=0;
+const glitterGeo=()=>0, glitterMat=()=>({userData:{}}), glowMat=()=>({userData:{}}), GLOW_PLANE=0;
 const glowOf=G=>G.glow, BB_Q={copy(){return this},invert(){return this},multiply(){return this}}, capGroup={getWorldQuaternion(){}}, camera={quaternion:0};
 const S={glitter:"star",mat:"resin",charPos:"inside",glitColor:"",glow:false}; let partSys=null;`;
 eval(pre+src+`
