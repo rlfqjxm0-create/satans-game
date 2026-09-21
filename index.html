@@ -118,10 +118,12 @@ footer{margin-top:30px; text-align:center; font-size:13px; color:var(--ink-soft)
 <script>
 (function(){
   // progress from each game's own on-device record (same site, so it can be read here)
+  const TOTAL=19;   // 사탄의 세탁 도감 종류 수 (히든 '사탄'은 따로) — laundry 쪽 DEX_ORDER 와 같은 값
   try{
-    const raw=localStorage.getItem("choiae-laundry-dex"); const arr=raw?JSON.parse(raw):[]; const n=arr.filter(k=>k!=="satan").length;
-    document.getElementById("laundryDex").textContent=`도감 ${n}/19`+(arr.includes("satan")?" + 히든":"");
-    document.getElementById("laundryBar").style.width=Math.min(100,n/19*100)+"%";
+    const raw=localStorage.getItem("choiae-laundry-dex"); const got=raw?JSON.parse(raw):[]; const arr=Array.isArray(got)?got:[];
+    const n=Math.min(TOTAL,arr.filter(k=>k!=="satan").length);
+    document.getElementById("laundryDex").textContent=`도감 ${n}/${TOTAL}`+(arr.includes("satan")?" + 히든":"");
+    document.getElementById("laundryBar").style.width=n/TOTAL*100+"%";
   }catch(e){}
 })();
 </script>

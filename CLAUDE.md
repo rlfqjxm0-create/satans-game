@@ -58,7 +58,10 @@
    - `THEMES` 세탁기 색 7종 / `COURSES` 코스 4종(코스마다 결과 가중치 `w`)
    - `RESULTS` **결과 19종 + 히든 `satan`**. 각 항목: `short/title/sub/says/stars/mood`,
      옵션 `poof`(연기 연출) `pairs`(분신 전용 2인 대사) `multi`(합체) `hidden`
-   - `LINES` 진행 중 대사 풀(fill/wash/spin/end/tap/common)
+   - `LINES` 대사 풀 — fill 32 / wash 51 / spin 34 / end 28 / tap 33 / common 3.
+     한 판에 **말풍선은 다섯 개**다(`washTalk`): 물 받기 0.5–1.25s, 본세탁 1.45–2.2s·2.4–3.2s,
+     탈수 3.45–4.55s, 종료 4.95–5.35s. 대사는 판이 시작할 때 한 번씩 뽑고 본세탁 둘은 서로 다르게 고른다.
+     **말풍선은 줄바꿈이 없다** — 새 대사는 한글 10자를 넘기지 말 것(지금 가장 긴 것이 151px, 한계 464px).
 2. **결정론적 난수·물리 곡선** (1104~1145) — `mulberry32` 시드 난수, `omega/ANG/drumAngle`
    (드럼 회전 각도를 미리 적분해 둔 테이블), `waterLevel`. 같은 시드면 같은 판이 나온다.
 3. **그리기 프리미티브** (1125~1280) — `rrect/star4/star5/heart/bubble/drop/speech`,
@@ -79,11 +82,9 @@
 
 ### 도감과 뽑기 규칙 (건드릴 때 주의)
 
-- `DEX_ORDER` **19개**. 히든 `satan`은 이 목록에 없고 19개를 다 모아야(`has18()`) 열린다.
-  - ⚠️ **이름이 낡았다.** `has18()`은 실제로는 "19개 전부 모았나"이고, 마크업에 박힌
-    `도감 0/18`(laundry) / `도감 0/19`(메인)도 손으로 적은 값이다. 화면 값은
-    `renderDex()`가 `DEX_ORDER.length`로 덮어쓴다. **결과를 추가하면 `DEX_ORDER`에
-    넣고, 메인 `index.html`의 하드코딩된 `19`도 같이 고칠 것** (두 군데다).
+- `DEX_ORDER` **19개**. 히든 `satan`은 이 목록에 없고 19개를 다 모아야(`hasAll()`) 열린다.
+  - 결과를 추가하면 **세 곳을 같이** 고친다 — `DEX_ORDER`, laundry 마크업의 `#dexCount` 기본값,
+    메인 `index.html`의 `const TOTAL`. 화면 값은 `renderDex()`가 `DEX_ORDER.length`로 덮어쓴다.
   - 도감 격자 자리는 `dexSlot(i)`가 정하고 `i===19`가 히든 칸이다 — 개수를 바꾸면 여기도 본다.
 - **천장(pity)**: 새 결과 없이 30판을 넘기면 못 모은 결과의 확률이 판마다 12%씩 오른다
   (`STATS.pity`). 레어는 `gold` 3% / `rainbow` 3% 고정.
@@ -95,7 +96,7 @@
 | 키 | 내용 | 읽는 곳 |
 |----|------|---------|
 | `choiae-laundry-dex` | 모은 결과 키 배열 | laundry + **메인 `index.html`의 진행도 표시** |
-| `choiae-laundry-stats` | `{spins, pity, done, first}` | laundry |
+| `choiae-laundry-stats` | `{spins, pity, done, first}` — done·first 는 인증서에 찍힌다 | laundry |
 | `choiae-laundry-sound` | `"on"`/`"off"` | laundry |
 
 메인 페이지가 게임의 키를 직접 읽어 진행 바를 그린다(같은 오리진이라 가능).

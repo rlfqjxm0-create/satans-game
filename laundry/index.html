@@ -134,7 +134,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <p class="hint" id="hint">세탁이 끝나면 캐릭터를 잡고 흔들어서 물기를 털어 보세요</p>
       <div class="stagebox">
         <button class="btn" id="start">세탁 시작</button>
-        <button type="button" class="dexpill" id="dexBtn" aria-expanded="false" aria-controls="dex"><span id="dexCount">도감 0/18</span><span class="bar"><i id="dexBar" style="width:0"></i></span></button>
+        <button type="button" class="dexpill" id="dexBtn" aria-expanded="false" aria-controls="dex"><span id="dexCount">도감 0/19</span><span class="bar"><i id="dexBar" style="width:0"></i></span></button>
         <div class="dex" id="dex"><div class="dexgrid" id="dexGrid"></div><p>나온 결과는 이 기기에 기록돼요. 30번 넘게 새 결과가 안 나오면 못 모은 결과가 점점 잘 나와요.</p>
           <div id="cert" style="display:none; margin-top:12px; border-top:1.5px dashed var(--line); padding-top:12px">
             <div style="font-family:Jua,sans-serif; font-size:18px">명예 세탁사 인증서</div>
@@ -1042,7 +1042,7 @@ return exports;})();
 (function(){
 "use strict";
 const LW=480, LH=640, DX=240, DY=398, RG=90, RR=114, HINGE=124;
-const END=9.0, FPS=20, T_LAND=5.9;
+const END=9.0, T_LAND=5.9;
 const INK="#4E5F73";
 
 const THEMES={
@@ -1083,10 +1083,10 @@ const RESULTS={
   gold:{short:"거부", title:"세탁을 거부당했어요", sub:"이미 완벽해서 빨 게 없대요", says:["후훗", "당연하지", "완벽 그 자체", "빨 게 없대", "원래 깨끗했거든", "내가 좀 그래", "세탁기도 인정함", "빛나는 게 당연해", "흠 잡을 데 없지", "가볍게 통과~"], stars:3, mood:"gold"}
 };
 const LINES={
-  fill:["어…?", "물이다!", "차가워!", "어라라?", "발 젖었어", "수영장이야?", "문 좀 열어 줘", "첨벙첨벙~", "물 온도 괜찮네", "둥실둥실~", "세제 향 좋다", "여기 나 혼자야?", "엄", "야르!"],
-  wash:["살려줘~", "빙글빙글~", "어푸어푸!", "꺄아아~", "거품 맛있다…?", "물 먹었어", "거꾸로야!", "양말 날아다녀", "재밌는데…?", "한 바퀴 더~", "어지러워어", "목욕 좋아~", "거품 모자다!", "누구 없어요?", "놀이기구 같아", "머리 감는 중~", "빨래판 필요 없네", "으랏차차", "철퍽철퍽!", "출렁출렁~", "줴줴이야~", "야르!", "엄"],
-  spin:["으아아아아", "멈춰어어어", "세상이 돈다", "흐아아앙", "날아간다아", "얼굴 늘어나", "빨라 빨라!", "혼이 빠져나가", "원심력이다아", "중력 어디 갔어", "으다다다다", "뱅뱅뱅뱅", "야르으으으!", "줴줴이야아~"],
-  end:["끝났어?", "살았다…", "나가도 돼?", "어지러워…", "조용해졌다", "문 열어 줘~", "뽀송해졌나?", "다 빨았다!", "휴… 멈췄다", "띠리링 소리 났어", "엄", "야르!"],
+  fill:["어…?", "물이다!", "차가워!", "어라라?", "발 젖었어", "수영장이야?", "문 좀 열어 줘", "첨벙첨벙~", "물 온도 괜찮네", "둥실둥실~", "세제 향 좋다", "여기 나 혼자야?", "엄", "야르!", "발 시려!", "물 들어온다!", "여기 어디야?", "잠깐만 잠깐만", "준비 안 됐어", "문이 잠겼어", "나 수영 못 해", "비누 냄새다", "창밖에 누구야?", "숨 참을게", "따뜻하다…", "목욕하는 건가?", "옷 입은 채로?", "거품 올라온다", "물결이 온다", "발끝만 담갔어", "구명조끼 없어?", "물 맛 이상해"],
+  wash:["살려줘~", "빙글빙글~", "어푸어푸!", "꺄아아~", "거품 맛있다…?", "물 먹었어", "거꾸로야!", "양말 날아다녀", "재밌는데…?", "한 바퀴 더~", "어지러워어", "목욕 좋아~", "거품 모자다!", "누구 없어요?", "놀이기구 같아", "머리 감는 중~", "빨래판 필요 없네", "으랏차차", "철퍽철퍽!", "출렁출렁~", "줴줴이야~", "야르!", "엄", "빙글 또 빙글", "위아래가 없어", "거품 천국이다", "숨 쉴 틈 좀!", "누가 날 흔들어", "세제 너무 많아", "발이 안 닿아!", "천장이 바닥이야", "물살 세다!", "여기서 살까?", "빨래 동지들아", "손 좀 잡아 줘", "파도타기 중~", "때가 벗겨져", "간지럽다니까!", "이거 언제 끝나", "회전목마 같아", "물 좀 그만!", "거품에 묻혔어", "구석에 끼었어", "우당탕탕!", "퐁당퐁당~", "부글부글~", "휘청휘청~", "꼬르륵…", "귀에 물 들어갔어", "눈 감고 있을래", "더 돌려도 돼!"],
+  spin:["으아아아아", "멈춰어어어", "세상이 돈다", "흐아아앙", "날아간다아", "얼굴 늘어나", "빨라 빨라!", "혼이 빠져나가", "원심력이다아", "중력 어디 갔어", "으다다다다", "뱅뱅뱅뱅", "야르으으으!", "줴줴이야아~", "꺄아아아악", "우주로 간다", "멈춰 줘 제발", "몸이 늘어나", "눈이 돌아가", "벽에 붙었어", "안 떨어져!", "손이 안 움직여", "머리가 다 섰어", "속이 울렁여", "탈수 그만!", "나 납작해져", "기억이 날아가", "위잉위잉!", "이러다 뚫겠어", "물이 다 빠진다", "쥐어짜지 마!", "어… 어지…", "다들 무사해?", "속도 좀 줄여!"],
+  end:["끝났어?", "살았다…", "나가도 돼?", "어지러워…", "조용해졌다", "문 열어 줘~", "뽀송해졌나?", "다 빨았다!", "휴… 멈췄다", "띠리링 소리 났어", "엄", "야르!", "이제 끝?", "안 도는 거지?", "다리가 후들후들", "세상이 멈췄다", "살아남았어", "꺼내 줘…", "물기만 남았어", "귀가 멍해", "두 번은 못 해", "거울 좀 줘", "내 꼴 어때?", "빨래 끝!", "문 열리는 소리", "밖이 밝다…", "다시 태어났어", "어질… 잠깐만"],
   tap:["꺄!", "간지러워!", "물 튀어!", "또 돌릴 거야?", "살살 해 줘~", "에취!", "뭐야뭐야", "아직 덜 말랐어!", "흐에…", "놔 줘~", "한 번 더?", "헤헤", "어지러워~", "톡톡 그만!", "물기 다 털었어", "수건 있어?", "으쌰!", "나 가벼워졌어", "찰랑찰랑~", "더 흔들어 봐", "그만 그만!", "물방울 공격!", "뽀득뽀득", "이제 좀 말랐나?", "날 떨어뜨리지 마", "재밌다!", "멀미 나~", "으앗 차가워", "탈탈탈탈", "보송해질 때까지!", "야르!", "줴줴이야~", "엄"],
   common:["야르!", "줴줴이야~", "엄"]
 };
@@ -1996,7 +1996,7 @@ function playSound(result){ // must be called inside the tap
 /* ---------- collection (per-viewer, this device) ---------- */
 const DEX=new Set();
 try{const raw=localStorage.getItem("choiae-laundry-dex"); if(raw) JSON.parse(raw).forEach(k=>{if(RESULTS[k]) DEX.add(k)})}catch(e){}
-const has18=()=>DEX_ORDER.every(k=>DEX.has(k));
+const hasAll=()=>DEX_ORDER.every(k=>DEX.has(k));
 function saveDex(){try{localStorage.setItem("choiae-laundry-dex",JSON.stringify([...DEX]))}catch(e){}}
 
 /* ---------- preview loop ---------- */
@@ -2103,15 +2103,15 @@ function renderDex(){
   DEX_ORDER.forEach(k=>{const R=RESULTS[k], d=document.createElement("div"), got=DEX.has(k); d.className="dexcell"+(got?"":" locked")+(R.stars===3?" rare":"");
     if(got){d.innerHTML=`<b>${R.short}</b><span class="st">${"★".repeat(R.stars)}</span>`; d.title=R.title} else {d.innerHTML=`<b>?</b><span class="st">${"★".repeat(R.stars)}</span>`}
     g.appendChild(d)});
-  if(has18()){const R=RESULTS.satan, got=DEX.has("satan"), d=document.createElement("div"); d.className="dexcell hidden"+(got?"":" locked"); d.innerHTML=got?`<b>${R.short}</b><span class="st">히든</span>`:`<b>✦</b><span class="st">히든</span>`; g.appendChild(d)}
-  $("cert").style.display=has18()?"block":"none";
+  if(hasAll()){const R=RESULTS.satan, got=DEX.has("satan"), d=document.createElement("div"); d.className="dexcell hidden"+(got?"":" locked"); d.innerHTML=got?`<b>${R.short}</b><span class="st">히든</span>`:`<b>✦</b><span class="st">히든</span>`; g.appendChild(d)}
+  $("cert").style.display=hasAll()?"block":"none";
 }
 $("dexBtn").addEventListener("click",()=>{const o=$("dex").classList.toggle("open"); $("dexBtn").setAttribute("aria-expanded",String(o))});
 renderDex();
 
 function resetRun(){playing=false; tl=0; S.run=null; revealed=false; stopSound(); IA.per=[]; IA.parts=[]; IA.talk=[]; IA.last=[]; cv.classList.remove("touchable"); $("hint").textContent=HINT0; $("rcard").style.display="none"; $("start").disabled=false; $("start").textContent="세탁 시작"; $("out").style.display="none"; outBlob=null}
 function pickResult(rng){
-  if(has18()){ if(!DEX.has("satan")) return "satan"; if(rng()<0.05) return "satan"; }
+  if(hasAll()){ if(!DEX.has("satan")) return "satan"; if(rng()<0.05) return "satan"; }
   // pity: after 30 spins without anything new, missing results become steadily more likely
   const missing=DEX_ORDER.filter(k=>!DEX.has(k)&&!(k==="clone"&&items().length>1)&&!(k==="fusion"&&items().length<2));
   if(missing.length&&STATS.pity>=30&&rng()<Math.min(1,(STATS.pity-29)*0.12)){
@@ -2144,14 +2144,14 @@ $("start").addEventListener("click",()=>{
 function showResult(){
   const run=S.run, r=RESULTS[run.result];
   if(run.isNew){DEX.add(run.result); saveDex(); renderDex()}
-  $("rt").innerHTML=""; $("rt").textContent=`${r.stars===3?"✦ ":""}${r.title}`;
+  $("rt").textContent=`${r.stars===3?"✦ ":""}${r.title}`;
   if(run.isNew){const b=document.createElement("span"); b.className="new"; b.textContent="NEW"; $("rt").appendChild(b)}
   $("rs").textContent=r.hidden?`${r.sub} · 히든 결과`:`${r.sub} · 희귀도 ${"★".repeat(r.stars)}${"☆".repeat(3-r.stars)}`;
   $("rcard").style.display="block"; $("status").textContent=""; $("progress").style.display="none";
   $("start").disabled=false; $("start").textContent="한 번 더 돌리기";
   cv.classList.add("touchable"); $("hint").innerHTML="<b>캐릭터를 잡고 흔들어서</b> 물기를 털어 주세요 · 톡 치면 반응해요";
   if(run.isNew&&run.result!=="satan"){
-    if(has18()&&!STATS.done){STATS.done=new Date().toISOString(); saveStats(); toast("도감 완성! 명예 세탁사 인증서를 받을 수 있어요. 다음 세탁에 뭔가 일어날지도…"); $("dex").classList.add("open"); $("dexBtn").setAttribute("aria-expanded","true")}
+    if(hasAll()&&!STATS.done){STATS.done=new Date().toISOString(); saveStats(); toast("도감 완성! 명예 세탁사 인증서를 받을 수 있어요. 다음 세탁에 뭔가 일어날지도…"); $("dex").classList.add("open"); $("dexBtn").setAttribute("aria-expanded","true")}
     else toast(`도감에 '${r.short}' 빨래가 널렸어요 (${dexCount()}/${DEX_ORDER.length})`);
   }
   if(run.isNew&&run.result==="satan") toast("히든 결과 발견! 인증서에 사탄 인증 도장이 찍혀요");
@@ -2180,8 +2180,11 @@ async function makeCertificate(holder){
     c.beginPath(); c.arc(x,y,52,0,7); c.fillStyle=THEMES[S.theme].soft; c.fill();
     c.save(); c.translate(x,y-30); c.scale(1.85,1.85); drawDexPiece(c,k,th); c.restore();
     c.fillStyle="#7489A0"; c.font='21px "Noto Sans KR", sans-serif'; c.fillText(RESULTS[k].short,x,y+70)});
-  const d=STATS.done?new Date(STATS.done):new Date(), ds=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`;
-  c.fillStyle="#2E4153"; c.font='32px "Noto Sans KR", sans-serif'; c.fillText(`완주일 ${ds}   ·   총 세탁 ${STATS.spins}회`,W/2,1118);
+  const day=t=>{const d=new Date(t); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,"0")}.${String(d.getDate()).padStart(2,"0")}`};
+  const stamp=(STATS.first?`첫 세탁 ${day(STATS.first)}   ·   완주 ${day(STATS.done||Date.now())}`:`완주일 ${day(STATS.done||Date.now())}`)+`   ·   총 세탁 ${STATS.spins}회`;
+  c.fillStyle="#2E4153"; c.font='32px "Noto Sans KR", sans-serif';
+  if(c.measureText(stamp).width>860) c.font='26px "Noto Sans KR", sans-serif';   // a long date pair must not run past the frame
+  c.fillText(stamp,W/2,1118);
   c.fillStyle="#7489A0"; c.font='28px "Noto Sans KR", sans-serif'; c.fillText("세탁소장 사탄",W/2+10,1216);
   // seal
   const seal=(x,y,r,col,txt,rot)=>{c.save(); c.translate(x,y); c.rotate(rot); c.globalAlpha=0.9; c.lineWidth=7; c.strokeStyle=col; c.beginPath(); c.arc(0,0,r,0,7); c.stroke(); c.lineWidth=3; c.beginPath(); c.arc(0,0,r-14,0,7); c.stroke(); c.fillStyle=col; c.font=`${r*0.42}px Jua, sans-serif`; c.fillText(txt,0,4); c.restore()};
@@ -2189,13 +2192,12 @@ async function makeCertificate(holder){
   if(satan){seal(W/2+290,1212,66,"#E3344B","사탄 인증",0.22); c.save(); c.translate(W/2+290,1212); c.rotate(0.22); c.fillStyle="#E3344B"; for(const sd of [-1,1]){c.beginPath(); c.moveTo(sd*22,-62); c.quadraticCurveTo(sd*34,-86,sd*22,-98); c.quadraticCurveTo(sd*18,-80,sd*8,-64); c.closePath(); c.fill()} c.restore()}
   return cv2;
 }
+let certBlob=null;
 $("certMake").addEventListener("click",async()=>{
   const btn=$("certMake"); btn.disabled=true;
   try{const cv2=await makeCertificate($("certName").value.trim()); cv2.toBlob(async b=>{if(!b) return; certBlob=b; $("certImg").src=await readURL(b); $("certOut").style.display="block"; btn.disabled=false},"image/png")}catch(e){btn.disabled=false; toast("인증서를 만들지 못했어요")}
 });
-let certBlob=null;
 $("certSave").addEventListener("click",()=>{if(certBlob) saveFile("satan-laundry-certificate.png",certBlob)});
-renderDex();
 
 /* ---------- slots & files ---------- */
 function renderSlots(){
@@ -2203,7 +2205,7 @@ function renderSlots(){
   S.items.forEach((it,i)=>{const d=document.createElement("div"); d.className="slot";
     const p=document.createElement("button"); p.type="button"; p.className="pick"; p.setAttribute("aria-label",`그림 ${i+1} 배경 고치기`); const im=document.createElement("img"); im.src=it.thumb; im.alt=""; p.appendChild(im); p.addEventListener("click",()=>openEditor(it,false)); d.appendChild(p);
     const tg=document.createElement("span"); tg.className="edit"; tg.textContent="고치기"; d.appendChild(tg);
-    const x=document.createElement("button"); x.type="button"; x.className="x"; x.textContent="×"; x.setAttribute("aria-label",`그림 ${i+1} 빼기`); x.addEventListener("click",()=>{S.items.splice(i,1); renderSlots(); resetRun()}); d.appendChild(x); el.appendChild(d)});
+    const x=document.createElement("button"); x.type="button"; x.className="x"; x.textContent="×"; x.setAttribute("aria-label",`그림 ${i+1} 빼기`); x.addEventListener("click",()=>{S.items.splice(i,1); const q=queue.indexOf(it); if(q>=0) queue.splice(q,1); renderSlots(); resetRun()}); d.appendChild(x); el.appendChild(d)});
   if(S.items.length<3){const a=document.createElement("button"); a.type="button"; a.className="add"; a.innerHTML='<span class="plus">+</span>그림 고르기'; a.addEventListener("click",()=>$("file").click()); el.appendChild(a)}
 }
 function readURL(f){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f)})}
