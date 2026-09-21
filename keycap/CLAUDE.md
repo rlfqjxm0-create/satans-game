@@ -145,8 +145,9 @@ camera made the video jump at the start. The title is a die-cut label sticker to
 
 ## Phones
 
-Below 820 px `.stage` is `display:contents`, so the preview frame is a row of the page grid and stays `position:sticky`
-at the top while the menus scroll under it. Quick taps must not zoom the page: `maximum-scale=1`, `touch-action:manipulation`,
+Below 820 px `.stage` is `display:contents`, so the preview frame is a row of the page grid and docks at the top as a
+full-width bar (`position:sticky`, shadow via `.stuck` once it is stuck); the tabs dock right under it (`--barh`, set from
+the bar's height) with a page-coloured band so nothing shows through the gap. Only the menus scroll. Quick taps must not zoom the page: `maximum-scale=1`, `touch-action:manipulation`,
 `touchend`/`gesture*`/`dblclick` default prevented (pointer events still drive turning and pressing).
 
 "돌아가는 영상" replaced the silent 360° GIF: the image card's framing (4:5, `cardOverlay`), one slow
