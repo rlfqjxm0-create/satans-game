@@ -16,6 +16,7 @@ MODULES = [
     "10-keycap.js",      # ★ the keycap maker: three.js scene, geometry, materials, deco, glitter, RGB, sounds, UI
     "20-files.js",       # file upload -> character item (+ background cleanup)
     "21-eraser.js",      # background-eraser modal
+    "25-gifworker.js",   # GIF encoding in a Web Worker (the page keeps moving while it works)
     "30-export.js",      # PNG card, 360° GIF, save/download
 ]
 THREE_CDN = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"

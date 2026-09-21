@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>사탄의 키캡 공방 · 사탄의 게임</title>
+<title>사탄의 키캡 · 사탄의 장난감</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Cellipse cx="14.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3Cellipse cx="49.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,7 +140,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
 <body>
 <div class="wrap">
   <a class="back" id="backLink" href="../index.html" hidden>← 목록으로</a>
-  <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="7" width="22" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="5" width="14" height="14" rx="4" fill="currentColor" opacity=".35"/></svg>사탄의 키캡 공방</div>
+  <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="7" width="22" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="5" width="14" height="14" rx="4" fill="currentColor" opacity=".35"/></svg>사탄의 키캡</div>
   <h1>캐릭터 키캡을<br>만들어 보세요</h1>
   <p class="lede">돌려 보고, 눌러 보고, 캐릭터를 레진 속에 넣어 보세요.</p>
   <div class="layout">
@@ -171,12 +172,12 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>윗면 장식</h2><div class="chips" id="decoChips"></div>
         <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
         <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
-      <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요.</p><div class="chips" id="glitChips"></div></div>
+      <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요. 무지개 동그라미는 반짝이마다의 기본 색이에요.</p><div class="chips" id="glitChips"></div><div class="swatches" id="glitSw" style="margin-top:12px" aria-label="반짝이 색"></div></div>
       <div class="group"><h2>스위치</h2><p class="sub">직접 녹음한 키보드 소리예요. 누를 때마다 다른 키 소리가 나요.</p><div class="chips" id="swChips"></div></div>
       <div class="group"><h2>RGB 조명</h2><div class="chips" id="rgbChips"></div><div class="swatches" id="rgbSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
-      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div>
+      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">밤하늘 배경에서 키캡과 반짝이가 은은하게 빛나요.</p>
         <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
         <input type="file" id="bgFile" accept="image/*" class="sr" aria-label="배경 이미지 고르기"></div>
     </section>

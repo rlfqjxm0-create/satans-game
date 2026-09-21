@@ -1,4 +1,4 @@
-# 사탄의 키캡 공방 (Satan's Keycap Workshop)
+# 사탄의 키캡 (Satan's Keycap)
 
 A single-page 3D "artisan keycap" maker. Users upload a character image and customise a keycap
 that sits on a keychain switch tester; they can spin it, press it (it clicks and the glitter swirls
@@ -76,6 +76,48 @@ shake test (all glitter kinds × shapes, thousands of frames) and count flakes o
   render on their own, so they are unaffected.
 - No `preserveDrawingBuffer`: every read (PNG, GIF, `__k.shot`) copies the canvas right after its own
   render in the same task. Keep it that way — reading the canvas later would get a blank image.
+
+## Glitter (table-driven)
+
+`GLITTERS` has one row per kind: count, size, sink speed, shape, and optionally `glow` (a soft light in
+the flake's own shape, drawn on an instanced plane that tumbles with the flake - so a star glows as a
+star; `glitGlowTex` blurs the outline with canvas shadowBlur) or `flutter` (petals drift sideways) or
+`multi` (confetti colours via instanceColor). `S.glitColor` ("" = each kind's own colour) re-tints any
+kind; materials are cached per kind+colour. To add a kind: a row in `GLITTERS`, a base colour in
+`GLIT_BASE`, its unit radius in `GLIT_R`, a shape in `glitterGeo`, a material in `glitterMat`, a label
+in `OPT.glitter` - then run `node sim_check.js`.
+
+**Containment is proven by `sim_check.js`** (run it from this folder after any glitter or cap change):
+every kind x every shape x flat/normal top, 3000 frames with a press every 20. Sides use the section
+outline (`fenceTable/fenceLim`), the top uses the real surface (`capTopY` - dished SA/round, domed heart,
+rounded edges) and each flake's reach as it is tilted right now (`hv`). Spin is applied *before* the
+limits, otherwise a flake tips out after being checked (that was the "pokes out when pressed" bug).
+
+## Glow mode (야광)
+
+`S.glow`: `applyGlow(t)` dims the three lights and gives the cap (in its own colour) and the glitter an
+emissive glow that breathes slowly; turning it on switches the background to night. In the share link as `gl`.
+
+## Decorations
+
+Ears and horns are seated on the lowest point of the real top under their base (`seat`), and shrink
+with small tops (`fit`, SA). Horns grow straight up from a level base ring just under the surface - never
+clamp their vertices flat again (that shaved the base off). Geometry is cached in `DECO_GEO` via `GEO()`.
+
+## Caches and first-use warm-up
+
+`CAP_GEO` (cap shapes), `DECO_GEO`, `GLIT_GEO/GLIT_MAT/GLOW_*`, `CHAR_TEX` (the character picture is
+uploaded once per slot; a new picture frees the old one) are all registered with `keep()`, so
+`freeTree()` leaves them alone. `warmUp()` (1.5 s after load, one look per idle moment) builds every
+material look once and compiles it, so the first click on e.g. 홀로그램 no longer freezes (0.37~0.69 s
+measured before). It snapshots `S` at every step - never restore an older snapshot, or it undoes what the
+user just picked. The compiled programs stay alive because their materials are kept in `WARM_KEEP`.
+
+## First press
+
+The chosen switch's sounds start downloading immediately on load. A press that arrives before they are
+decoded waits for them (up to 0.7 s) instead of playing the synth - `PACK_DONE` tells "still loading"
+from "failed" (only then does the synth play, e.g. when the page is opened as a file).
 
 ## Deploying into the game site
 

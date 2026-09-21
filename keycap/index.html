@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>사탄의 키캡 공방 · 사탄의 게임</title>
+<title>사탄의 키캡 · 사탄의 장난감</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Cellipse cx="14.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3Cellipse cx="49.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -139,7 +140,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
 <body>
 <div class="wrap">
   <a class="back" id="backLink" href="../index.html" hidden>← 목록으로</a>
-  <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="7" width="22" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="5" width="14" height="14" rx="4" fill="currentColor" opacity=".35"/></svg>사탄의 키캡 공방</div>
+  <div class="brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="7" width="22" height="20" rx="5" fill="none" stroke="currentColor" stroke-width="2.4"/><rect x="9" y="5" width="14" height="14" rx="4" fill="currentColor" opacity=".35"/></svg>사탄의 키캡</div>
   <h1>캐릭터 키캡을<br>만들어 보세요</h1>
   <p class="lede">돌려 보고, 눌러 보고, 캐릭터를 레진 속에 넣어 보세요.</p>
   <div class="layout">
@@ -171,12 +172,12 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>윗면 장식</h2><div class="chips" id="decoChips"></div>
         <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
         <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
-      <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요.</p><div class="chips" id="glitChips"></div></div>
+      <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요. 무지개 동그라미는 반짝이마다의 기본 색이에요.</p><div class="chips" id="glitChips"></div><div class="swatches" id="glitSw" style="margin-top:12px" aria-label="반짝이 색"></div></div>
       <div class="group"><h2>스위치</h2><p class="sub">직접 녹음한 키보드 소리예요. 누를 때마다 다른 키 소리가 나요.</p><div class="chips" id="swChips"></div></div>
       <div class="group"><h2>RGB 조명</h2><div class="chips" id="rgbChips"></div><div class="swatches" id="rgbSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
-      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div>
+      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">밤하늘 배경에서 키캡과 반짝이가 은은하게 빛나요.</p>
         <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
         <input type="file" id="bgFile" accept="image/*" class="sr" aria-label="배경 이미지 고르기"></div>
     </section>
@@ -1247,33 +1248,22 @@ function trimCanvas(c){
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(d[(y*w+x)*4+3]>16){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
   if(x1<0) return c; const o=document.createElement("canvas"); o.width=x1-x0+1; o.height=y1-y0+1; o.getContext("2d").drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height); return o;
 }
-function makePlaceholder(){ // sample character: a round, deadpan black cat face
-  const c=document.createElement("canvas"); c.width=320; c.height=300; const x=c.getContext("2d");
-  const B="#2C2F36", L="#15171B";
-  const ear=(sx)=>{x.beginPath(); x.moveTo(160+sx*100,138); x.quadraticCurveTo(160+sx*108,62,160+sx*94,52); x.quadraticCurveTo(160+sx*74,52,160+sx*36,98); x.closePath()};
-  const head=()=>{x.beginPath(); x.moveTo(160,92); x.bezierCurveTo(238,92,284,132,284,184); x.bezierCurveTo(284,244,228,276,160,276); x.bezierCurveTo(92,276,36,244,36,184); x.bezierCurveTo(36,132,82,92,160,92); x.closePath()};
-  x.lineJoin="round"; x.lineCap="round";
-  for(const f of [()=>ear(-1),()=>ear(1),head]){f(); x.lineWidth=16; x.strokeStyle="#FFFFFF"; x.stroke()}
-  for(const sx of [-1,1]){ear(sx); x.fillStyle=B; x.fill(); x.lineWidth=4; x.strokeStyle=L; x.stroke();
-    x.beginPath(); x.moveTo(160+sx*88,120); x.quadraticCurveTo(160+sx*94,76,160+sx*86,70); x.quadraticCurveTo(160+sx*72,72,160+sx*50,100); x.closePath(); x.fillStyle="#8A8F99"; x.fill()}
-  head(); x.fillStyle=B; x.fill(); x.lineWidth=4; x.strokeStyle=L; x.stroke();
-  x.fillStyle="rgba(255,255,255,.07)"; x.beginPath(); x.ellipse(116,128,40,20,-0.35,0,7); x.fill();
-  for(const sx of [118,202]){
-    x.save(); x.beginPath(); x.ellipse(sx,188,24,24,0,0,7); x.clip();
-    x.fillStyle="#FFD45C"; x.fillRect(sx-30,160,60,60);
-    x.beginPath(); x.ellipse(sx,192,5,17,0,0,7); x.fillStyle="#1A1B20"; x.fill();
-    x.fillStyle=B; x.fillRect(sx-30,160,60,19);
-    x.restore();
-    x.beginPath(); x.ellipse(sx,188,24,24,0,0,7); x.lineWidth=3; x.strokeStyle=L; x.stroke();
-    x.beginPath(); x.moveTo(sx-25,179); x.lineTo(sx+25,179); x.lineWidth=4; x.stroke();
-    x.fillStyle="rgba(255,255,255,.85)"; x.beginPath(); x.arc(sx+9,199,3,0,7); x.fill();
-  }
-  x.fillStyle="#F7A8BC"; x.beginPath(); x.moveTo(152,220); x.quadraticCurveTo(160,216,168,220); x.quadraticCurveTo(160,230,152,220); x.fill();
-  x.strokeStyle="#E9E3EA"; x.lineWidth=3.5; x.beginPath(); x.moveTo(160,227); x.lineTo(160,233); x.moveTo(151,236); x.lineTo(169,236); x.stroke();
-  x.strokeStyle="rgba(233,227,234,.8)"; x.lineWidth=3;
-  x.beginPath(); x.moveTo(62,214); x.lineTo(24,206); x.moveTo(62,226); x.lineTo(22,230); x.moveTo(258,214); x.lineTo(296,206); x.moveTo(258,226); x.lineTo(298,230); x.stroke();
-  return trimCanvas(c);
+/* The site's black cat (the same shapes as the logo on the main page, in a 64-unit box):
+   no outline, big round pupils, no nose. Used as the character when no picture has been added. */
+function drawSatanCat(x){
+  const B="#2A2C33";
+  x.lineJoin="round"; x.lineWidth=2.4;
+  for(const s of [1,-1]){x.save(); if(s<0){x.translate(64,0); x.scale(-1,1)}
+    const ear=new Path2D("M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"); x.fillStyle=B; x.strokeStyle=B; x.fill(ear); x.stroke(ear);
+    x.fillStyle="#4B4F5A"; x.fill(new Path2D("M15.2 25 L15.9 12.8 L25.2 20.2 Z")); x.restore()}
+  x.fillStyle=B; x.beginPath(); x.ellipse(32,37,23.5,19.5,0,0,Math.PI*2); x.fill();
+  for(const cx of [22.5,41.5]){
+    x.fillStyle="#FFD45C"; x.beginPath(); x.arc(cx,37,7,0,Math.PI*2); x.fill();
+    x.fillStyle="#121317"; x.beginPath(); x.arc(cx+0.3,37.8,5.6,0,Math.PI*2); x.fill();
+    x.fillStyle="#FFFFFF"; x.beginPath(); x.arc(cx-1.9,35.2,1.9,0,Math.PI*2); x.fill(); x.beginPath(); x.arc(cx+2.3,40.2,0.9,0,Math.PI*2); x.fill()}
+  x.fillStyle="rgba(255,143,176,.5)"; for(const cx of [14.5,49.5]){x.beginPath(); x.ellipse(cx,45.5,3.2,1.9,0,0,Math.PI*2); x.fill()}
 }
+function makePlaceholder(){const c=document.createElement("canvas"); c.width=320; c.height=300; const x=c.getContext("2d"); x.scale(5,5); drawSatanCat(x); return trimCanvas(c)}
 const PLACEHOLDER={canvas:makePlaceholder(), cutout:true, v:{}};
 /* fusion: a vertical slice of every character stitched into one body */
 const MERGE=new Map(); let UID=0;
@@ -1434,7 +1424,7 @@ function motion(res,t,k){ // returns offsets
   return m;
 }
 
-/* ================= 사탄의 키캡 공방 v2 ================= */
+/* ================= 사탄의 키캡 v3 ================= */
 const $=id=>document.getElementById(id);
 function toast(m){const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2600)}
 const INK="#4E5F73";
@@ -1445,15 +1435,15 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false};
 const OPT={
   shape:{cherry:"체리",sa:"SA",round:"동글",heart:"하트"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
   charPos:{inside:"레진 속에",top:"윗면 프린트",stand:"아크릴 스탠드",none:"안 넣기"},
-  deco:{none:"없음",cat:"고양이 귀",horn:"사탄 뿔",bow:"리본",halo:"헤일로",star:"별",heart:"하트"},
+  deco:{none:"없음",cat:"고양이 귀",bunny:"토끼 귀",horn:"사탄 뿔",bow:"리본",halo:"헤일로",star:"별",heart:"하트"},
   base:{clear:"투명",tint:"컬러 투명",gloss:"유광",matte:"무광",holo:"홀로그램"},
   decoMat:{gloss:"유광",matte:"무광",holo:"홀로그램"},
-  glitter:{none:"없음",star:"별가루",snow:"눈송이",heart:"하트",aurora:"오로라"},
+  glitter:{none:"없음",star:"별가루",snow:"눈송이",heart:"하트",aurora:"오로라",pearl:"진주",sakura:"벚꽃잎",confetti:"하트 컨페티"},
   sw:{mango:"망고스틴축",frog:"개구리축",tico:"저소음축",violet:"바이올렛축",black:"흑축"},
   rgb:{off:"끄기",solid:"고정",breath:"숨쉬기",rainbow:"무지개"},
   bg:{peach:"피치 노을",lilac:"라일락",soda:"소다",sunset:"핑크 선셋",night:"밤하늘"}
@@ -1483,7 +1473,7 @@ camera.position.set(0,32,90); camera.lookAt(0,6,0); camera.fov=31;
   panel(-40,50,30,50,30,3.4); panel(46,26,24,26,50,1.6,0xffe6f2); panel(0,60,-40,60,20,1.4); panel(-50,10,-20,20,40,1.2,0xdde8ff); panel(0,-30,50,80,10,0.45);
   scene.environment=keep(pm.fromScene(es,0.04).texture);
 })();
-scene.add(new THREE.HemisphereLight(0xffffff,0xd6c8ee,0.35));
+const hemiL=new THREE.HemisphereLight(0xffffff,0xd6c8ee,0.35); scene.add(hemiL);
 const keyL=new THREE.DirectionalLight(0xffffff,0.95); keyL.position.set(-30,60,40); scene.add(keyL);
 const rimL=new THREE.DirectionalLight(0xffd9f0,0.55); rimL.position.set(40,20,-40); scene.add(rimL);
 
@@ -1618,20 +1608,28 @@ function capMaterial(){
     default: return surfMat("gloss",S.color);
   }
 }
-function charCanvas(sq){ // character drawn into a square canvas ("contain"), for textures
-  const it=S.items[0]||PLACEHOLDER, src=it.canvas; if(!sq) return src;
-  const s=Math.max(src.width,src.height), c=document.createElement("canvas"); c.width=c.height=Math.min(1024,s); const k=c.width/s; c.getContext("2d").drawImage(src,(c.width-src.width*k)/2,(c.height-src.height*k)/2,src.width*k,src.height*k); return c;
+const SQ=new WeakMap();
+function charCanvas(sq){ // character drawn into a square canvas ("contain"), for textures - made once per picture
+  const it=S.items[0]||PLACEHOLDER, src=it.canvas; if(!sq) return src; if(SQ.has(src)) return SQ.get(src);
+  const s=Math.max(src.width,src.height), c=document.createElement("canvas"); c.width=c.height=Math.min(1024,s); const k=c.width/s; c.getContext("2d").drawImage(src,(c.width-src.width*k)/2,(c.height-src.height*k)/2,src.width*k,src.height*k); SQ.set(src,c); return c;
 }
 function texOf(c){const t=new THREE.CanvasTexture(c); t.encoding=THREE.sRGBEncoding; t.anisotropy=8; return t}
+/* the character picture is uploaded to the GPU once, not on every option click (it was re-sent each
+   time - up to 1024x1024). One slot per use; a new picture replaces and frees the old one. */
+const CHAR_TEX={};
+function charTex(slot,src){const e=CHAR_TEX[slot]; if(e&&e.src===src) return e.tex; if(e){KEEP.delete(e.tex); e.tex.dispose()}
+  const tex=keep(texOf(src)); CHAR_TEX[slot]={src,tex}; return tex}
+const CAP_GEO={};
+function capGeoFor(p,flat){const k=S.shape+(flat?"/flat":""); return CAP_GEO[k]||(CAP_GEO[k]=keep(capGeometry(p,flat)))}
 function buildChar(p,g){
   const grp=new THREE.Group(); const see=S.mat==="resin"||S.mat==="jelly";
   const it=S.items[0]||PLACEHOLDER, ar=it.canvas.width/it.canvas.height;
   if(S.charPos==="inside"&&see){const h=p.h*0.74, w=Math.min(p.tw*0.92,h*ar), hh=w/ar;
-    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,hh),new THREE.MeshBasicMaterial({map:texOf(it.canvas),alphaTest:0.35,side:THREE.DoubleSide})); m.position.y=p.h*0.48; grp.add(m)}
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,hh),new THREE.MeshBasicMaterial({map:charTex("inside",it.canvas),alphaTest:0.35,side:THREE.DoubleSide})); m.position.y=p.h*0.48; grp.add(m)}
   if(S.charPos==="top"){ // printed onto the flat top, clipped to the cap's outline
     const sec=g.userData.sec, w=g.userData.topW*0.96, shape=new THREE.Shape(); sec.forEach(([ux,uz],i)=>{const x=ux*w, y=-uz*w; i?shape.lineTo(x,y):shape.moveTo(x,y)});
     const sg=new THREE.ShapeGeometry(shape,1), pos=sg.attributes.position, uv=[]; for(let i=0;i<pos.count;i++) uv.push(pos.getX(i)/(2*w)+0.5,pos.getY(i)/(2*w)+0.5); sg.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); sg.rotateX(-Math.PI/2);
-    const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:texOf(charCanvas(true)),transparent:true,alphaTest:0.2,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-4})); m.position.y=g.userData.topY+0.04; grp.add(m)}
+    const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:charTex("top",charCanvas(true)),transparent:true,alphaTest:0.2,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-4})); m.position.y=g.userData.topY+0.04; grp.add(m)}
   if(S.charPos==="stand"){ // one solid piece of clear acrylic cut around the character, print on the front
     const H=12.5, cut=acrylicOutline(it), W=H*cut.ar, topY=g.userData.topY, T=1.3;
     const shape=new THREE.Shape(); cut.pts.forEach(([u,v],i)=>{const x=(u-0.5)*W, y=(1-v)*H; i?shape.lineTo(x,y):shape.moveTo(x,y)}); shape.closePath();
@@ -1639,7 +1637,7 @@ function buildChar(p,g){
     const acr=new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.03,transmission:0.9,transparent:true,clearcoat:1,clearcoatRoughness:0.02,envMapIntensity:2.2,depthWrite:false});
     const m=new THREE.Mesh(body,acr); m.position.y=topY; m.renderOrder=5; grp.add(m);
     // printed layer just behind the front face: glossy so it catches light as the camera turns
-    const printMat=new THREE.MeshPhysicalMaterial({map:texOf(cut.img),transparent:true,alphaTest:0.3,roughness:0.12,clearcoat:1,clearcoatRoughness:0.04,envMapIntensity:1.1,side:THREE.FrontSide});
+    const printMat=new THREE.MeshPhysicalMaterial({map:charTex("stand",cut.img),transparent:true,alphaTest:0.3,roughness:0.12,clearcoat:1,clearcoatRoughness:0.04,envMapIntensity:1.1,side:THREE.FrontSide});
     const front=new THREE.Mesh(new THREE.PlaneGeometry(W,H),printMat); front.position.set(0,topY+H/2,T/2-0.06); grp.add(front);
     const backMat=printMat.clone(); backMat.side=THREE.BackSide; backMat.color=lin("#E9EEF6"); const back=new THREE.Mesh(new THREE.PlaneGeometry(W,H),backMat); back.position.set(0,topY+H/2,-T/2+0.06); grp.add(back);
     grp.userData.standTop=topY+H}
@@ -1669,53 +1667,82 @@ function acrylicOutline(it){
 }
 function lathe(points,seg){return new THREE.LatheGeometry(points.map(([x,y])=>new THREE.Vector2(x,y)),seg||32)}
 function sitOn(geo){geo.computeBoundingBox(); const b=geo.boundingBox; geo.translate(-(b.min.x+b.max.x)/2,-b.min.y,-(b.min.z+b.max.z)/2); return geo}
+/* Decorations. Their shapes never change with the colour or material, so each geometry is built once and
+   reused (GEO) - switching decorations used to rebuild every extruded shape. Ears and horns sit on the
+   real top surface at their own spot (surfY): SA/round tops are dished and the heart is domed, so the
+   centre height alone left them floating or sunk. */
+const DECO_GEO={};
+const GEO=(k,f)=>DECO_GEO[k]||(DECO_GEO[k]=keep(f()));
 function buildDeco(p,g){
   const grp=new THREE.Group(), top=g.userData.topY, w=g.userData.topW;
   const main=surfMat(S.decoMat,S.decoColor), accentPink=surfMat(S.decoMat==="holo"?"holo":"gloss","#FFB8C9");
   const add=(geo,mat,x,y,z,rx,ry,rz)=>{const o=new THREE.Mesh(geo,mat); o.position.set(x,y,z); o.rotation.set(rx||0,ry||0,rz||0); grp.add(o); return o};
-  const soft=(shape,depth,bev)=>new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:6,curveSegments:28});
-  const stand=S.charPos==="stand";
+  const soft=(shape,depth,bev,bevSize)=>new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:bev,bevelSize:bevSize==null?bev:bevSize,bevelSegments:6,curveSegments:28});
+  const stand=S.charPos==="stand", flat=S.charPos==="top"||stand;
   const floatBase=stand?(top+13.5):top;
+  const F=fenceTable(p), surfY=(x,z)=>capTopY(p,flat,Math.hypot(x,z)/(fenceAt(F.R,Math.atan2(z,x))*p.tw/2));
+  // lowest point of the top under a base of half-size rx (sideways) x rz: seating there leaves no gap
+  // anywhere around the base, and only a sliver sits below the surface (it shows through clear resin)
+  const seat=(x,z,rx,rz)=>Math.min(surfY(x,z),surfY(x-rx,z),surfY(x+rx,z),surfY(x,z-rz),surfY(x,z+rz));
+  // SA's flat top is small (big rounded edge): ears and horns shrink with it and keep apart
+  const fit=clamp(w/5.2,0.7,1);
   switch(S.deco){
-    case "cat":{
-      const ear=new THREE.Shape(); ear.moveTo(-2.4,0); ear.quadraticCurveTo(-2.6,3.2,-0.4,4.6); ear.quadraticCurveTo(0,4.9,0.4,4.6); ear.quadraticCurveTo(2.6,3.2,2.4,0); ear.lineTo(-2.4,0);
-      const inner=new THREE.Shape(); inner.moveTo(-1.3,0.6); inner.quadraticCurveTo(-1.4,2.6,0,3.5); inner.quadraticCurveTo(1.4,2.6,1.3,0.6); inner.lineTo(-1.3,0.6);
-      for(const sd of [-1,1]){const eg=soft(ear,0.9,0.5); eg.translate(0,0.5,-0.45); const o=add(eg,main,sd*w*0.58,top,-w*0.2,0,0,-sd*0.22);
-        const ig=soft(inner,0.4,0.2); ig.translate(0,0.5,0.55); add(ig,accentPink,sd*w*0.58,top,-w*0.2,0,0,-sd*0.22)}
+    case "cat":{ // pointed cat ears: a narrow tip and a small bevel so the point stays sharp
+      const eg=GEO("cat.ear",()=>{const s=new THREE.Shape(); s.moveTo(-2.5,0); s.quadraticCurveTo(-2.3,3,-0.2,5.6); s.quadraticCurveTo(0,5.85,0.2,5.6); s.quadraticCurveTo(2.3,3,2.5,0); s.lineTo(-2.5,0);
+        const g2=soft(s,0.9,0.45,0.26); g2.translate(0,0.26,-0.45); return g2});
+      const ig=GEO("cat.inner",()=>{const s=new THREE.Shape(); s.moveTo(-1.35,0.7); s.quadraticCurveTo(-1.2,2.9,-0.1,4.5); s.quadraticCurveTo(0,4.65,0.1,4.5); s.quadraticCurveTo(1.2,2.9,1.35,0.7); s.lineTo(-1.35,0.7);
+        const g2=soft(s,0.4,0.2,0.14); g2.translate(0,0.26,0.55); return g2});
+      for(const sd of [-1,1]){const x=sd*Math.max(w*0.58,2.5*fit+0.25), z=-w*0.2, y=seat(x,z,2.4*fit,0.8*fit)-0.12;
+        add(eg,main,x,y,z,0,0,-sd*0.22).scale.setScalar(fit); add(ig,accentPink,x,y,z,0,0,-sd*0.22).scale.setScalar(fit)}
       break;}
-    case "horn":{ // short, chubby, softly curled devil horns with round tips
-      const hm=surfMat(S.decoMat,S.decoColor==="#FFFFFF"?"#FF5C7A":S.decoColor);
-      for(const sd of [-1,1]){const curve=new THREE.CubicBezierCurve3(new THREE.Vector3(0,0,0),new THREE.Vector3(sd*0.9,1.6,0),new THREE.Vector3(sd*1.3,3.2,-0.1),new THREE.Vector3(sd*0.5,4.4,-0.2));
-        const tg=new THREE.TubeGeometry(curve,32,1.55,20,false), pos=tg.attributes.position, v=new THREE.Vector3();
-        for(let i=0;i<pos.count;i++){const seg=Math.floor(i/21)/32, pt=curve.getPoint(seg); v.set(pos.getX(i),pos.getY(i),pos.getZ(i)).sub(pt).multiplyScalar(lerp(1,0.32,Math.pow(seg,1.4))).add(pt); pos.setXYZ(i,v.x,Math.max(0,v.y),v.z)} tg.computeVertexNormals();
-        const o=new THREE.Mesh(tg,hm); o.position.set(sd*w*0.46,top,-w*0.15); grp.add(o);
-        const tip=new THREE.Mesh(new THREE.SphereGeometry(1.55*0.32,16,12),hm); tip.position.set(sd*w*0.46+sd*0.5,top+4.4,-w*0.15-0.2); grp.add(tip);
-        const cap=new THREE.Mesh(new THREE.CircleGeometry(1.55,24),hm); cap.rotation.x=-Math.PI/2; cap.position.set(sd*w*0.46,top+0.01,-w*0.15); grp.add(cap)}
+    case "bunny":{ // long, soft bunny ears leaning a little outward
+      const eg=GEO("bun.ear",()=>{const s=new THREE.Shape(); s.moveTo(-1.5,0); s.bezierCurveTo(-2.45,2.8,-2.05,7.4,0,7.9); s.bezierCurveTo(2.05,7.4,2.45,2.8,1.5,0); s.lineTo(-1.5,0);
+        const g2=soft(s,0.9,0.45,0.4); g2.translate(0,0.4,-0.45); return g2});
+      const ig=GEO("bun.inner",()=>{const s=new THREE.Shape(); s.moveTo(-0.75,1); s.bezierCurveTo(-1.35,3.2,-1.05,6.4,0,6.8); s.bezierCurveTo(1.05,6.4,1.35,3.2,0.75,1); s.lineTo(-0.75,1);
+        const g2=soft(s,0.4,0.2); g2.translate(0,0.4,0.55); return g2});
+      for(const sd of [-1,1]){const x=sd*Math.max(w*0.42,1.9*fit+0.25), z=-w*0.18, y=seat(x,z,1.8*fit,0.8*fit)-0.12;
+        add(eg,main,x,y,z,0,0,-sd*0.17).scale.setScalar(fit); add(ig,accentPink,x,y,z,0,0,-sd*0.17).scale.setScalar(fit)}
+      break;}
+    case "horn":{ // short, chubby devil horns - black unless another colour is picked
+      const hm=surfMat(S.decoMat,S.decoColor==="#FFFFFF"?"#26262B":S.decoColor);
+      for(const sd of [-1,1]){
+        // the curve starts going straight up, so the base ring is level and can sit just below the top
+        // surface on any cap shape; nothing is clamped flat any more (that used to shave the base off)
+        const tg=GEO("horn.tube"+sd,()=>{const curve=new THREE.CubicBezierCurve3(new THREE.Vector3(0,-0.4,0),new THREE.Vector3(0,1.3,0),new THREE.Vector3(sd*1.5,3.0,-0.1),new THREE.Vector3(sd*0.5,4.4,-0.2));
+          const t=new THREE.TubeGeometry(curve,32,1.55,20,false), pos=t.attributes.position, v=new THREE.Vector3();
+          for(let i=0;i<pos.count;i++){const seg=Math.floor(i/21)/32, pt=curve.getPoint(seg); v.set(pos.getX(i),pos.getY(i),pos.getZ(i)).sub(pt).multiplyScalar(lerp(1,0.32,Math.pow(seg,1.4))).add(pt); pos.setXYZ(i,v.x,v.y,v.z)}
+          t.computeVertexNormals(); return t});
+        const r=1.55*fit, x=sd*Math.max(w*0.46,r+0.4), z=-w*0.15, y=seat(x,z,r,r)-0.08+0.4*fit;   // base ring just under the lowest point
+        add(tg,hm,x,y,z).scale.setScalar(fit);
+        add(GEO("horn.tip",()=>new THREE.SphereGeometry(1.55*0.32,16,12)),hm,x+sd*0.5*fit,y+4.4*fit,z-0.2*fit).scale.setScalar(fit);
+        add(GEO("horn.base",()=>new THREE.CircleGeometry(1.55,24)),hm,x,y-0.4*fit,z,Math.PI/2).scale.setScalar(fit)}   // closes the tube's bottom
       break;}
     case "bow":{ // two pleated loops, a knot and notched tails, standing upright
-      const loop=new THREE.Shape(); loop.moveTo(0,0.8); loop.bezierCurveTo(1.6,2.6,4.2,3.6,5.2,2.6); loop.bezierCurveTo(6,1.6,5.8,-1.2,5,-2); loop.bezierCurveTo(3.9,-2.9,1.6,-1.8,0,-0.8); loop.lineTo(0,0.8);
-      const fold=new THREE.Shape(); fold.moveTo(0.6,0.3); fold.bezierCurveTo(2,1.2,3.6,1.5,4.3,0.9); fold.lineTo(4.1,0.3); fold.bezierCurveTo(3.2,0.6,2,0.3,0.6,-0.2); fold.lineTo(0.6,0.3);
+      const lg=GEO("bow.loop",()=>{const s=new THREE.Shape(); s.moveTo(0,0.8); s.bezierCurveTo(1.6,2.6,4.2,3.6,5.2,2.6); s.bezierCurveTo(6,1.6,5.8,-1.2,5,-2); s.bezierCurveTo(3.9,-2.9,1.6,-1.8,0,-0.8); s.lineTo(0,0.8); const g2=soft(s,0.9,0.45); g2.translate(0,0,-0.45); return g2});
+      const fg=GEO("bow.fold",()=>{const s=new THREE.Shape(); s.moveTo(0.6,0.3); s.bezierCurveTo(2,1.2,3.6,1.5,4.3,0.9); s.lineTo(4.1,0.3); s.bezierCurveTo(3.2,0.6,2,0.3,0.6,-0.2); s.lineTo(0.6,0.3); return soft(s,0.2,0.12)});
+      const tgm=GEO("bow.tail",()=>{const s=new THREE.Shape(); s.moveTo(-0.7,0); s.lineTo(0.7,0); s.lineTo(2.2,-4.2); s.lineTo(1.2,-3.6); s.lineTo(0.6,-4.4); s.lineTo(-0.4,-0.6); s.lineTo(-0.7,0); const g2=soft(s,0.5,0.25); g2.translate(0,0,-0.6); return g2});
       const bowG=new THREE.Group();
-      for(const sd of [-1,1]){const lg=soft(loop,0.9,0.45); lg.translate(0,0,-0.45); const o=new THREE.Mesh(lg,main); o.scale.x=sd; bowG.add(o);
-        const fg=soft(fold,0.2,0.12); const f=new THREE.Mesh(fg,accentPink.clone()); f.material.opacity=0.35; f.material.transparent=true; f.scale.x=sd; f.position.z=0.62; bowG.add(f)}
-      const tail=new THREE.Shape(); tail.moveTo(-0.7,0); tail.lineTo(0.7,0); tail.lineTo(2.2,-4.2); tail.lineTo(1.2,-3.6); tail.lineTo(0.6,-4.4); tail.lineTo(-0.4,-0.6); tail.lineTo(-0.7,0);
-      for(const sd of [-1,1]){const tgm=soft(tail,0.5,0.25); tgm.translate(0,0,-0.6); const o=new THREE.Mesh(tgm,main); o.scale.x=sd; o.position.set(sd*0.3,-0.4,-0.2); o.rotation.z=sd*0.1; bowG.add(o)}
-      const knot=new THREE.Mesh(new THREE.SphereGeometry(1.3,24,16),main); knot.scale.set(1.05,1.25,0.8); bowG.add(knot);
+      for(const sd of [-1,1]){const o=new THREE.Mesh(lg,main); o.scale.x=sd; bowG.add(o);
+        const f=new THREE.Mesh(fg,accentPink.clone()); f.material.opacity=0.35; f.material.transparent=true; f.scale.x=sd; f.position.z=0.62; bowG.add(f)}
+      for(const sd of [-1,1]){const o=new THREE.Mesh(tgm,main); o.scale.x=sd; o.position.set(sd*0.3,-0.4,-0.2); o.rotation.z=sd*0.1; bowG.add(o)}
+      const knot=new THREE.Mesh(GEO("bow.knot",()=>new THREE.SphereGeometry(1.3,24,16)),main); knot.scale.set(1.05,1.25,0.8); bowG.add(knot);
       const bb=new THREE.Box3().setFromObject(bowG); bowG.position.set(0,top-bb.min.y,-w*0.1); grp.add(bowG);
       break;}
     case "halo":{
       const col=lin(S.decoColor==="#FFFFFF"?"#FFE38A":S.decoColor);
       const hm=S.decoMat==="holo"?surfMat("holo","#FFF3B0",{emissive:col,emissiveIntensity:0.5}):new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:S.decoMat==="matte"?0.45:0.75,roughness:S.decoMat==="matte"?0.6:0.25,metalness:0.2});
-      const R=Math.max(4.2,w*0.62), y=floatBase+6;
-      const ring=add(new THREE.TorusGeometry(R,0.5,20,64),hm,0,y,0,Math.PI/2); ring.userData.float=y;
-      const glow=new THREE.Mesh(new THREE.TorusGeometry(R,1.3,16,64),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.16,blending:THREE.AdditiveBlending,depthWrite:false})); glow.rotation.x=Math.PI/2; glow.position.y=y; grp.add(glow); glow.userData.float=y;
+      const R=Math.max(4.2,w*0.62), y=floatBase+6, Rk=R.toFixed(2);
+      const ring=add(GEO("halo.ring"+Rk,()=>new THREE.TorusGeometry(R,0.5,20,64)),hm,0,y,0,Math.PI/2); ring.userData.float=y;
+      const glow=new THREE.Mesh(GEO("halo.glow"+Rk,()=>new THREE.TorusGeometry(R,1.3,16,64)),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.16,blending:THREE.AdditiveBlending,depthWrite:false})); glow.rotation.x=Math.PI/2; glow.position.y=y; grp.add(glow); glow.userData.float=y;
       const gs=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col,transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false})); gs.scale.set(R*2.6,R*0.9,1); gs.position.y=y; grp.add(gs); gs.userData.float=y;
       grp.userData.halo=[ring,glow,gs]; break;}
-    case "star": case "heart":{const s2=new THREE.Shape();
-      if(S.deco==="star"){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2, r=i%2?2:4.2; const x=Math.cos(a)*r, y=-Math.sin(a)*r; i?s2.lineTo(x,y):s2.moveTo(x,y)} s2.closePath()}
-      else {s2.moveTo(0,-3.4); s2.bezierCurveTo(-1.6,-2.2,-4.6,-0.6,-4.6,1.6); s2.bezierCurveTo(-4.6,3.6,-2.9,4.6,-1.7,4.6); s2.bezierCurveTo(-0.8,4.6,-0.2,4.1,0,3.3); s2.bezierCurveTo(0.2,4.1,0.8,4.6,1.7,4.6); s2.bezierCurveTo(2.9,4.6,4.6,3.6,4.6,1.6); s2.bezierCurveTo(4.6,-0.6,1.6,-2.2,0,-3.4)}
+    case "star": case "heart":{
+      const geo=GEO("deco."+S.deco,()=>{const s2=new THREE.Shape();
+        if(S.deco==="star"){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2, r=i%2?2:4.2; const x=Math.cos(a)*r, y=-Math.sin(a)*r; i?s2.lineTo(x,y):s2.moveTo(x,y)} s2.closePath()}
+        else {s2.moveTo(0,-3.4); s2.bezierCurveTo(-1.6,-2.2,-4.6,-0.6,-4.6,1.6); s2.bezierCurveTo(-4.6,3.6,-2.9,4.6,-1.7,4.6); s2.bezierCurveTo(-0.8,4.6,-0.2,4.1,0,3.3); s2.bezierCurveTo(0.2,4.1,0.8,4.6,1.7,4.6); s2.bezierCurveTo(2.9,4.6,4.6,3.6,4.6,1.6); s2.bezierCurveTo(4.6,-0.6,1.6,-2.2,0,-3.4)}
+        const g2=soft(s2,1.4,1.2); g2.center(); return g2});
       const mat=S.decoColor==="#FFFFFF"?surfMat(S.decoMat,S.deco==="star"?"#FFD45C":"#FF8FB0"):main;
-      const geo=soft(s2,1.4,1.2); geo.center(); const fy=floatBase+(stand?4.5:5.6); const o=add(geo,mat,0,fy,0,0,0,0); grp.userData.spin=o; o.userData.float=fy; break;}
+      const fy=floatBase+(stand?4.5:5.6); const o=add(geo,mat,0,fy,0,0,0,0); grp.userData.spin=o; o.userData.float=fy; break;}
   }
   return grp;
 }
@@ -1746,29 +1773,84 @@ function applyBase(){
 }
 
 /* ---------- glitter: real little 3D flakes that tumble like a snow globe ---------- */
-const GLIT_GEO={}, GLIT_MAT={};
-function glitterGeo(kind){
-  if(GLIT_GEO[kind]) return GLIT_GEO[kind];
-  const s=new THREE.Shape();
-  if(kind==="star"){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2, r=i%2?0.42:0.95; i?s.lineTo(Math.cos(a)*r,Math.sin(a)*r):s.moveTo(Math.cos(a)*r,Math.sin(a)*r)} s.closePath()}
-  else if(kind==="snow"){for(let i=0;i<24;i++){const a=i/24*Math.PI*2, r=[1,0.35,0.62,0.35][i%4]; i?s.lineTo(Math.cos(a)*r,Math.sin(a)*r):s.moveTo(Math.cos(a)*r,Math.sin(a)*r)} s.closePath()}
-  else if(kind==="heart"){const k2=0.24; s.moveTo(0,-3.4*k2); s.bezierCurveTo(-1.6*k2,-2.2*k2,-4.6*k2,-0.6*k2,-4.6*k2,1.6*k2); s.bezierCurveTo(-4.6*k2,3.6*k2,-2.9*k2,4.6*k2,-1.7*k2,4.6*k2); s.bezierCurveTo(-0.8*k2,4.6*k2,-0.2*k2,4.1*k2,0,3.3*k2); s.bezierCurveTo(0.2*k2,4.1*k2,0.8*k2,4.6*k2,1.7*k2,4.6*k2); s.bezierCurveTo(2.9*k2,4.6*k2,4.6*k2,3.6*k2,4.6*k2,1.6*k2); s.bezierCurveTo(4.6*k2,-0.6*k2,1.6*k2,-2.2*k2,0,-3.4*k2)}
-  else {for(let i=0;i<6;i++){const a=i/6*Math.PI*2; i?s.lineTo(Math.cos(a)*0.7,Math.sin(a)*0.7):s.moveTo(Math.cos(a)*0.7,Math.sin(a)*0.7)} s.closePath()}
-  const g=new THREE.ExtrudeGeometry(s,{depth:0.14,bevelEnabled:true,bevelThickness:0.07,bevelSize:0.07,bevelSegments:2,curveSegments:10}); g.center(); GLIT_GEO[kind]=keep(g); return g;
+/* One row per kind. glow = soft light in the flake's OWN shape, drawn on a plane that tumbles with the
+   flake (so a star glows as a star, not as a round blob); the flake itself hides the plane's middle.
+   rad (worked out in makeParticles) = how far a flake plus its glow reaches from its centre. */
+const GLITTERS={
+  star:{n:60,scale:0.42,grav:4.2,shape:"star",glow:{tex:"star",size:3.4,amt:1,lo:0.35,speed:[1.6,3.8]}},
+  snow:{n:30,scale:1.0,grav:2.6,shape:"snow",glow:{tex:"snow",size:2.7,amt:0.7,lo:0.55,speed:[0.5,1.1]}},
+  heart:{n:28,scale:1.0,grav:4.2,shape:"heart"},
+  aurora:{n:46,scale:0.8,grav:4.2,shape:"hex"},
+  pearl:{n:34,scale:0.62,grav:5.2,shape:"pearl"},
+  sakura:{n:26,scale:0.95,grav:1.9,shape:"petal",flutter:true},
+  confetti:{n:44,scale:0.72,grav:3.2,shape:"cheart",multi:["#FF8FB8","#FFD45C","#8FD3FF","#B8A2FF","#9BE3B0"]}
+};
+const GLIT_BASE={star:"#FFD66B",snow:"#FFFFFF",heart:"#FF8FB8",aurora:"#FFFFFF",pearl:"#FFF3EE",sakura:"#FFC2D4",confetti:"#FFFFFF"};
+const GLIT_R={star:1.02,snow:1.07,heart:1.12,hex:0.77,pearl:0.62,petal:1.03,cheart:1.1};   // unit radius of each shape
+const GLIT_GEO={}, GLIT_MAT={}, GLOW_TEX={}, GLOW_MAT={};
+function starPts(r0,r1,n){const p=[]; for(let i=0;i<n*2;i++){const a=i/(n*2)*Math.PI*2-Math.PI/2, r=i%2?r1:r0; p.push([Math.cos(a)*r,Math.sin(a)*r])} return p}
+function snowPts(){const p=[]; for(let i=0;i<24;i++){const a=i/24*Math.PI*2, r=[1,0.35,0.62,0.35][i%4]; p.push([Math.cos(a)*r,Math.sin(a)*r])} return p}
+function heartShape(k){const s=new THREE.Shape(); s.moveTo(0,-3.4*k); s.bezierCurveTo(-1.6*k,-2.2*k,-4.6*k,-0.6*k,-4.6*k,1.6*k); s.bezierCurveTo(-4.6*k,3.6*k,-2.9*k,4.6*k,-1.7*k,4.6*k); s.bezierCurveTo(-0.8*k,4.6*k,-0.2*k,4.1*k,0,3.3*k);
+  s.bezierCurveTo(0.2*k,4.1*k,0.8*k,4.6*k,1.7*k,4.6*k); s.bezierCurveTo(2.9*k,4.6*k,4.6*k,3.6*k,4.6*k,1.6*k); s.bezierCurveTo(4.6*k,-0.6*k,1.6*k,-2.2*k,0,-3.4*k); return s}
+function polyShape(pts){const s=new THREE.Shape(); pts.forEach(([x,y],i)=>i?s.lineTo(x,y):s.moveTo(x,y)); s.closePath(); return s}
+function glitterGeo(shape){
+  if(GLIT_GEO[shape]) return GLIT_GEO[shape];
+  let g;
+  if(shape==="pearl") g=new THREE.SphereGeometry(0.62,18,14);
+  else{
+    const ext=(s,d,b)=>new THREE.ExtrudeGeometry(s,{depth:d,bevelEnabled:b>0,bevelThickness:b,bevelSize:b,bevelSegments:2,curveSegments:10});
+    if(shape==="star") g=ext(polyShape(starPts(0.95,0.42,5)),0.14,0.07);
+    else if(shape==="snow") g=ext(polyShape(snowPts()),0.14,0.07);
+    else if(shape==="heart") g=ext(heartShape(0.24),0.14,0.07);
+    else if(shape==="cheart") g=ext(heartShape(0.24),0.04,0.02);      // thin paper confetti
+    else if(shape==="petal"){const s=new THREE.Shape(); s.moveTo(0,-1); s.bezierCurveTo(0.95,-0.55,1.05,0.5,0.36,1); s.lineTo(0,0.76); s.lineTo(-0.36,1); s.bezierCurveTo(-1.05,0.5,-0.95,-0.55,0,-1); g=ext(s,0.05,0.03)}
+    else g=ext(polyShape(starPts(0.7,0.7,3)),0.14,0.07);              // aurora: hexagon
+    g.center();
+  }
+  return (GLIT_GEO[shape]=keep(g));
 }
+// pearl: a faint pastel sheen only at grazing angles (holoize is far too strong for a pearl)
+function pearlize(mat){mat.onBeforeCompile=(sh)=>{sh.fragmentShader=sh.fragmentShader.replace("#include <tonemapping_fragment>",`
+    { vec3 vd=normalize(vViewPosition); float f=1.0-abs(dot(normalize(normal),vd));
+      vec3 rb=0.8+0.2*cos(6.2831*(f*1.1+vec3(0.0,0.33,0.67)));
+      gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*rb+0.08,0.55*f); }
+    #include <tonemapping_fragment>`)}; mat.customProgramCacheKey=()=>"pearl"; return mat}
 function glitterMat(kind){
-  if(GLIT_MAT[kind]) return GLIT_MAT[kind];
-  let m;
-  if(kind==="star") m=new THREE.MeshStandardMaterial({color:lin("#FFD66B"),metalness:0.75,roughness:0.18,emissive:lin("#FFB938"),emissiveIntensity:0.85});
-  else if(kind==="snow") m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FFFFFF"),metalness:0.35,roughness:0.12,clearcoat:1,emissive:lin("#DDEBFF"),emissiveIntensity:0.25}));
-  else if(kind==="heart") m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FF8FB8"),metalness:0.25,roughness:0.14,clearcoat:1,emissive:lin("#FF6F9E"),emissiveIntensity:0.2}));
-  else m=holoize(new THREE.MeshPhysicalMaterial({color:lin("#FFFFFF"),metalness:0.7,roughness:0.1,clearcoat:1}));
-  GLIT_MAT[kind]=keep(m); return m;
+  const key=kind+"|"+S.glitColor; if(GLIT_MAT[key]) return GLIT_MAT[key];
+  const col=lin(S.glitColor||GLIT_BASE[kind]); let m;
+  if(kind==="star") m=new THREE.MeshStandardMaterial({color:col,metalness:0.75,roughness:0.18,emissive:col,emissiveIntensity:0.85});
+  else if(kind==="snow") m=new THREE.MeshPhysicalMaterial({color:col,metalness:0,roughness:0.28,clearcoat:1,clearcoatRoughness:0.1,emissive:S.glitColor?col:lin("#E6F1FF"),emissiveIntensity:0.6});
+  else if(kind==="heart") m=holoize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.25,roughness:0.14,clearcoat:1,emissive:col,emissiveIntensity:0.2}));
+  else if(kind==="pearl") m=pearlize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.05,roughness:0.16,clearcoat:1,clearcoatRoughness:0.05,emissive:col,emissiveIntensity:0.1}));
+  else if(kind==="sakura") m=new THREE.MeshPhysicalMaterial({color:col,metalness:0,roughness:0.45,clearcoat:0.4,side:THREE.DoubleSide,emissive:col,emissiveIntensity:0.14});
+  else if(kind==="confetti") m=new THREE.MeshStandardMaterial({color:0xffffff,metalness:0.1,roughness:0.5,side:THREE.DoubleSide,emissive:0x000000});
+  else m=holoize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.7,roughness:0.1,clearcoat:1}));
+  m.userData.e0=m.emissiveIntensity||0;
+  return (GLIT_MAT[key]=keep(m));
 }
-/* The glitter is fenced by the cap's own cross-section, not by a square box - a square let flakes
-   wander outside the heart (and the round cap's corners). FENCE[a] = distance from the centre to the
-   outline along angle a, for a unit-size section; the heart's notch is concave, so it also looks a few
-   degrees either side. Checked for all four shapes: a flake centre on the fence stays >=1.3 inside the wall. */
+// the glow texture: the flake's outline, filled and softly blurred (shadowBlur works in every browser)
+function glitGlowTex(tex){
+  if(GLOW_TEX[tex]) return GLOW_TEX[tex];
+  const pts=tex==="star"?starPts(0.95,0.42,5):snowPts(), R=tex==="star"?38:51;   // tips at 30% / 40% of the texture
+  const t=canvasTex(128,128,(x)=>{x.translate(64,64); const path=()=>{x.beginPath(); pts.forEach(([px,py],i)=>{const X=px*R/0.95*(tex==="star"?1:0.95), Y=-py*R/0.95*(tex==="star"?1:0.95); i?x.lineTo(X,Y):x.moveTo(X,Y)}); x.closePath()};
+    x.shadowColor="rgba(255,255,255,1)"; x.fillStyle="rgba(255,255,255,1)";
+    for(const [b,a] of [[26,0.55],[14,0.8],[6,1]]){x.shadowBlur=b; x.globalAlpha=a; path(); x.fill()}});
+  return (GLOW_TEX[tex]=keep(t));
+}
+function glowMat(G){
+  const key=G.glow.tex+"|"+S.glitColor; if(GLOW_MAT[key]) return GLOW_MAT[key];
+  const base=G.glow.tex==="star"?"#FFD98A":"#DDEBFF", col=S.glitColor?new THREE.Color(S.glitColor).lerp(new THREE.Color("#FFFFFF"),0.4):new THREE.Color(base);
+  return (GLOW_MAT[key]=keep(new THREE.MeshBasicMaterial({map:glitGlowTex(G.glow.tex),color:col.convertSRGBToLinear(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide})));
+}
+const GLOW_PLANE=keep(new THREE.PlaneGeometry(1,1));
+
+/* Keeping the glitter inside the cap, in all three directions.
+   Sideways: the cap's own cross-section, not a square box (a square let flakes out of the heart and the
+   round cap's corners). FENCE.R[a] = distance from the centre to the outline along angle a for a unit
+   section; FENCE.E is the same, looking a few degrees either side at the heart's concave notch.
+   Up/down: the real top surface (SA and round tops are dished, the heart is domed, every top edge is
+   rounded) and the flake's own size - a flat 90%-of-height ceiling let big flakes poke through the top
+   whenever the key was pressed. Checked headless: every kind x every shape, thousands of shaken frames. */
 const FENCE_N=180, FENCES={};
 function fenceTable(p){const key=p.sec+p.n0+"/"+p.n1; if(FENCES[key]) return FENCES[key];
   const secs=p.sec==="heart"?[section("heart",0,96)]:[section("se",p.n0,96),section("se",p.n1,96)], R=new Float32Array(FENCE_N);
@@ -1776,65 +1858,70 @@ function fenceTable(p){const key=p.sec+p.n0+"/"+p.n1; if(FENCES[key]) return FEN
     for(const sec of secs) for(let i=0;i<sec.length;i++){const [x1,z1]=sec[i],[x2,z2]=sec[(i+1)%sec.length], ex=x2-x1, ez=z2-z1, den=ex*dz-dx*ez; if(Math.abs(den)<1e-12) continue;
       const t=(ex*z1-x1*ez)/den, u=(dx*z1-dz*x1)/den; if(t>0&&u>=0&&u<1&&t<best) best=t}
     R[k]=best}
-  const win=p.sec==="heart"?6:0, out=new Float32Array(FENCE_N);
-  for(let k=0;k<FENCE_N;k++){let m=R[k]; for(let j=-win;j<=win;j++) m=Math.min(m,R[(k+j+FENCE_N)%FENCE_N]); out[k]=m}
-  return (FENCES[key]=out)}
+  const win=p.sec==="heart"?9:0, E=new Float32Array(FENCE_N);
+  for(let k=0;k<FENCE_N;k++){let m=R[k]; for(let j=-win;j<=win;j++) m=Math.min(m,R[(k+j+FENCE_N)%FENCE_N]); E[k]=m}
+  return (FENCES[key]={R,E})}
 function fenceAt(T,a){const f=((a/(Math.PI*2))%1+1)%1*FENCE_N, i=Math.floor(f)%FENCE_N; return lerp(T[i],T[(i+1)%FENCE_N],f-Math.floor(f))}
-const fenceLim=(T,a,w)=>{const r=fenceAt(T,a)*w; return Math.max(0,Math.min(r*0.72,r-1.3))};
-/* a soft halo + thin cross flare on every star flake; additive, so it reads as light, and each one
-   twinkles at its own pace. Shares the flakes' position array, so it costs one small draw call. */
-let GLOW_TEX=null, GLOW_MAT=null;
-function starGlow(pos,N){
-  if(!GLOW_TEX) GLOW_TEX=keep(canvasTex(64,64,(x)=>{const g=x.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.14,"rgba(255,244,200,.95)");
-    g.addColorStop(0.4,"rgba(255,206,100,.32)"); g.addColorStop(1,"rgba(255,190,80,0)"); x.fillStyle=g; x.fillRect(0,0,64,64);
-    x.globalCompositeOperation="lighter"; for(const [w,h] of [[64,3.2],[3.2,64]]){const l=x.createLinearGradient(32-w/2,32-h/2,32+w/2,32+h/2); l.addColorStop(0,"rgba(255,240,200,0)"); l.addColorStop(0.5,"rgba(255,252,236,1)"); l.addColorStop(1,"rgba(255,240,200,0)"); x.fillStyle=l; x.fillRect(32-w/2,32-h/2,w,h)}}));
-  if(!GLOW_MAT) GLOW_MAT=keep(new THREE.PointsMaterial({map:GLOW_TEX,size:2.9,sizeAttenuation:true,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,vertexColors:true}));
-  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.BufferAttribute(pos,3)); g.setAttribute("color",new THREE.BufferAttribute(new Float32Array(N*3),3));
-  const pts=new THREE.Points(g,GLOW_MAT); pts.renderOrder=4; pts.frustumCulled=false; return pts;
-}
-function twinkle(pts,N,t){const col=pts.geometry.attributes.color.array;
-  for(let i=0;i<N;i++){const s=0.5+0.5*Math.sin(t*(1.6+hash(i+300)*2.2)+hash(i+500)*6.28), k=0.3+0.7*s*s; col[i*3]=k; col[i*3+1]=k*0.92; col[i*3+2]=k*0.72}
-  pts.geometry.attributes.color.needsUpdate=true; pts.geometry.attributes.position.needsUpdate=true}
+// half-width of the cap wall at height y (same formula as capGeometry, bevel included)
+function wallW(p,y){const yb=p.h-p.bev; if(y<=yb) return lerp(p.bw,p.tw,Math.pow(clamp(y/yb),1.2))/2;
+  const s=clamp((y-yb)/p.bev); return p.tw/2-p.bev*(1-Math.sqrt(1-s*s))}
+// height of the top surface at relative radius rho (1 = the wall's top edge), dish / dome / rounded edge included
+function capTopY(p,flat,rho){const hw=p.tw/2, topW=hw-p.bev, rTop=topW/hw, dish=flat?0:p.dish, dome=flat?Math.min(p.dome,0.6):p.dome;
+  if(rho<=rTop){const f=rho/rTop; return p.h+(dome-dish)*(1-f*f)}
+  const c=clamp(1-(1-Math.min(rho,1))*hw/p.bev,0,1); return p.h-p.bev+Math.sqrt(1-c*c)*p.bev}
+function fenceLim(F,a,w,rad){const r=fenceAt(F.E,a)*w; return Math.max(0,Math.min(r*0.72,r-rad-0.45))}
+// hv = how far the flake reaches up/down right now: flat flakes reach less when lying flat (see stepParticles)
+function ceilAt(sys,x,z,hv){const {p,flat,F,rad}=sys, hw=p.tw/2, rr=Math.hypot(x,z), R=fenceAt(F.R,Math.atan2(z,x))*hw, rho=rr/R, d=rad/R;
+  return Math.min(capTopY(p,flat,Math.max(0,rho-d)),capTopY(p,flat,rho+d))-(hv==null?rad:hv)-0.12}
 function makeParticles(p,g){
   if(S.glitter==="none"||!(S.mat==="resin"||S.mat==="jelly")) return null;
-  const kind=S.glitter, N={star:60,snow:30,heart:28,aurora:46}[kind], scale={star:0.42,snow:1.1,heart:1.0,aurora:0.8}[kind];
-  const mesh=new THREE.InstancedMesh(glitterGeo(kind),glitterMat(kind),N); mesh.renderOrder=1;
+  const kind=S.glitter, G=GLITTERS[kind]; if(!G) return null;
+  const N=G.n, flat=S.charPos==="top"||S.charPos==="stand", F=fenceTable(p);
+  let rad=GLIT_R[G.shape]*G.scale*1.15; if(G.glow) rad=Math.max(rad,G.glow.size*G.scale*1.15/2*0.8);
+  const mesh=new THREE.InstancedMesh(glitterGeo(G.shape),glitterMat(kind),N); mesh.renderOrder=1; mesh.frustumCulled=false;
+  if(G.multi){const c=new THREE.Color(); for(let i=0;i<N;i++){c.copy(lin(S.glitColor||G.multi[i%G.multi.length])); mesh.setColorAt(i,c)} mesh.instanceColor.needsUpdate=true}
+  let glow=null; if(G.glow){glow=new THREE.InstancedMesh(GLOW_PLANE,glowMat(G),N); glow.renderOrder=4; glow.frustumCulled=false; const c=new THREE.Color(1,1,1); for(let i=0;i<N;i++) glow.setColorAt(i,c)}
   const pos=new Float32Array(N*3), vel=new Float32Array(N*3), rot=new Float32Array(N*3), spin=new Float32Array(N*3), r=mulberry32(9);
-  const fence=fenceTable(p);
-  for(let i=0;i<N;i++){const v=r()*0.3, a=r()*Math.PI*2, rr=Math.sqrt(r())*fenceLim(fence,a,lerp(p.bw,p.tw,Math.pow(v,1.2))/2);
-    pos[i*3]=Math.cos(a)*rr; pos[i*3+1]=0.9+v*p.h*0.6; pos[i*3+2]=Math.sin(a)*rr;
-    for(let a=0;a<3;a++){rot[i*3+a]=r()*6.28; spin[i*3+a]=(r()*2-1)*0.4}}
-  const sys={mesh,pos,vel,rot,spin,N,p,scale,fence,dummy:new THREE.Object3D()};
-  if(kind==="star") sys.glow=starGlow(pos,N);
+  const sys={mesh,glow,G,pos,vel,rot,spin,rest:new Uint8Array(N),N,p,flat,F,rad,floor:rad*0.75+0.12,dummy:new THREE.Object3D(),tc:new THREE.Color()};
+  for(let i=0;i<N;i++){const y=sys.floor+r()*p.h*0.25, a=r()*Math.PI*2, rr=Math.sqrt(r())*fenceLim(F,a,wallW(p,y),rad);
+    pos[i*3]=Math.cos(a)*rr; pos[i*3+1]=Math.min(y,ceilAt(sys,pos[i*3],Math.sin(a)*rr)); pos[i*3+2]=Math.sin(a)*rr;
+    for(let k=0;k<3;k++){rot[i*3+k]=r()*6.28; spin[i*3+k]=(r()*2-1)*0.4}}
   return sys;
 }
 function stirParticles(){if(!partSys) return; const {vel,spin,N}=partSys; for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2; vel[i*3]+=Math.cos(a)*(5+Math.random()*9); vel[i*3+1]+=9+Math.random()*14; vel[i*3+2]+=Math.sin(a)*(5+Math.random()*9); for(let k2=0;k2<3;k2++) spin[i*3+k2]+=(Math.random()*2-1)*9}}
 function stepParticles(dt,t){
-  if(!partSys) return; const {mesh,pos,vel,rot,spin,N,p,scale,fence,dummy}=partSys, grav=S.glitter==="snow"?2.6:4.2;
+  if(!partSys) return; const sys=partSys, {mesh,glow,G,pos,vel,rot,spin,rest,N,p,F,rad,floor,dummy,tc}=sys, grav=G.grav, lit=S.glow?1.5:1;
   for(let i=0;i<N;i++){const ix=i*3;
     vel[ix+1]-=grav*dt; const d=1-2.4*dt; vel[ix]*=d; vel[ix+1]*=d; vel[ix+2]*=d;
+    if(G.flutter){vel[ix]+=Math.sin(t*1.7+i*1.3)*2.2*dt; vel[ix+2]+=Math.cos(t*1.3+i*0.7)*2.2*dt}   // petals drift side to side
     pos[ix]+=vel[ix]*dt; pos[ix+1]+=vel[ix+1]*dt; pos[ix+2]+=vel[ix+2]*dt;
-    const floor=0.9, y=pos[ix+1], v=clamp((y-floor)/(p.h*0.85));
-    if(y<floor){pos[ix+1]=floor; vel[ix+1]=0; for(let k2=0;k2<3;k2++) spin[ix+k2]*=0.9}
-    if(y>p.h*0.9){pos[ix+1]=p.h*0.9; vel[ix+1]*=-0.3}
-    {const px=pos[ix], pz=pos[ix+2], rr=Math.hypot(px,pz);
-      if(rr>1e-6){const lim=fenceLim(fence,Math.atan2(pz,px),lerp(p.bw,p.tw,Math.pow(v,1.2))/2);
-        if(rr>lim){const ux=px/rr, uz=pz/rr, vr=vel[ix]*ux+vel[ix+2]*uz; pos[ix]=ux*lim; pos[ix+2]=uz*lim; if(vr>0){vel[ix]-=1.4*vr*ux; vel[ix+2]-=1.4*vr*uz}}}}
+    // turn first, so the limits below see the flake exactly as it is drawn this frame
     const sd=1-1.5*dt; for(let k2=0;k2<3;k2++){rot[ix+k2]+=spin[ix+k2]*dt; spin[ix+k2]*=sd}
-    // resting flakes lie flat-ish, like glitter settled at the bottom
-    if(pos[ix+1]<=floor+0.01){rot[ix]=lerp(rot[ix],Math.round(rot[ix]/Math.PI)*Math.PI+Math.PI/2,dt*3)}
-    dummy.position.set(pos[ix],pos[ix+1],pos[ix+2]); dummy.rotation.set(rot[ix],rot[ix+1],rot[ix+2]); dummy.scale.setScalar(scale*(0.85+0.3*hash(i+40))); dummy.updateMatrix(); mesh.setMatrixAt(i,dummy.matrix);
+    if(rest[i]) rot[ix]=lerp(rot[ix],Math.round(rot[ix]/Math.PI)*Math.PI+Math.PI/2,dt*3);   // settled flakes lie flat-ish
+    // vertical reach of this flake as it is tilted now: a flat piece reaches rad*|sin(tilt)| (+ its thickness)
+    const ny=-Math.sin(rot[ix])*Math.cos(rot[ix+1]), hv=G.shape==="pearl"?rad:rad*Math.sqrt(Math.max(0,1-ny*ny))+0.1*G.scale, fl=Math.max(floor*0.4,hv+0.05);
+    if(pos[ix+1]<fl){pos[ix+1]=fl; vel[ix+1]=0; for(let k2=0;k2<3;k2++) spin[ix+k2]*=0.9}
+    {const px=pos[ix], pz=pos[ix+2], rr=Math.hypot(px,pz);
+      if(rr>1e-6){const lim=fenceLim(F,Math.atan2(pz,px),wallW(p,pos[ix+1]),rad);
+        if(rr>lim){const ux=px/rr, uz=pz/rr, vr=vel[ix]*ux+vel[ix+2]*uz; pos[ix]=ux*lim; pos[ix+2]=uz*lim; if(vr>0){vel[ix]-=1.4*vr*ux; vel[ix+2]-=1.4*vr*uz}}}}
+    {const top=ceilAt(sys,pos[ix],pos[ix+2],hv); if(pos[ix+1]>top){pos[ix+1]=Math.max(fl,top); if(vel[ix+1]>0) vel[ix+1]*=-0.3}}
+    rest[i]=pos[ix+1]<=fl+0.01?1:0;
+    const s=G.scale*(0.85+0.3*hash(i+40));
+    dummy.position.set(pos[ix],pos[ix+1],pos[ix+2]); dummy.rotation.set(rot[ix],rot[ix+1],rot[ix+2]); dummy.scale.setScalar(s); dummy.updateMatrix(); mesh.setMatrixAt(i,dummy.matrix);
+    if(glow){dummy.scale.setScalar(s*G.glow.size); dummy.updateMatrix(); glow.setMatrixAt(i,dummy.matrix);
+      const sp=G.glow.speed, w=0.5+0.5*Math.sin(t*(sp[0]+hash(i+300)*(sp[1]-sp[0]))+hash(i+500)*6.28), lo=G.glow.lo;
+      glow.setColorAt(i,tc.setScalar((lo+(1-lo)*w*w)*G.glow.amt*lit))}
   }
   mesh.instanceMatrix.needsUpdate=true;
-  if(partSys.glow) twinkle(partSys.glow,N,t);
+  if(glow){glow.instanceMatrix.needsUpdate=true; glow.instanceColor.needsUpdate=true}
 }
 
 function rebuild(){
   const p=PROFILES[S.shape], flat=S.charPos==="top"||S.charPos==="stand";
   capGroup.children.forEach(freeTree);
   while(capGroup.children.length) capGroup.remove(capGroup.children[0]);
-  capGeo=capGeometry(p,flat);
-  capMesh=new THREE.Mesh(capGeo,capMaterial()); capMesh.renderOrder=2; capGroup.add(capMesh);
+  capGeo=capGeoFor(p,flat);
+  capMesh=new THREE.Mesh(capGeo,capMaterial()); capMesh.renderOrder=2; capMesh.userData.col=lin(S.color); capGroup.add(capMesh);
   if(S.charPos!=="none"){charGroup=buildChar(p,capGeo); capGroup.add(charGroup)}
   partSys=makeParticles(p,capGeo); if(partSys){capGroup.add(partSys.mesh); if(partSys.glow) capGroup.add(partSys.glow); stepParticles(0.001,0)}
   decoGroup=buildDeco(p,capGeo); capGroup.add(decoGroup);
@@ -1877,18 +1964,18 @@ function chime(a,t0){[1568,2093,2637].forEach((f,i)=>{const o=a.createOscillator
    keycap sounds like typing instead of one clip on repeat. gain evens the packs out (key RMS 841~1216). */
 const PACKS={mango:{keys:10,spec:1,gain:1.1},frog:{keys:10,spec:1,gain:0.96},tico:{keys:24,spec:4,gain:0.8},
   violet:{keys:10,spec:1,gain:1.12},black:{keys:10,spec:1,gain:1.04}};
-const PACK_BUF={}, PACK_LOAD={};
+const PACK_BUF={}, PACK_LOAD={}, PACK_DONE={};
 function loadPack(id){
   if(PACK_LOAD[id]||!PACKS[id]) return PACK_LOAD[id]; const P=PACKS[id], names=[];
   for(let i=1;i<=P.keys;i++) names.push("key"+i); for(const k of ["space","enter","shift","back"]) for(let i=1;i<=P.spec;i++) names.push(k+i);
   // decoding needs no user gesture on an offline context, and AudioBuffers play on any context
   let dec=null; try{dec=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,1,44100)}catch(e){}
-  if(!dec) return (PACK_LOAD[id]=Promise.resolve());
+  if(!dec){PACK_DONE[id]=true; return (PACK_LOAD[id]=Promise.resolve())}
   return (PACK_LOAD[id]=Promise.all(names.map(n=>fetch(`sounds/${id}/${n}.wav`).then(r=>r.ok?r.arrayBuffer():Promise.reject(r.status))
       .then(b=>new Promise((ok,no)=>dec.decodeAudioData(b,ok,no))).then(buf=>[n,buf]).catch(()=>null)))
     .then(list=>{const pb={key:[],space:[],enter:[],shift:[],back:[]}; let got=0;
       for(const it of list){if(!it) continue; pb[it[0].replace(/\d+$/,"")].push(it[1]); got++}
-      if(got&&pb.key.length) PACK_BUF[id]=pb}));   // nothing loaded (opened as a file) -> the synth below stays
+      if(got&&pb.key.length) PACK_BUF[id]=pb; PACK_DONE[id]=true}));   // nothing loaded (opened as a file) -> the synth below stays
 }
 let lastKeys=[];
 function pickSound(pb){
@@ -1904,8 +1991,11 @@ function playPack(a){const pb=PACK_BUF[S.sw]; if(!pb) return false;
   const g=a.createGain(); g.gain.value=PACKS[S.sw].gain; src.connect(g).connect(a.destination); src.start(); return true}
 // changing the switch: let its sounds arrive before the demo press, so it is heard with the new switch
 function previewSwitch(){ac(); const p=loadPack(S.sw); if(PACK_BUF[S.sw]||!p) pressKey(); else p.then(pressKey,pressKey)}
-function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; loadPack(S.sw);
-  if(PACK_BUF[S.sw]){if(kind==="down") playPack(a); return}   // a recording already holds the whole keystroke
+function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; const p=loadPack(S.sw), id=S.sw;
+  if(PACK_BUF[id]){if(kind==="down") playPack(a); return}   // a recording already holds the whole keystroke
+  // still arriving (a press right after the page opens): play the recording as soon as it lands instead
+  // of the synth - it used to answer the very first press with the synth's "둥"
+  if(p&&!PACK_DONE[id]){if(kind==="down"){const t0=performance.now(); p.then(()=>{if(PACK_BUF[id]&&S.sw===id&&performance.now()-t0<700) playPack(a)})} return}
   const t=a.currentTime; const deep=S.mat==="resin"||S.mat==="jelly"?0.9:1.1;   // fallback when the files can't load
   if(kind==="down"){burst(a,t+0.02,500*deep,2200*deep,0.7,0.06); thump(a,t+0.02,170*deep,0.45,0.09)}
   else{burst(a,t,700*deep,2600*deep,0.3,0.04); thump(a,t,230*deep,0.18,0.05)}}
@@ -1923,12 +2013,18 @@ function applyRGB(t){
   rgbFloor.material.color.copy(col); rgbFloor.material.opacity=on?0.45*k:0;
   if(clearMat.emissive) clearMat.emissive.copy(col).multiplyScalar(on&&(S.base==='clear'||S.base==='tint')?0.18*k:0);
 }
+/* 야광 모드: the lights dim and the cap (in its own colour) and the glitter glow from inside, breathing slowly */
+function applyGlow(t){const on=S.glow;
+  hemiL.intensity=on?0.2:0.35; keyL.intensity=on?0.55:0.95; rimL.intensity=on?0.32:0.55;
+  if(capMesh&&capMesh.material.emissive){capMesh.material.emissive.copy(capMesh.userData.col); capMesh.material.emissiveIntensity=on?0.42+0.08*Math.sin(t*1.3):0}
+  for(const k in GLIT_MAT){const m=GLIT_MAT[k]; if(m.emissive) m.emissiveIntensity=on?(m.userData.e0||0)*1.8+0.35:(m.userData.e0||0)}
+}
 function poseAt(t){
   root.rotation.set(rotX,rotY,0);
   capGroup.position.y=5.2-press*2.4; stem.position.y=-press*2.4;
   if(decoGroup&&decoGroup.userData.halo){decoGroup.userData.halo.forEach(o=>o.position.y=o.userData.float+Math.sin(t*2)*0.45)}
   if(decoGroup&&decoGroup.userData.spin){const o=decoGroup.userData.spin; o.rotation.set(0,Math.sin(t*1.1)*0.6,0); o.position.y=o.userData.float+Math.sin(t*1.8)*0.5}
-  applyRGB(t);
+  applyRGB(t); applyGlow(t);
 }
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000); last=now; T+=dt; idle+=dt;
@@ -1950,18 +2046,47 @@ function extractPalette(it){
   return out.map(([r,g,b])=>"#"+[r,g,b].map(v=>v.toString(16).padStart(2,"0")).join("").toUpperCase());
 }
 
+/* ---------- first-use hitches ----------
+   The first time a look is drawn the GPU compiles its shader: 0.37~0.69 s froze the page on the first
+   홀로그램 / 윗면 프린트 / 아크릴 스탠드 / 눈송이 (measured). warmUp() builds every look once, one per idle moment,
+   and compiles it. The throw-away materials are kept alive (never disposed) so their programs stay cached. */
+const WARM_KEEP=[]; const idleCall=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:3000}):setTimeout(f,150);
+function warmUp(){
+  const jobs=[];
+  for(const m of Object.keys(OPT.mat)) jobs.push({mat:m});
+  for(const c of ["top","stand"]) jobs.push({charPos:c});
+  for(const d of Object.keys(OPT.deco)) for(const dm of Object.keys(OPT.decoMat)) jobs.push({deco:d,decoMat:dm});
+  for(const gl of Object.keys(OPT.glitter)) jobs.push({mat:"resin",glitter:gl});
+  for(const b of Object.keys(OPT.base)) jobs.push({base:b});
+  const step=()=>{if(!jobs.length) return; if(gesture||PAUSE){idleCall(step); return}
+    // snapshot the user's settings now (not once at the start): a step must never undo a change they just made
+    const tmp=new THREE.Group(), saved=Object.assign({},S);
+    try{Object.assign(S,jobs.shift()); const p=PROFILES[S.shape], flat=S.charPos==="top"||S.charPos==="stand", cg=capGeoFor(p,flat);
+      tmp.add(new THREE.Mesh(cg,capMaterial())); tmp.add(new THREE.Mesh(cg,baseMaterial()));
+      if(S.charPos!=="none") tmp.add(buildChar(p,cg));
+      const ps=makeParticles(p,cg); if(ps){tmp.add(ps.mesh); if(ps.glow) tmp.add(ps.glow)}
+      tmp.add(buildDeco(p,cg));
+      scene.add(tmp); renderer.compile(scene,camera)}
+    catch(e){console.error("warm-up",e)}
+    finally{Object.assign(S,saved); scene.remove(tmp);
+      tmp.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!KEEP.has(m)) WARM_KEEP.push(m)})})}
+    idleCall(step)};
+  idleCall(step);
+}
+
 /* ---------- UI ---------- */
 function chipGroup(id,key,labels,after){const el=$(id); el.innerHTML="";
   for(const k of Object.keys(labels)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=labels[k]; if(key==="sw"){const d=document.createElement("span"); d.className="dot"; d.style.background=SWC[k]; b.prepend(d)} b.setAttribute("aria-pressed",String(S[key]===k));
     b.addEventListener("click",()=>{S[key]=k; if(key==="bg") S.bgImg=null; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(after) after(k); else rebuild(); if(key==="sw") previewSwitch()}); el.appendChild(b)}}
 function swatches(id,key,list){const el=$(id); el.innerHTML="";
   const all=[...S.palette,...list].filter((c,i,a)=>a.indexOf(c)===i);
-  all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); b.style.background=col; b.setAttribute("aria-label",col); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
-  const pick=document.createElement("input"); pick.type="color"; pick.className="sw pick"; pick.value=S[key]; pick.setAttribute("aria-label","직접 고르기"); pick.addEventListener("input",()=>{S[key]=pick.value.toUpperCase(); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(pick);
+  all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); if(col) b.style.background=col; else {b.style.background="conic-gradient(#FFD66B,#FF8FB8,#8FD3FF,#B8A2FF,#FFD66B)"; b.title="기본 색"} b.setAttribute("aria-label",col||"기본 색"); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
+  const pick=document.createElement("input"); pick.type="color"; pick.className="sw pick"; pick.value=S[key]||"#FFD66B"; pick.setAttribute("aria-label","직접 고르기"); pick.addEventListener("input",()=>{S[key]=pick.value.toUpperCase(); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(pick);
 }
 function renderUI(){
   chipGroup("shapeChips","shape",OPT.shape); chipGroup("matChips","mat",OPT.mat); chipGroup("posChips","charPos",OPT.charPos); chipGroup("decoChips","deco",OPT.deco); chipGroup("decoMatChips","decoMat",OPT.decoMat);
   chipGroup("glitChips","glitter",OPT.glitter,()=>{rebuild(); pressKey()}); chipGroup("baseChips","base",OPT.base,()=>applyBase()); swatches("baseSw","baseColor",["#CFE3FF","#FFD1E3","#FFF1B8","#CDEFE0","#DCCBFF","#FFFFFF","#2C2F36"]); chipGroup("swChips","sw",OPT.sw); chipGroup("rgbChips","rgb",OPT.rgb,()=>{}); chipGroup("bgChips","bg",OPT.bg,()=>setBg());
+  swatches("glitSw","glitColor",["","#FFD66B","#FFFFFF","#FF8FB8","#8FD3FF","#B8A2FF","#9BE3B0","#FFB38A"]);
   swatches("colSw","color",BASE_COLORS); swatches("decoSw","decoColor",DECO_COLORS); swatches("rgbSw","rgbColor",["#FF6FB5","#FF4D4D","#FFB547","#6BFF9E","#4DC3FF","#8C6BFF","#FFFFFF"]);
 }
 $("name").addEventListener("input",e=>{S.name=e.target.value.trim(); $("count").textContent=`${[...e.target.value].length}/6`; applyBase(); writeHash()});
@@ -1970,6 +2095,8 @@ $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); r
   S.shape=pk(OPT.shape); S.mat=pk(OPT.mat); S.deco=pk(OPT.deco); S.decoMat=pk(OPT.decoMat); S.glitter=pk(OPT.glitter); S.sw=pk(OPT.sw); S.rgb=pk(OPT.rgb); loadPack(S.sw);
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
+function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.textContent=S.glow?"🌙 야광 켜짐":"🌙 야광 모드"}
+$("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(S.glow&&!S.bgImg&&S.bg!=="night"){S.bg="night"; setBg(); renderUI()} glowLabel(); writeHash()});
 $("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
 $("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
 $("camLock").addEventListener("click",e=>{CAM.locked=!CAM.locked; velY=0; e.currentTarget.setAttribute("aria-pressed",String(CAM.locked)); e.currentTarget.textContent=CAM.locked?"🔒 카메라 고정됨":"🔓 카메라 고정"});
@@ -1979,15 +2106,16 @@ $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.tar
     const c=document.createElement("canvas"); c.width=800; c.height=1000; const x=c.getContext("2d"); const k=Math.max(800/img.width,1000/img.height); x.drawImage(img,(800-img.width*k)/2,(1000-img.height*k)/2,img.width*k,img.height*k);
     S.bgImg=texOf(c); setBg(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
-    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):""}); $("name").value=S.name}catch(e){}}
+    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1}); $("name").value=S.name}catch(e){}}
 $("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
 function resetRun(){rebuild()}
-readHash(); setBg(); renderUI(); rebuild(); (window.requestIdleCallback||setTimeout)(()=>loadPack(S.sw));
+readHash(); loadPack(S.sw); setBg(); renderUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
+setTimeout(warmUp,1500);
 
 /* ---------- slots & files ---------- */
 function renderSlots(){
@@ -2126,6 +2254,41 @@ $("edDone").addEventListener("click",()=>closeEditor(true));
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("editor").hidden) closeEditor(true)});
 
 
+/* ---------- GIF encoding in a Web Worker ----------
+   Colour-matching and compressing every frame used to run on the page itself, so the whole page froze
+   while a GIF was being made. The worker gets the same gifenc code this page already carries (read from
+   its own <script>), so nothing extra is downloaded. Returns null when workers aren't available; the
+   caller then encodes on the page as before. The same helper lives in laundry/index.html. */
+function gifWorkerMain(){ // runs inside the worker
+  let gif=null,pal=null,TI=0,prev=null,W=0,H=0,delay=60,first=true;
+  onmessage=e=>{const m=e.data;
+    if(m.t==="start"){pal=gifenc.quantize(m.sample,255,{format:"rgb565"}); TI=pal.length; gif=gifenc.GIFEncoder(); prev=null; W=m.W; H=m.H; delay=m.delay; first=true; postMessage({t:"started"})}
+    else if(m.t==="frame"){const idx=gifenc.applyPalette(m.px,pal,"rgb565"); let out=idx;
+      if(prev){out=new Uint8Array(idx.length); for(let i=0;i<idx.length;i++) out[i]=idx[i]===prev[i]?TI:idx[i]}
+      gif.writeFrame(out,W,H,first?{palette:pal.concat([[0,0,0]]),delay,dispose:1}:{delay,transparent:true,transparentIndex:TI,dispose:1}); first=false; prev=idx; postMessage({t:"frame"})}
+    else if(m.t==="finish"){gif.finish(); const b=gif.bytes(); postMessage({t:"bytes",bytes:b},[b.buffer])}};
+}
+function gifWorker(onFrame){
+  try{
+    const src=[...document.scripts].map(s=>s.textContent).find(t=>t.trim().startsWith("/* gifenc"));
+    if(!src||!window.Worker||!window.Blob) return null;
+    const url=URL.createObjectURL(new Blob(["self.window=self;\n"+src+"\n("+gifWorkerMain.toString()+")();\n"],{type:"text/javascript"}));
+    const w=new Worker(url); URL.revokeObjectURL(url);
+    let fail=null, sent=0, done=0; const waits=[], drains=[];
+    const kick=()=>{for(let i=drains.length-1;i>=0;i--) if(sent-done<=drains[i].k||fail){drains[i].r(); drains.splice(i,1)}};
+    w.onmessage=e=>{const m=e.data; if(m.t==="frame"){done++; onFrame&&onFrame(done); kick()} else {const r=waits.shift(); r&&r.ok(m)}};
+    w.onerror=e=>{e.preventDefault&&e.preventDefault(); fail=new Error(e.message||"gif worker failed"); while(waits.length) waits.shift().no(fail); kick()};
+    const call=(msg,tr)=>new Promise((ok,no)=>{if(fail) return no(fail); waits.push({ok,no}); w.postMessage(msg,tr||[])});
+    return {
+      start:(sample,W,H,delay)=>call({t:"start",sample,W,H,delay},[sample.buffer]),
+      frame:(px)=>{if(fail) throw fail; sent++; w.postMessage({t:"frame",px},[px.buffer])},
+      // wait until at most k frames are still queued (keeps memory flat while frames are produced)
+      drain:(k)=>new Promise(r=>{if(fail||sent-done<=k) return r(); drains.push({k,r})}).then(()=>{if(fail) throw fail}),
+      finish:()=>call({t:"finish"}).then(m=>m.bytes),
+      close:()=>w.terminate()};
+  }catch(e){return null}
+}
+
 /* ---------- export ---------- */
 let downloads=null, outBlob=null, outExt="png";
 (async()=>{try{if(window.claude&&typeof window.claude.use==="function") downloads=await window.claude.use("downloads")}catch(e){downloads=null}})();
@@ -2148,7 +2311,7 @@ function cardOverlay(x,W,H){ // name tag + little title, like a product card
   x.font=`${46*s}px Jua, sans-serif`; x.textAlign="left"; x.fillStyle=S.bg==="night"?"#FFE38A":"#4A3A5A"; x.fillText(S.name?`${S.name}의 키캡`:"나의 아티산 키캡",60*s,110*s);
   x.font=`${24*s}px "Noto Sans KR", sans-serif`; x.fillStyle=S.bg==="night"?"rgba(255,255,255,.7)":"rgba(74,58,90,.65)";
   x.fillText(`${OPT.shape[S.shape]} · ${OPT.mat[S.mat]} · ${OPT.deco[S.deco]} · ${OPT.sw[S.sw].split(" · ")[0]}`,60*s,156*s);
-  x.textAlign="right"; x.fillText("사탄의 키캡 공방",W-60*s,H-60*s);
+  x.textAlign="right"; x.fillText("사탄의 키캡",W-60*s,H-60*s);
   x.restore();
 }
 $("savePng").addEventListener("click",async()=>{
@@ -2169,11 +2332,19 @@ $("makeGif").addEventListener("click",async()=>{
     const frames=[];
     for(let f=0;f<N;f++){rotY=keep+f/N*Math.PI*2; press=(f===N/2)?0.9:(f===N/2+1?0.4:0); poseAt(T+f*0.08); const c=snap(W,H); cardOverlay(c.getContext("2d"),W,H); frames.push(c.getContext("2d").getImageData(0,0,W,H).data); if(f%4===0){prog(0.02+0.45*f/N,"360도 촬영 중…"); await tick()}}
     rotY=keep; press=0; restoreSize(); PAUSE=false;
-    const sample=new Uint8ClampedArray(frames[0].length*4); [0,12,24,36].forEach((k,i)=>sample.set(frames[k],i*frames[0].length));
+    const mkSample=()=>{const sm=new Uint8ClampedArray(frames[0].length*4); [0,12,24,36].forEach((k,i)=>sm.set(frames[k],i*frames[0].length)); return sm};
+    // encode in a worker so the page keeps moving; frames are handed over, not copied
+    let bytes=null, sent=false; const job=gifWorker(done=>prog(0.5+0.48*done/N,"움짤 만드는 중…"));
+    if(job){try{await job.start(mkSample(),W,H,60); sent=true; for(let f=0;f<N;f++) job.frame(frames[f]); bytes=await job.finish()}
+      catch(e){console.error("gif worker",e); if(sent) throw e}   // frames already handed over: report it rather than retry
+      finally{job.close()}}
+    if(!bytes){   // no worker (or it failed before any frame was sent): encode here, as before
+    const sample=mkSample();
     const pal=quantize(sample,255,{format:"rgb565"}), TI=pal.length, palette=pal.concat([[0,0,0]]); const gif=GIFEncoder(); let prev=null;
     for(let f=0;f<N;f++){const idx=applyPalette(frames[f],pal,"rgb565"); let out=idx; if(prev){out=new Uint8Array(idx.length); for(let i=0;i<idx.length;i++) out[i]=idx[i]===prev[i]?TI:idx[i]}
       gif.writeFrame(out,W,H,f===0?{palette,delay:60,dispose:1}:{delay:60,transparent:true,transparentIndex:TI,dispose:1}); prev=idx; if(f%4===0){prog(0.5+0.48*f/N,"움짤 만드는 중…"); await tick()}}
-    gif.finish(); outBlob=new Blob([gif.bytes()],{type:"image/gif"}); outExt="gif";
+    gif.finish(); bytes=gif.bytes()}
+    outBlob=new Blob([bytes],{type:"image/gif"}); outExt="gif";
     $("outImg").src=await readURL(outBlob); $("out").style.display="block"; prog(1,`움짤 완성 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
   }catch(err){console.error(err); $("status").textContent="움짤을 만들지 못했어요."; PAUSE=false; restoreSize()}
   finally{busy(false)}
@@ -2181,7 +2352,7 @@ $("makeGif").addEventListener("click",async()=>{
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};
 
-/* back to the game list: only inside the "사탄의 게임" site, not inside the Claude viewer (same rule as laundry) */
+/* back to the game list: only inside the "사탄의 장난감" site, not inside the Claude viewer (same rule as laundry) */
 (function(){try{const host=location.hostname||""; const inClaude=/claude\.ai$|claudeusercontent|anthropic/.test(host)||window.top!==window; if(!inClaude) document.getElementById("backLink").hidden=false}catch(e){}})();
 
 })();

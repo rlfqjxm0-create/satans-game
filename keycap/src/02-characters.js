@@ -4,33 +4,22 @@ function trimCanvas(c){
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){if(d[(y*w+x)*4+3]>16){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
   if(x1<0) return c; const o=document.createElement("canvas"); o.width=x1-x0+1; o.height=y1-y0+1; o.getContext("2d").drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height); return o;
 }
-function makePlaceholder(){ // sample character: a round, deadpan black cat face
-  const c=document.createElement("canvas"); c.width=320; c.height=300; const x=c.getContext("2d");
-  const B="#2C2F36", L="#15171B";
-  const ear=(sx)=>{x.beginPath(); x.moveTo(160+sx*100,138); x.quadraticCurveTo(160+sx*108,62,160+sx*94,52); x.quadraticCurveTo(160+sx*74,52,160+sx*36,98); x.closePath()};
-  const head=()=>{x.beginPath(); x.moveTo(160,92); x.bezierCurveTo(238,92,284,132,284,184); x.bezierCurveTo(284,244,228,276,160,276); x.bezierCurveTo(92,276,36,244,36,184); x.bezierCurveTo(36,132,82,92,160,92); x.closePath()};
-  x.lineJoin="round"; x.lineCap="round";
-  for(const f of [()=>ear(-1),()=>ear(1),head]){f(); x.lineWidth=16; x.strokeStyle="#FFFFFF"; x.stroke()}
-  for(const sx of [-1,1]){ear(sx); x.fillStyle=B; x.fill(); x.lineWidth=4; x.strokeStyle=L; x.stroke();
-    x.beginPath(); x.moveTo(160+sx*88,120); x.quadraticCurveTo(160+sx*94,76,160+sx*86,70); x.quadraticCurveTo(160+sx*72,72,160+sx*50,100); x.closePath(); x.fillStyle="#8A8F99"; x.fill()}
-  head(); x.fillStyle=B; x.fill(); x.lineWidth=4; x.strokeStyle=L; x.stroke();
-  x.fillStyle="rgba(255,255,255,.07)"; x.beginPath(); x.ellipse(116,128,40,20,-0.35,0,7); x.fill();
-  for(const sx of [118,202]){
-    x.save(); x.beginPath(); x.ellipse(sx,188,24,24,0,0,7); x.clip();
-    x.fillStyle="#FFD45C"; x.fillRect(sx-30,160,60,60);
-    x.beginPath(); x.ellipse(sx,192,5,17,0,0,7); x.fillStyle="#1A1B20"; x.fill();
-    x.fillStyle=B; x.fillRect(sx-30,160,60,19);
-    x.restore();
-    x.beginPath(); x.ellipse(sx,188,24,24,0,0,7); x.lineWidth=3; x.strokeStyle=L; x.stroke();
-    x.beginPath(); x.moveTo(sx-25,179); x.lineTo(sx+25,179); x.lineWidth=4; x.stroke();
-    x.fillStyle="rgba(255,255,255,.85)"; x.beginPath(); x.arc(sx+9,199,3,0,7); x.fill();
-  }
-  x.fillStyle="#F7A8BC"; x.beginPath(); x.moveTo(152,220); x.quadraticCurveTo(160,216,168,220); x.quadraticCurveTo(160,230,152,220); x.fill();
-  x.strokeStyle="#E9E3EA"; x.lineWidth=3.5; x.beginPath(); x.moveTo(160,227); x.lineTo(160,233); x.moveTo(151,236); x.lineTo(169,236); x.stroke();
-  x.strokeStyle="rgba(233,227,234,.8)"; x.lineWidth=3;
-  x.beginPath(); x.moveTo(62,214); x.lineTo(24,206); x.moveTo(62,226); x.lineTo(22,230); x.moveTo(258,214); x.lineTo(296,206); x.moveTo(258,226); x.lineTo(298,230); x.stroke();
-  return trimCanvas(c);
+/* The site's black cat (the same shapes as the logo on the main page, in a 64-unit box):
+   no outline, big round pupils, no nose. Used as the character when no picture has been added. */
+function drawSatanCat(x){
+  const B="#2A2C33";
+  x.lineJoin="round"; x.lineWidth=2.4;
+  for(const s of [1,-1]){x.save(); if(s<0){x.translate(64,0); x.scale(-1,1)}
+    const ear=new Path2D("M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"); x.fillStyle=B; x.strokeStyle=B; x.fill(ear); x.stroke(ear);
+    x.fillStyle="#4B4F5A"; x.fill(new Path2D("M15.2 25 L15.9 12.8 L25.2 20.2 Z")); x.restore()}
+  x.fillStyle=B; x.beginPath(); x.ellipse(32,37,23.5,19.5,0,0,Math.PI*2); x.fill();
+  for(const cx of [22.5,41.5]){
+    x.fillStyle="#FFD45C"; x.beginPath(); x.arc(cx,37,7,0,Math.PI*2); x.fill();
+    x.fillStyle="#121317"; x.beginPath(); x.arc(cx+0.3,37.8,5.6,0,Math.PI*2); x.fill();
+    x.fillStyle="#FFFFFF"; x.beginPath(); x.arc(cx-1.9,35.2,1.9,0,Math.PI*2); x.fill(); x.beginPath(); x.arc(cx+2.3,40.2,0.9,0,Math.PI*2); x.fill()}
+  x.fillStyle="rgba(255,143,176,.5)"; for(const cx of [14.5,49.5]){x.beginPath(); x.ellipse(cx,45.5,3.2,1.9,0,0,Math.PI*2); x.fill()}
 }
+function makePlaceholder(){const c=document.createElement("canvas"); c.width=320; c.height=300; const x=c.getContext("2d"); x.scale(5,5); drawSatanCat(x); return trimCanvas(c)}
 const PLACEHOLDER={canvas:makePlaceholder(), cutout:true, v:{}};
 /* fusion: a vertical slice of every character stitched into one body */
 const MERGE=new Map(); let UID=0;
