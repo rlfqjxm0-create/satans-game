@@ -77,6 +77,7 @@ footer{margin-top:30px; text-align:center; font-size:13px; color:var(--ink-soft)
     <a class="game" href="laundry/index.html">
       <div class="thumb">
         <svg viewBox="0 0 200 160" aria-hidden="true">
+          <defs><clipPath id="lgDrum"><circle cx="100" cy="110" r="25"/></clipPath></defs>
           <path d="M10 26 Q100 44 190 26" fill="none" stroke="#9FB0C3" stroke-width="1.6"/>
           <g transform="translate(48 30) rotate(-4)"><rect x="-7" y="0" width="14" height="18" rx="3" fill="#FFB8C9" stroke="#4E5F73" stroke-width="1.6"/></g>
           <g transform="translate(150 30) rotate(5)"><rect x="-8" y="0" width="16" height="16" rx="3" fill="#A8E3CF" stroke="#4E5F73" stroke-width="1.6"/></g>
@@ -87,11 +88,24 @@ footer{margin-top:30px; text-align:center; font-size:13px; color:var(--ink-soft)
           <circle cx="124" cy="60" r="3.2" fill="#3E95DA"/><circle cx="133" cy="60" r="3.2" fill="#3E95DA"/>
           <circle cx="100" cy="110" r="32" fill="#FFFFFF" stroke="#6F9CC4" stroke-width="2.6"/>
           <circle cx="100" cy="110" r="25" fill="#4A5169"/>
-          <path d="M90 97 Q88 84 93 90 M110 97 Q112 84 107 90" stroke="#4E5F73" stroke-width="1.5" fill="#FFFFFF"/>
-          <ellipse cx="100" cy="113" rx="16" ry="13" fill="#FFFFFF" stroke="#D9CFE8" stroke-width="1.6"/>
-          <circle cx="94" cy="112" r="1.8" fill="#3B3350"/><circle cx="106" cy="112" r="1.8" fill="#3B3350"/>
-          <path d="M97 117 Q100 120 103 117" stroke="#3B3350" stroke-width="1.4" fill="none" stroke-linecap="round"/>
-          <path d="M75 116 Q100 104 125 116 L125 135 L75 135 Z" fill="rgba(120,185,245,.35)"/>
+          <g clip-path="url(#lgDrum)">
+            <path d="M80.5 117 Q76.5 106 84 98.5" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M88.5 103 L90.6 92.5 L98.5 99.5 Z" fill="#FFFFFF" stroke="#8FA3BC" stroke-width="1.7" stroke-linejoin="round"/>
+            <path d="M111.5 103 L109.4 92.5 L101.5 99.5 Z" fill="#FFFFFF" stroke="#8FA3BC" stroke-width="1.7" stroke-linejoin="round"/>
+            <ellipse cx="100" cy="112" rx="16.5" ry="14" fill="#FFFFFF" stroke="#8FA3BC" stroke-width="1.7"/>
+            <path d="M91.2 100.6 L92.4 95.8 L95.8 99 Z" fill="#FFC2D4"/>
+            <path d="M108.8 100.6 L107.6 95.8 L104.2 99 Z" fill="#FFC2D4"/>
+            <ellipse cx="88.8" cy="115.4" rx="3.1" ry="2" fill="#FFC2D4"/>
+            <ellipse cx="111.2" cy="115.4" rx="3.1" ry="2" fill="#FFC2D4"/>
+            <ellipse cx="94.2" cy="110.6" rx="1.9" ry="2.3" fill="#3B3350"/>
+            <ellipse cx="105.8" cy="110.6" rx="1.9" ry="2.3" fill="#3B3350"/>
+            <circle cx="93.4" cy="109.6" r=".7" fill="#FFFFFF"/><circle cx="105" cy="109.6" r=".7" fill="#FFFFFF"/>
+            <path d="M96.9 116 Q100 118.6 103.1 116" fill="none" stroke="#3B3350" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M74 122 Q87 117 100 120 Q113 123 126 117 L126 138 L74 138 Z" fill="rgba(120,185,245,.42)"/>
+            <circle cx="83" cy="121" r="3.6" fill="rgba(255,255,255,.7)"/>
+            <circle cx="93.5" cy="124.5" r="2.6" fill="rgba(255,255,255,.55)"/>
+            <circle cx="117" cy="119" r="3" fill="rgba(255,255,255,.65)"/>
+          </g>
           <circle cx="160" cy="84" r="7" fill="rgba(255,255,255,.7)" stroke="#78A0D7" stroke-width="1.4"/>
           <circle cx="170" cy="66" r="4" fill="rgba(255,255,255,.7)" stroke="#78A0D7" stroke-width="1.2"/>
           <circle cx="34" cy="96" r="5" fill="rgba(255,255,255,.7)" stroke="#78A0D7" stroke-width="1.2"/>

@@ -58,7 +58,7 @@
    - `THEMES` 세탁기 색 7종 / `COURSES` 코스 4종(코스마다 결과 가중치 `w`)
    - `RESULTS` **결과 19종 + 히든 `satan`**. 각 항목: `short/title/sub/says/stars/mood`,
      옵션 `poof`(연기 연출) `pairs`(분신 전용 2인 대사) `multi`(합체) `hidden`
-   - `LINES` 대사 풀 — fill 32 / wash 51 / spin 34 / end 28 / tap 33 / common 3.
+   - `LINES` 대사 풀 — fill 32 / wash 51 / spin 34 / end 28 / tap 33 / dry 15 / common 3.
      한 판에 **말풍선은 다섯 개**다(`washTalk`): 물 받기 0.5–1.25s, 본세탁 1.45–2.2s·2.4–3.2s,
      탈수 3.45–4.55s, 종료 4.95–5.35s. 대사는 판이 시작할 때 한 번씩 뽑고 본세탁 둘은 서로 다르게 고른다.
      **말풍선은 줄바꿈이 없다** — 새 대사는 한글 10자를 넘기지 말 것(지금 가장 긴 것이 151px, 한계 464px).
@@ -98,9 +98,30 @@
 | `choiae-laundry-dex` | 모은 결과 키 배열 | laundry + **메인 `index.html`의 진행도 표시** |
 | `choiae-laundry-stats` | `{spins, pity, done, first}` — done·first 는 인증서에 찍힌다 | laundry |
 | `choiae-laundry-sound` | `"on"`/`"off"` | laundry |
+| `choiae-laundry-vol` | 소리 크기 0~100 (기본 70) | laundry |
 
 메인 페이지가 게임의 키를 직접 읽어 진행 바를 그린다(같은 오리진이라 가능).
 **키 이름을 바꾸면 메인 페이지도 같이 고칠 것.**
+
+### 물기 털기(말리기)
+
+세탁이 끝나면 캐릭터를 잡고 흔들 수 있고, 충분히 털면 보상이 나온다.
+상태는 `IA.wet[i]`(1→0)과 `IA.dry[i]`(마른 시각) 둘뿐이고 저장하지 않는다.
+
+- 손이 `DRY_SHAKE`(2600) 픽셀만큼 움직이면 마른다(`dryStep`). 톡 치는 것도 조금씩 친다.
+- 마르는 순간: `LINES.dry` 전용 대사(2.6초 동안 떠 있다) + 별 입자 + 오르는 소리(`sfxDry`).
+  그 뒤로는 `sparkles()`가 계속 반짝이고, 톡 칠 때도 `LINES.dry`에서 말한다.
+- 캐릭터마다 따로 마른다(분신은 둘). 안내 문구는 `updateHint()` 한 곳에서 정한다.
+- 마른 뒤에는 `spawnParts`가 물방울 대신 별을 튀긴다.
+
+### 소리
+
+`S.sound`(켜고 끄기) 와 `S.vol`(0~1, 기본 0.7) 둘로 나뉘어 있다.
+
+- 세탁 트랙은 Web Audio면 `gainNode`, `<audio>`면 `audioEl.volume`. 둘 다 재생 중에도 즉시 반영된다.
+- 톡·물방울·말림 효과음은 gain 값에 `S.vol`을 곱한다. **새 효과음을 만들면 이것을 빼먹지 말 것.**
+- 음량은 **재생에만** 걸린다 — 움짤·영상에 담기는 소리는 원래 크기 그대로다
+  (소리를 꺼 두면 영상에 오디오 트랙을 안 넣는 기존 동작은 그대로).
 
 ### 저장 기능
 
