@@ -377,8 +377,8 @@ function applyBase(){
    flake (so a star glows as a star, not as a round blob); the flake itself hides the plane's middle.
    rad (worked out in makeParticles) = how far a flake plus its glow reaches from its centre. */
 const GLITTERS={
-  star:{n:60,scale:0.42,grav:4.2,shape:"star",glow:{tex:"star",size:3.4,amt:1,lo:0.35,speed:[1.6,3.8]}},
-  snow:{n:30,scale:1.0,grav:2.6,shape:"snow",glow:{tex:"snow",size:2.0,amt:0.3,lo:0.5,speed:[0.5,1.1]}},
+  star:{n:60,scale:0.42,grav:4.2,shape:"star",self:true},   // self: the body itself shines - no light around it
+  snow:{n:30,scale:1.0,grav:2.6,shape:"snow",self:true},
   heart:{n:28,scale:1.0,grav:4.2,shape:"heart"},
   aurora:{n:46,scale:0.8,grav:4.2,shape:"hex"},
   pearl:{n:34,scale:0.62,grav:5.2,shape:"pearl"},
@@ -392,7 +392,7 @@ const GLIT_GEO={}, GLIT_MAT={}, GLOW_TEX={}, GLOW_MAT={};
    kind lights up in its own colour and gets a soft light around it (drawn after the cap, so the tint can't dull it). */
 const DARK_GLOW={tex:"dot",size:2.3,amt:0.6,lo:0.3,speed:[0.7,1.9]};
 function darkCap(){if(!(S.mat==="resin"||S.mat==="jelly")) return false; const c=new THREE.Color(S.color); return (0.299*c.r+0.587*c.g+0.114*c.b)<0.4}
-function glowOf(G){const d=darkCap(); return G.glow?(d?Object.assign({},G.glow,{amt:G.glow.amt*1.3}):G.glow):(d?DARK_GLOW:null)}
+function glowOf(G){if(G.self) return null; const d=darkCap(); return G.glow?(d?Object.assign({},G.glow,{amt:G.glow.amt*1.3}):G.glow):(d?DARK_GLOW:null)}
 function starPts(r0,r1,n){const p=[]; for(let i=0;i<n*2;i++){const a=i/(n*2)*Math.PI*2-Math.PI/2, r=i%2?r1:r0; p.push([Math.cos(a)*r,Math.sin(a)*r])} return p}
 function snowPts(){const p=[]; for(let i=0;i<24;i++){const a=i/24*Math.PI*2, r=[1,0.35,0.62,0.35][i%4]; p.push([Math.cos(a)*r,Math.sin(a)*r])} return p}
 function heartShape(k){const s=new THREE.Shape(); s.moveTo(0,-3.4*k); s.bezierCurveTo(-1.6*k,-2.2*k,-4.6*k,-0.6*k,-4.6*k,1.6*k); s.bezierCurveTo(-4.6*k,3.6*k,-2.9*k,4.6*k,-1.7*k,4.6*k); s.bezierCurveTo(-0.8*k,4.6*k,-0.2*k,4.1*k,0,3.3*k);

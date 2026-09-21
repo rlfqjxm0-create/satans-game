@@ -129,7 +129,8 @@ opaque base `applyRGB` moves it just behind the base (away from the camera) so i
 
 Star dust and snowflakes (and every kind on a dark resin/jelly cap, `darkCap()`) are drawn **after** the cap
 (`transparent` but fully opaque, `renderOrder 3`): drawn before it, the resin covered them and dulled them however
-strongly they glowed. Their glow (`glowOf()`) is a soft round light with a bright middle (star dust: four faint rays)
+strongly they glowed. Star dust and snowflakes are `self:true` - no light around them at all, the body is the light (requested).
+Other kinds' glow (`glowOf()`) is a soft round light with a bright middle (star dust: four faint rays)
 that always faces the camera (`BB_Q`) - an outline-shaped blur on a plane turning with the flake made a bright rim and
 vanished edge-on. On a dark cap every kind gets `DARK_GLOW` in its own colour.
 
