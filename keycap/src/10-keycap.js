@@ -11,9 +11,9 @@ function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const 
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
 const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false};
 const OPT={
-  shape:{cherry:"체리",sa:"SA",round:"동글",heart:"하트"},
+  shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",catface:"고양이 얼굴",bunnyface:"토끼 얼굴"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
-  charPos:{inside:"레진 속에",top:"윗면 프린트",stand:"아크릴 스탠드",none:"안 넣기"},
+  charPos:{inside:"레진 속에 세우기",lie:"레진 속에 눕히기",top:"윗면 프린트",stand:"아크릴 스탠드",none:"안 넣기"},
   deco:{none:"없음",cat:"고양이 귀",bunny:"토끼 귀",horn:"사탄 뿔",bow:"리본",halo:"헤일로",star:"별",heart:"하트"},
   base:{clear:"투명",tint:"컬러 투명",gloss:"유광",matte:"무광",holo:"홀로그램"},
   decoMat:{gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -34,6 +34,10 @@ const cv=$("cv");
 const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});
 renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+/* r128 asks the GPU "did this shader link?" right after every compile, which makes the page wait for
+   the compile. Without the check, the warm-up's compiles run in the background instead of freezing the
+   spinning keycap for a few hundred ms each (that was the stutter while it turned on its own). */
+renderer.debug.checkShaderErrors=false;
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(31,4/5,1,600);
 camera.position.set(0,32,90); camera.lookAt(0,6,0); camera.fov=31;
@@ -96,6 +100,14 @@ function roundedBox(w,h,d,r){const s=new THREE.Shape(); const x=-w/2,y=-d/2; s.m
 // unit cross-section of a keycap shape (max |x|,|z| = 1)
 function section(kind,n,M){
   const pts=[];
+  if(kind==="cat"||kind==="bunny"){ // a round face seen from above, ears pointing to the back (-z)
+    const ears=kind==="cat"?[{a:-Math.PI/2-0.62,w:0.42,len:0.62},{a:-Math.PI/2+0.62,w:0.42,len:0.62}]
+                          :[{a:-Math.PI/2-0.3,w:0.2,len:1.05,round:1},{a:-Math.PI/2+0.3,w:0.2,len:1.05,round:1}];
+    const raw=[]; for(let i=0;i<M;i++){const t=i/M*Math.PI*2; let r=1;
+      for(const e of ears){const d=Math.atan2(Math.sin(t-e.a),Math.cos(t-e.a)); if(Math.abs(d)<e.w){const u=1-Math.abs(d)/e.w; r+=e.len*(e.round?Math.sin(u*Math.PI/2):u)}}
+      raw.push([Math.cos(t)*r*1.06,Math.sin(t)*r*0.94])}
+    let x0=Infinity,x1=-Infinity,z0=Infinity,z1=-Infinity; raw.forEach(([x,z])=>{x0=Math.min(x0,x); x1=Math.max(x1,x); z0=Math.min(z0,z); z1=Math.max(z1,z)});
+    const cx=(x0+x1)/2, cz=(z0+z1)/2, s=Math.max(x1-x0,z1-z0)/2; return raw.map(([x,z])=>[(x-cx)/s,(z-cz)/s])}
   if(kind==="heart"){const raw=[]; for(let i=0;i<M;i++){const t=i/M*Math.PI*2; raw.push([16*Math.pow(Math.sin(t),3),-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))])}
     let mx=0,mz=0,cz=0; raw.forEach(p=>{mx=Math.max(mx,Math.abs(p[0])); cz+=p[1]}); cz/=raw.length; raw.forEach(p=>mz=Math.max(mz,Math.abs(p[1]-cz))); const s=Math.max(mx,mz);
     // blend toward a circle so the heart reads soft and chubby
@@ -103,15 +115,19 @@ function section(kind,n,M){
   for(let i=0;i<M;i++){const a=i/M*Math.PI*2, c=Math.cos(a), s=Math.sin(a); pts.push([Math.sign(c)*Math.pow(Math.abs(c),2/n),Math.sign(s)*Math.pow(Math.abs(s),2/n)])}
   return pts;
 }
+// every top is flat like the cherry profile (dish 0, dome 0) - the domed heart top looked bloated
 const PROFILES={
   cherry:{sec:"sq",bw:18,tw:13.6,h:9,n0:9,n1:7,dish:0,dome:0,bev:0.7,tilt:0},
-  sa:{sec:"sq",bw:18,tw:12.4,h:12,n0:5.5,n1:3.4,dish:1.1,dome:0,bev:2.6,tilt:0},
-  round:{sec:"circle",bw:17.5,tw:14.5,h:9.5,n0:2,n1:2,dish:0.7,dome:0,bev:2.2,tilt:0},
-  heart:{sec:"heart",bw:19,tw:16,h:9,n0:0,n1:0,dish:0,dome:1.2,bev:2.2,tilt:0}
+  pudding:{sec:"circle",bw:18.6,tw:12.4,h:11,n0:2,n1:2,dish:0,dome:0,bev:2.6,tilt:0},
+  round:{sec:"circle",bw:17.5,tw:14.5,h:9.5,n0:2,n1:2,dish:0,dome:0,bev:2.2,tilt:0},
+  heart:{sec:"heart",bw:19,tw:16,h:9,n0:0,n1:0,dish:0,dome:0,bev:2.2,tilt:0},
+  catface:{sec:"cat",bw:19,tw:16,h:9,n0:0,n1:0,dish:0,dome:0,bev:1.6,tilt:0},
+  bunnyface:{sec:"bunny",bw:19,tw:16,h:9.5,n0:0,n1:0,dish:0,dome:0,bev:1.6,tilt:0}
 };
+const FIXED_SEC={heart:1,cat:1,bunny:1};   // one outline at every height (super-ellipses change with height)
 function capGeometry(p,flat){
   const M=96, L=22, K=12, verts=[], idx=[], rings=[];
-  const secAt=(v)=>p.sec==="heart"?section("heart",0,M):section("se",lerp(p.n0,p.n1,v),M);
+  const secAt=(v)=>FIXED_SEC[p.sec]?section(p.sec,0,M):section("se",lerp(p.n0,p.n1,v),M);
   const ring=(sec,hw,y,tilt)=>{const r=[]; for(const [ux,uz] of sec){r.push(verts.length/3); verts.push(ux*hw,y+(tilt?-uz*hw*tilt:0),uz*hw)} return r};
   for(let l=0;l<=L;l++){const v=l/L; const w=lerp(p.bw,p.tw,Math.pow(v,1.2))/2, y=v*(p.h-p.bev); rings.push(ring(secAt(v),w,y,p.tilt*v))}
   for(let l=1;l<=7;l++){const a=l/7*Math.PI/2; const w=p.tw/2-p.bev*(1-Math.cos(a)); const y=p.h-p.bev+Math.sin(a)*p.bev; rings.push(ring(secAt(1),w,y,p.tilt))}
@@ -197,24 +213,35 @@ const CAP_GEO={};
 function capGeoFor(p,flat){const k=S.shape+(flat?"/flat":""); return CAP_GEO[k]||(CAP_GEO[k]=keep(capGeometry(p,flat)))}
 function buildChar(p,g){
   const grp=new THREE.Group(); const see=S.mat==="resin"||S.mat==="jelly";
-  const it=S.items[0]||PLACEHOLDER, ar=it.canvas.width/it.canvas.height;
-  if(S.charPos==="inside"&&see){const h=p.h*0.74, w=Math.min(p.tw*0.92,h*ar), hh=w/ar;
-    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,hh),new THREE.MeshBasicMaterial({map:charTex("inside",it.canvas),alphaTest:0.35,side:THREE.DoubleSide})); m.position.y=p.h*0.48; grp.add(m)}
+  const it=S.items[0]||PLACEHOLDER, topY=g.userData.topY;
+  /* one piece of clear acrylic cut around the character, printed on both faces (the 아크릴 스탠드 look).
+     The print is opaque with alpha-to-coverage: the antialiasing smooths its outline, where a hard alpha
+     cut-off used to leave jagged pixel steps (and it still sorts as an opaque object inside the resin). */
+  const acrylic=(H,T,order)=>{
+    const cut=acrylicOutline(it), W=H*cut.ar, piece=new THREE.Group();
+    const shape=new THREE.Shape(); cut.pts.forEach(([u,v],i)=>{const x=(u-0.5)*W, y=(1-v)*H; i?shape.lineTo(x,y):shape.moveTo(x,y)}); shape.closePath();
+    const bev=Math.min(0.18,T*0.2), body=new THREE.ExtrudeGeometry(shape,{depth:T,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:3,curveSegments:6}); body.translate(0,0,-T/2);
+    const acr=new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.03,transmission:0.9,transparent:true,clearcoat:1,clearcoatRoughness:0.02,envMapIntensity:2.2,depthWrite:false});
+    const m=new THREE.Mesh(body,acr); m.renderOrder=order; piece.add(m);
+    const printMat=new THREE.MeshPhysicalMaterial({map:charTex("stand",cut.img),alphaTest:0.02,alphaToCoverage:true,roughness:0.12,clearcoat:1,clearcoatRoughness:0.04,envMapIntensity:1.1,side:THREE.FrontSide});
+    const front=new THREE.Mesh(new THREE.PlaneGeometry(W,H),printMat); front.position.set(0,H/2,T/2-0.06); piece.add(front);
+    const backMat=printMat.clone(); backMat.side=THREE.BackSide; backMat.color=lin("#E9EEF6");
+    const back=new THREE.Mesh(new THREE.PlaneGeometry(W,H),backMat); back.position.set(0,H/2,-T/2+0.06); piece.add(back);
+    return {piece,W,H,ar:cut.ar};
+  };
+  if(S.charPos==="inside"&&see){ // standing up inside the resin
+    const ar=acrylicOutline(it).ar, H=Math.min(p.h*0.74,p.tw*0.92/ar), a=acrylic(H,0.8,1);
+    a.piece.position.y=p.h*0.48-H/2; grp.add(a.piece)}
+  if(S.charPos==="lie"&&see){ // lying flat inside the resin, the same size as the top print
+    const ar=acrylicOutline(it).ar, L=2*g.userData.topW*0.96*0.9, H=ar>=1?L/ar:L, a=acrylic(H,0.8,1);
+    a.piece.rotation.x=-Math.PI/2; a.piece.position.set(0,p.h*0.42,H/2); grp.add(a.piece)}
   if(S.charPos==="top"){ // printed onto the flat top, clipped to the cap's outline
     const sec=g.userData.sec, w=g.userData.topW*0.96, shape=new THREE.Shape(); sec.forEach(([ux,uz],i)=>{const x=ux*w, y=-uz*w; i?shape.lineTo(x,y):shape.moveTo(x,y)});
     const sg=new THREE.ShapeGeometry(shape,1), pos=sg.attributes.position, uv=[]; for(let i=0;i<pos.count;i++) uv.push(pos.getX(i)/(2*w)+0.5,pos.getY(i)/(2*w)+0.5); sg.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); sg.rotateX(-Math.PI/2);
-    const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:charTex("top",charCanvas(true)),transparent:true,alphaTest:0.2,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-4})); m.position.y=g.userData.topY+0.04; grp.add(m)}
-  if(S.charPos==="stand"){ // one solid piece of clear acrylic cut around the character, print on the front
-    const H=12.5, cut=acrylicOutline(it), W=H*cut.ar, topY=g.userData.topY, T=1.3;
-    const shape=new THREE.Shape(); cut.pts.forEach(([u,v],i)=>{const x=(u-0.5)*W, y=(1-v)*H; i?shape.lineTo(x,y):shape.moveTo(x,y)}); shape.closePath();
-    const body=new THREE.ExtrudeGeometry(shape,{depth:T,bevelEnabled:true,bevelThickness:0.18,bevelSize:0.18,bevelSegments:3,curveSegments:6}); body.translate(0,0,-T/2);
-    const acr=new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.03,transmission:0.9,transparent:true,clearcoat:1,clearcoatRoughness:0.02,envMapIntensity:2.2,depthWrite:false});
-    const m=new THREE.Mesh(body,acr); m.position.y=topY; m.renderOrder=5; grp.add(m);
-    // printed layer just behind the front face: glossy so it catches light as the camera turns
-    const printMat=new THREE.MeshPhysicalMaterial({map:charTex("stand",cut.img),transparent:true,alphaTest:0.3,roughness:0.12,clearcoat:1,clearcoatRoughness:0.04,envMapIntensity:1.1,side:THREE.FrontSide});
-    const front=new THREE.Mesh(new THREE.PlaneGeometry(W,H),printMat); front.position.set(0,topY+H/2,T/2-0.06); grp.add(front);
-    const backMat=printMat.clone(); backMat.side=THREE.BackSide; backMat.color=lin("#E9EEF6"); const back=new THREE.Mesh(new THREE.PlaneGeometry(W,H),backMat); back.position.set(0,topY+H/2,-T/2+0.06); grp.add(back);
-    grp.userData.standTop=topY+H}
+    // blended edges (tiny alphaTest only drops empty pixels) - 0.2 used to cut a jagged outline
+    const m=new THREE.Mesh(sg,new THREE.MeshPhysicalMaterial({map:charTex("top",charCanvas(true)),transparent:true,alphaTest:0.02,roughness:0.3,clearcoat:0.6,polygonOffset:true,polygonOffsetFactor:-4})); m.position.y=topY+0.04; grp.add(m)}
+  if(S.charPos==="stand"){ // standing on top of the keycap
+    const a=acrylic(12.5,1.3,5); a.piece.position.y=topY; grp.add(a.piece); grp.userData.standTop=topY+a.H}
   return grp;
 }
 /* trace the character's silhouette (with a clear margin) the way an acrylic cutter would */
@@ -242,54 +269,56 @@ function acrylicOutline(it){
 function lathe(points,seg){return new THREE.LatheGeometry(points.map(([x,y])=>new THREE.Vector2(x,y)),seg||32)}
 function sitOn(geo){geo.computeBoundingBox(); const b=geo.boundingBox; geo.translate(-(b.min.x+b.max.x)/2,-b.min.y,-(b.min.z+b.max.z)/2); return geo}
 /* Decorations. Their shapes never change with the colour or material, so each geometry is built once and
-   reused (GEO) - switching decorations used to rebuild every extruded shape. Ears and horns sit on the
-   real top surface at their own spot (surfY): SA/round tops are dished and the heart is domed, so the
-   centre height alone left them floating or sunk. */
+   reused (GEO). Every keycap top is flat, so ears and horns stand right on topY:
+   - their base is flat (anything the bevel pushed below 0 is pressed up to 0), so they touch the top all
+     along the base and nothing is sunk into it;
+   - ears lean outward by shape (the tip is shifted), not by tilting the mesh - tilting lifted one corner of
+     the base off the top and pushed the other corner into it;
+   - pair() shrinks them until both bases fit inside the flat part of the top (small tops like 푸딩). */
 const DECO_GEO={};
 const GEO=(k,f)=>DECO_GEO[k]||(DECO_GEO[k]=keep(f()));
+function flatBase(g2){const p=g2.attributes.position; for(let i=0;i<p.count;i++) if(p.getY(i)<0) p.setY(i,0); g2.computeVertexNormals(); return g2}
+function earShape(half,height,lean,y0){const s=new THREE.Shape(), h=height, L=lean;
+  s.moveTo(-half,y0); s.quadraticCurveTo(-half*0.9+L*0.45,y0+h*0.55,L-0.2,y0+h*0.97); s.quadraticCurveTo(L,y0+h*1.03,L+0.2,y0+h*0.97);
+  s.quadraticCurveTo(half*0.9+L*0.45,y0+h*0.55,half,y0); s.lineTo(-half,y0); return s}
+function longEarShape(half,height,lean,y0){const s=new THREE.Shape(), h=height, L=lean;
+  s.moveTo(-half,y0); s.bezierCurveTo(-half*1.6+L*0.3,y0+h*0.36,-half*1.35+L,y0+h*0.94,L,y0+h); s.bezierCurveTo(half*1.35+L,y0+h*0.94,half*1.6+L*0.3,y0+h*0.36,half,y0); s.lineTo(-half,y0); return s}
 function buildDeco(p,g){
   const grp=new THREE.Group(), top=g.userData.topY, w=g.userData.topW;
   const main=surfMat(S.decoMat,S.decoColor), accentPink=surfMat(S.decoMat==="holo"?"holo":"gloss","#FFB8C9");
   const add=(geo,mat,x,y,z,rx,ry,rz)=>{const o=new THREE.Mesh(geo,mat); o.position.set(x,y,z); o.rotation.set(rx||0,ry||0,rz||0); grp.add(o); return o};
   const soft=(shape,depth,bev,bevSize)=>new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:bev,bevelSize:bevSize==null?bev:bevSize,bevelSegments:6,curveSegments:28});
-  const stand=S.charPos==="stand", flat=S.charPos==="top"||stand;
-  const floatBase=stand?(top+13.5):top;
-  const F=fenceTable(p), surfY=(x,z)=>capTopY(p,flat,Math.hypot(x,z)/(fenceAt(F.R,Math.atan2(z,x))*p.tw/2));
-  // lowest point of the top under a base of half-size rx (sideways) x rz: seating there leaves no gap
-  // anywhere around the base, and only a sliver sits below the surface (it shows through clear resin)
-  const seat=(x,z,rx,rz)=>Math.min(surfY(x,z),surfY(x-rx,z),surfY(x+rx,z),surfY(x,z-rz),surfY(x,z+rz));
-  // SA's flat top is small (big rounded edge): ears and horns shrink with it and keep apart
-  const fit=clamp(w/5.2,0.7,1);
+  const stand=S.charPos==="stand", floatBase=stand?(top+13.5):top;
+  const F=fenceTable(p), inTop=(x,z)=>Math.hypot(x,z)<=fenceAt(F.R,Math.atan2(z,x))*w*0.97;
+  // biggest scale (<=1) at which both bases (half-width hx, half-depth hz) sit inside the flat top
+  const pair=(hx,hz,x0,z)=>{for(let f=1;f>=0.45;f-=0.05){const x=Math.max(x0,hx*f+0.25);
+      if([-1,1].every(sd=>[[-1,-1],[1,-1],[-1,1],[1,1]].every(([a,b])=>inTop(sd*x+a*hx*f,z+b*hz*f)))) return {f,x}}
+    return {f:0.45,x:Math.max(x0,hx*0.45+0.25)}};
   switch(S.deco){
-    case "cat":{ // pointed cat ears: a narrow tip and a small bevel so the point stays sharp
-      const eg=GEO("cat.ear",()=>{const s=new THREE.Shape(); s.moveTo(-2.5,0); s.quadraticCurveTo(-2.3,3,-0.2,5.6); s.quadraticCurveTo(0,5.85,0.2,5.6); s.quadraticCurveTo(2.3,3,2.5,0); s.lineTo(-2.5,0);
-        const g2=soft(s,0.9,0.45,0.26); g2.translate(0,0.26,-0.45); return g2});
-      const ig=GEO("cat.inner",()=>{const s=new THREE.Shape(); s.moveTo(-1.35,0.7); s.quadraticCurveTo(-1.2,2.9,-0.1,4.5); s.quadraticCurveTo(0,4.65,0.1,4.5); s.quadraticCurveTo(1.2,2.9,1.35,0.7); s.lineTo(-1.35,0.7);
-        const g2=soft(s,0.4,0.2,0.14); g2.translate(0,0.26,0.55); return g2});
-      for(const sd of [-1,1]){const x=sd*Math.max(w*0.58,2.5*fit+0.25), z=-w*0.2, y=seat(x,z,2.4*fit,0.8*fit)-0.12;
-        add(eg,main,x,y,z,0,0,-sd*0.22).scale.setScalar(fit); add(ig,accentPink,x,y,z,0,0,-sd*0.22).scale.setScalar(fit)}
-      break;}
-    case "bunny":{ // long, soft bunny ears leaning a little outward
-      const eg=GEO("bun.ear",()=>{const s=new THREE.Shape(); s.moveTo(-1.5,0); s.bezierCurveTo(-2.45,2.8,-2.05,7.4,0,7.9); s.bezierCurveTo(2.05,7.4,2.45,2.8,1.5,0); s.lineTo(-1.5,0);
-        const g2=soft(s,0.9,0.45,0.4); g2.translate(0,0.4,-0.45); return g2});
-      const ig=GEO("bun.inner",()=>{const s=new THREE.Shape(); s.moveTo(-0.75,1); s.bezierCurveTo(-1.35,3.2,-1.05,6.4,0,6.8); s.bezierCurveTo(1.05,6.4,1.35,3.2,0.75,1); s.lineTo(-0.75,1);
-        const g2=soft(s,0.4,0.2); g2.translate(0,0.4,0.55); return g2});
-      for(const sd of [-1,1]){const x=sd*Math.max(w*0.42,1.9*fit+0.25), z=-w*0.18, y=seat(x,z,1.8*fit,0.8*fit)-0.12;
-        add(eg,main,x,y,z,0,0,-sd*0.17).scale.setScalar(fit); add(ig,accentPink,x,y,z,0,0,-sd*0.17).scale.setScalar(fit)}
-      break;}
-    case "horn":{ // short, chubby devil horns - black unless another colour is picked
-      const hm=surfMat(S.decoMat,S.decoColor==="#FFFFFF"?"#26262B":S.decoColor);
+    case "cat":{ // pointed cat ears, leaning a little outward
+      const z=-w*0.2, {f,x}=pair(2.6,0.9,w*0.56,z);
       for(const sd of [-1,1]){
-        // the curve starts going straight up, so the base ring is level and can sit just below the top
-        // surface on any cap shape; nothing is clamped flat any more (that used to shave the base off)
-        const tg=GEO("horn.tube"+sd,()=>{const curve=new THREE.CubicBezierCurve3(new THREE.Vector3(0,-0.4,0),new THREE.Vector3(0,1.3,0),new THREE.Vector3(sd*1.5,3.0,-0.1),new THREE.Vector3(sd*0.5,4.4,-0.2));
-          const t=new THREE.TubeGeometry(curve,32,1.55,20,false), pos=t.attributes.position, v=new THREE.Vector3();
-          for(let i=0;i<pos.count;i++){const seg=Math.floor(i/21)/32, pt=curve.getPoint(seg); v.set(pos.getX(i),pos.getY(i),pos.getZ(i)).sub(pt).multiplyScalar(lerp(1,0.32,Math.pow(seg,1.4))).add(pt); pos.setXYZ(i,v.x,v.y,v.z)}
-          t.computeVertexNormals(); return t});
-        const r=1.55*fit, x=sd*Math.max(w*0.46,r+0.4), z=-w*0.15, y=seat(x,z,r,r)-0.08+0.4*fit;   // base ring just under the lowest point
-        add(tg,hm,x,y,z).scale.setScalar(fit);
-        add(GEO("horn.tip",()=>new THREE.SphereGeometry(1.55*0.32,16,12)),hm,x+sd*0.5*fit,y+4.4*fit,z-0.2*fit).scale.setScalar(fit);
-        add(GEO("horn.base",()=>new THREE.CircleGeometry(1.55,24)),hm,x,y-0.4*fit,z,Math.PI/2).scale.setScalar(fit)}   // closes the tube's bottom
+        const eg=GEO("cat.ear"+sd,()=>{const g2=soft(earShape(2.5,5.6,sd*1.0,0),0.9,0.45,0.26); g2.translate(0,0,-0.45); return flatBase(g2)});
+        const ig=GEO("cat.inner"+sd,()=>{const g2=soft(earShape(1.35,3.8,sd*0.8,0.7),0.4,0.2,0.14); g2.translate(0,0,0.55); return flatBase(g2)});
+        add(eg,main,sd*x,top,z).scale.setScalar(f); add(ig,accentPink,sd*x,top,z).scale.setScalar(f)}
+      break;}
+    case "bunny":{ // long, soft bunny ears
+      const z=-w*0.18, {f,x}=pair(1.9,0.9,w*0.4,z);
+      for(const sd of [-1,1]){
+        const eg=GEO("bun.ear"+sd,()=>{const g2=soft(longEarShape(1.5,7.9,sd*0.9,0),0.9,0.45,0.4); g2.translate(0,0,-0.45); return flatBase(g2)});
+        const ig=GEO("bun.inner"+sd,()=>{const g2=soft(longEarShape(0.72,5.8,sd*0.75,1),0.4,0.2); g2.translate(0,0,0.55); return flatBase(g2)});
+        add(eg,main,sd*x,top,z).scale.setScalar(f); add(ig,accentPink,sd*x,top,z).scale.setScalar(f)}
+      break;}
+    case "horn":{ // classic little devil horns: chunky at the base, curving up and outward to a point
+      const hm=surfMat(S.decoMat,S.decoColor==="#FFFFFF"?"#26262B":S.decoColor), z=-w*0.15, {f,x}=pair(1.35,1.35,w*0.44,z);
+      for(const sd of [-1,1]){
+        const tg=GEO("horn2.tube"+sd,()=>{const curve=new THREE.CubicBezierCurve3(new THREE.Vector3(0,0,0),new THREE.Vector3(0,1.5,0),new THREE.Vector3(sd*0.7,2.9,0),new THREE.Vector3(sd*1.8,3.9,0));
+          const t=new THREE.TubeGeometry(curve,40,1.3,20,false), pos=t.attributes.position, v=new THREE.Vector3();
+          for(let i=0;i<pos.count;i++){const seg=Math.floor(i/21)/40, pt=curve.getPoint(seg); v.set(pos.getX(i),pos.getY(i),pos.getZ(i)).sub(pt).multiplyScalar(lerp(1,0.07,Math.pow(seg,0.9))).add(pt); pos.setXYZ(i,v.x,v.y,v.z)}
+          t.computeVertexNormals(); return t});   // the curve starts straight up, so the base ring lies flat on the top
+        const h=add(tg,hm,sd*x,top,z); h.scale.setScalar(f);
+        add(GEO("horn2.tip",()=>new THREE.SphereGeometry(1.3*0.07,10,8)),hm,sd*x+sd*1.8*f,top+3.9*f,z).scale.setScalar(f);
+        add(GEO("horn2.base",()=>new THREE.CircleGeometry(1.3,24)),hm,sd*x,top+0.001,z,Math.PI/2).scale.setScalar(f)}   // closes the tube's bottom
       break;}
     case "bow":{ // two pleated loops, a knot and notched tails, standing upright
       const lg=GEO("bow.loop",()=>{const s=new THREE.Shape(); s.moveTo(0,0.8); s.bezierCurveTo(1.6,2.6,4.2,3.6,5.2,2.6); s.bezierCurveTo(6,1.6,5.8,-1.2,5,-2); s.bezierCurveTo(3.9,-2.9,1.6,-1.8,0,-0.8); s.lineTo(0,0.8); const g2=soft(s,0.9,0.45); g2.translate(0,0,-0.45); return g2});
@@ -297,7 +326,7 @@ function buildDeco(p,g){
       const tgm=GEO("bow.tail",()=>{const s=new THREE.Shape(); s.moveTo(-0.7,0); s.lineTo(0.7,0); s.lineTo(2.2,-4.2); s.lineTo(1.2,-3.6); s.lineTo(0.6,-4.4); s.lineTo(-0.4,-0.6); s.lineTo(-0.7,0); const g2=soft(s,0.5,0.25); g2.translate(0,0,-0.6); return g2});
       const bowG=new THREE.Group();
       for(const sd of [-1,1]){const o=new THREE.Mesh(lg,main); o.scale.x=sd; bowG.add(o);
-        const f=new THREE.Mesh(fg,accentPink.clone()); f.material.opacity=0.35; f.material.transparent=true; f.scale.x=sd; f.position.z=0.62; bowG.add(f)}
+        const fm=new THREE.Mesh(fg,accentPink.clone()); fm.material.opacity=0.35; fm.material.transparent=true; fm.scale.x=sd; fm.position.z=0.62; bowG.add(fm)}
       for(const sd of [-1,1]){const o=new THREE.Mesh(tgm,main); o.scale.x=sd; o.position.set(sd*0.3,-0.4,-0.2); o.rotation.z=sd*0.1; bowG.add(o)}
       const knot=new THREE.Mesh(GEO("bow.knot",()=>new THREE.SphereGeometry(1.3,24,16)),main); knot.scale.set(1.05,1.25,0.8); bowG.add(knot);
       const bb=new THREE.Box3().setFromObject(bowG); bowG.position.set(0,top-bb.min.y,-w*0.1); grp.add(bowG);
@@ -311,23 +340,28 @@ function buildDeco(p,g){
       const gs=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:col,transparent:true,opacity:0.22,blending:THREE.AdditiveBlending,depthWrite:false})); gs.scale.set(R*2.6,R*0.9,1); gs.position.y=y; grp.add(gs); gs.userData.float=y;
       grp.userData.halo=[ring,glow,gs]; break;}
     case "star": case "heart":{
-      const geo=GEO("deco."+S.deco,()=>{const s2=new THREE.Shape();
+      const geo=GEO("deco2."+S.deco,()=>{let s2=new THREE.Shape();
         if(S.deco==="star"){for(let i=0;i<10;i++){const a=i/10*Math.PI*2-Math.PI/2, r=i%2?2:4.2; const x=Math.cos(a)*r, y=-Math.sin(a)*r; i?s2.lineTo(x,y):s2.moveTo(x,y)} s2.closePath()}
-        else {s2.moveTo(0,-3.4); s2.bezierCurveTo(-1.6,-2.2,-4.6,-0.6,-4.6,1.6); s2.bezierCurveTo(-4.6,3.6,-2.9,4.6,-1.7,4.6); s2.bezierCurveTo(-0.8,4.6,-0.2,4.1,0,3.3); s2.bezierCurveTo(0.2,4.1,0.8,4.6,1.7,4.6); s2.bezierCurveTo(2.9,4.6,4.6,3.6,4.6,1.6); s2.bezierCurveTo(4.6,-0.6,1.6,-2.2,0,-3.4)}
-        const g2=soft(s2,1.4,1.2); g2.center(); return g2});
+        else { // a clear heart: round lobes and a deep dip between them at the top
+          s2.moveTo(0,-4.1); s2.bezierCurveTo(-1.5,-2.7,-4.9,-0.9,-4.9,1.9); s2.bezierCurveTo(-4.9,4.1,-3.4,5.2,-2.3,5.2);
+          s2.bezierCurveTo(-1.1,5.2,-0.25,4.3,0,2.7); s2.bezierCurveTo(0.25,4.3,1.1,5.2,2.3,5.2);
+          s2.bezierCurveTo(3.4,5.2,4.9,4.1,4.9,1.9); s2.bezierCurveTo(4.9,-0.9,1.5,-2.7,0,-4.1)}
+        const g2=soft(s2,1.4,S.deco==="heart"?0.75:1.2); g2.center(); return g2});
       const mat=S.decoColor==="#FFFFFF"?surfMat(S.decoMat,S.deco==="star"?"#FFD45C":"#FF8FB0"):main;
       const fy=floatBase+(stand?4.5:5.6); const o=add(geo,mat,0,fy,0,0,0,0); grp.userData.spin=o; o.userData.float=fy; break;}
   }
   return grp;
 }
-function nameSticker(txt){ // a die-cut name sticker: white border, pastel label, tiny heart
+const mixHex=(a,b,t)=>"#"+new THREE.Color(a).lerp(new THREE.Color(b),t).getHexString();
+function nameSticker(txt){ // a die-cut name sticker: white border, a label in the keycap's colour, tiny heart
+  const c=S.color, lab0=mixHex(c,"#FFFFFF",0.8), lab1=mixHex(c,"#FFFFFF",0.58), acc=mixHex(c,"#1E1A24",0.12), ink=mixHex(c,"#2A2230",0.74), spark=mixHex(c,"#FFFFFF",0.35);
   return canvasTex(512,192,(x,w,h)=>{x.font='64px Jua, sans-serif'; const tw=Math.min(x.measureText(txt).width,300); const bw=tw+150, bh=112, bx=(w-bw)/2, by=(h-bh)/2;
     x.shadowColor="rgba(60,40,90,.25)"; x.shadowBlur=10; x.shadowOffsetY=4; rrect(x,bx-10,by-10,bw+20,bh+20,(bh+20)/2); x.fillStyle="#FFFFFF"; x.fill(); x.shadowColor="transparent";
-    rrect(x,bx,by,bw,bh,bh/2); const g=x.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,"#FFE3EE"); g.addColorStop(1,"#FFC9DE"); x.fillStyle=g; x.fill();
+    rrect(x,bx,by,bw,bh,bh/2); const g=x.createLinearGradient(0,by,0,by+bh); g.addColorStop(0,lab0); g.addColorStop(1,lab1); x.fillStyle=g; x.fill();
     x.setLineDash([8,6]); x.lineWidth=3; x.strokeStyle="rgba(255,255,255,.9)"; rrect(x,bx+10,by+10,bw-20,bh-20,(bh-20)/2); x.stroke(); x.setLineDash([]);
-    x.fillStyle="#FF6F91"; heart(x,bx+48,h/2+2,15); x.fill(); x.fillStyle="#FFFFFF"; x.beginPath(); x.arc(bx+42,h/2-6,4,0,7); x.fill();
-    x.fillStyle="#5A2E40"; x.textAlign="left"; x.textBaseline="middle"; x.fillText(txt,bx+84,h/2+4,300);
-    x.fillStyle="#FFD45C"; star4(x,bx+bw-24,by+22,12); x.fill()},true)}
+    x.fillStyle=acc; heart(x,bx+48,h/2+2,15); x.fill(); x.fillStyle="#FFFFFF"; x.beginPath(); x.arc(bx+42,h/2-6,4,0,7); x.fill();
+    x.fillStyle=ink; x.textAlign="left"; x.textBaseline="middle"; x.fillText(txt,bx+84,h/2+4,300);
+    x.fillStyle=spark; star4(x,bx+bw-24,by+22,12); x.fill()},true)}
 let nameMesh=null;
 function baseMaterial(){
   const c=lin(S.baseColor);
@@ -427,12 +461,12 @@ const GLOW_PLANE=keep(new THREE.PlaneGeometry(1,1));
    whenever the key was pressed. Checked headless: every kind x every shape, thousands of shaken frames. */
 const FENCE_N=180, FENCES={};
 function fenceTable(p){const key=p.sec+p.n0+"/"+p.n1; if(FENCES[key]) return FENCES[key];
-  const secs=p.sec==="heart"?[section("heart",0,96)]:[section("se",p.n0,96),section("se",p.n1,96)], R=new Float32Array(FENCE_N);
+  const secs=FIXED_SEC[p.sec]?[section(p.sec,0,96)]:[section("se",p.n0,96),section("se",p.n1,96)], R=new Float32Array(FENCE_N);
   for(let k=0;k<FENCE_N;k++){const a=k/FENCE_N*Math.PI*2, dx=Math.cos(a), dz=Math.sin(a); let best=Infinity;
     for(const sec of secs) for(let i=0;i<sec.length;i++){const [x1,z1]=sec[i],[x2,z2]=sec[(i+1)%sec.length], ex=x2-x1, ez=z2-z1, den=ex*dz-dx*ez; if(Math.abs(den)<1e-12) continue;
       const t=(ex*z1-x1*ez)/den, u=(dx*z1-dz*x1)/den; if(t>0&&u>=0&&u<1&&t<best) best=t}
     R[k]=best}
-  const win=p.sec==="heart"?9:0, E=new Float32Array(FENCE_N);
+  const win=p.sec==="bunny"?14:FIXED_SEC[p.sec]?9:0, E=new Float32Array(FENCE_N);   // the bunny's ears leave a narrow gap
   for(let k=0;k<FENCE_N;k++){let m=R[k]; for(let j=-win;j<=win;j++) m=Math.min(m,R[(k+j+FENCE_N)%FENCE_N]); E[k]=m}
   return (FENCES[key]={R,E})}
 function fenceAt(T,a){const f=((a/(Math.PI*2))%1+1)%1*FENCE_N, i=Math.floor(f)%FENCE_N; return lerp(T[i],T[(i+1)%FENCE_N],f-Math.floor(f))}
@@ -527,12 +561,13 @@ function resetView(){CAM.zoom=1; CAM.panX=0; CAM.panY=0; rotY=HOME.rotY; rotX=HO
 camApply();
 
 /* switch sounds */
-let AC=null;
+let AC=null, MASTER=null;
+function outNode(a){if(!MASTER){MASTER=a.createGain(); MASTER.connect(a.destination)} return MASTER}   // every sound goes through here
 function ac(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume(); return AC}catch(e){return null}}
 let NB=null; function noiseBuf(a){if(NB) return NB; const b=a.createBuffer(1,a.sampleRate*0.2,a.sampleRate), d=b.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; NB=b; return b}
-function burst(a,t0,lo,hi,vol,dec){const s=a.createBufferSource(); s.buffer=noiseBuf(a); const bp=a.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=Math.sqrt(lo*hi); bp.Q.value=Math.max(0.3,Math.sqrt(lo*hi)/(hi-lo)); const g=a.createGain(); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); s.connect(bp).connect(g).connect(a.destination); s.start(t0); s.stop(t0+dec+0.02)}
-function thump(a,t0,f,vol,dec){const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.setValueAtTime(f,t0); o.frequency.exponentialRampToValueAtTime(f*0.6,t0+dec); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); o.connect(g).connect(a.destination); o.start(t0); o.stop(t0+dec+0.02)}
-function chime(a,t0){[1568,2093,2637].forEach((f,i)=>{const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t0+i*0.05); g.gain.linearRampToValueAtTime(0.035,t0+i*0.05+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.05+0.5); o.connect(g).connect(a.destination); o.start(t0+i*0.05); o.stop(t0+i*0.05+0.55)})}
+function burst(a,t0,lo,hi,vol,dec){const s=a.createBufferSource(); s.buffer=noiseBuf(a); const bp=a.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=Math.sqrt(lo*hi); bp.Q.value=Math.max(0.3,Math.sqrt(lo*hi)/(hi-lo)); const g=a.createGain(); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); s.connect(bp).connect(g).connect(outNode(a)); s.start(t0); s.stop(t0+dec+0.02)}
+function thump(a,t0,f,vol,dec){const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.setValueAtTime(f,t0); o.frequency.exponentialRampToValueAtTime(f*0.6,t0+dec); g.gain.setValueAtTime(vol,t0); g.gain.exponentialRampToValueAtTime(0.0001,t0+dec); o.connect(g).connect(outNode(a)); o.start(t0); o.stop(t0+dec+0.02)}
+function chime(a,t0){[1568,2093,2637].forEach((f,i)=>{const o=a.createOscillator(), g=a.createGain(); o.type="sine"; o.frequency.value=f; g.gain.setValueAtTime(0.0001,t0+i*0.05); g.gain.linearRampToValueAtTime(0.035,t0+i*0.05+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+i*0.05+0.5); o.connect(g).connect(outNode(a)); o.start(t0+i*0.05); o.stop(t0+i*0.05+0.55)})}
 /* The owner's own keyboard recordings (the same packs her desktop timer uses), in sounds/<switch>/.
    Every press plays a different key - now and then a space/enter/shift/backspace - so pressing the
    keycap sounds like typing instead of one clip on repeat. gain evens the packs out (key RMS 841~1216). */
@@ -562,7 +597,7 @@ function pickSound(pb){
 }
 function playPack(a){const pb=PACK_BUF[S.sw]; if(!pb) return false;
   const src=a.createBufferSource(); src.buffer=pickSound(pb); src.playbackRate.value=0.98+Math.random()*0.04;
-  const g=a.createGain(); g.gain.value=PACKS[S.sw].gain; src.connect(g).connect(a.destination); src.start(); return true}
+  const g=a.createGain(); g.gain.value=PACKS[S.sw].gain; src.connect(g).connect(outNode(a)); src.start(); return true}
 // changing the switch: let its sounds arrive before the demo press, so it is heard with the new switch
 function previewSwitch(){ac(); const p=loadPack(S.sw); if(PACK_BUF[S.sw]||!p) pressKey(); else p.then(pressKey,pressKey)}
 function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; const p=loadPack(S.sw), id=S.sw;
@@ -578,9 +613,11 @@ function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; const p=loa
 function resize(){const r=cv.getBoundingClientRect(); renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(cv); resize();
 let last=performance.now(), T=0;
+const RGB_TMP=new THREE.Color(), RGB_BASE=new THREE.Color(); let rgbHex=null;   // reused every frame (no garbage)
 function applyRGB(t){
-  let on=S.rgb!=="off", col=lin(S.rgbColor), k=1;
-  if(S.rgb==="rainbow") col=new THREE.Color().setHSL((t*0.12)%1,0.9,0.6).convertSRGBToLinear();
+  if(rgbHex!==S.rgbColor){RGB_BASE.copy(lin(S.rgbColor)); rgbHex=S.rgbColor}
+  let on=S.rgb!=="off", col=RGB_BASE, k=1;
+  if(S.rgb==="rainbow") col=RGB_TMP.setHSL((t*0.12)%1,0.9,0.6).convertSRGBToLinear();
   if(S.rgb==="breath") k=0.35+0.65*(0.5+0.5*Math.sin(t*2.2));
   rgbLight.color.copy(col); rgbLight.intensity=on?2.4*k:0;
   rgbGlow.material.color.copy(col); rgbGlow.material.opacity=on?0.55*k:0;
@@ -602,7 +639,8 @@ function poseAt(t){
 }
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000); last=now; T+=dt; idle+=dt;
-  if(!gesture&&!CAM.locked){rotY+=velY; velY*=0.92; if(idle>2.5) rotY+=dt*0.35}
+  // the slow self-spin waits for the warm-up (it would stutter through its compiles); 12 s at most
+  if(!gesture&&!CAM.locked){rotY+=velY; velY*=0.92; if(idle>2.5&&(warmDone||idle>12)) rotY+=dt*0.35}
   const target=pressed?1:0; pressV+=(target-press)*dt*260; pressV*=0.72; press+=pressV*dt*8; press=clamp(press,-0.2,1.1);
   stepParticles(dt,T);
   if(!PAUSE&&ONSCREEN){poseAt(T); renderer.render(scene,camera)}
@@ -624,15 +662,20 @@ function extractPalette(it){
    The first time a look is drawn the GPU compiles its shader: 0.37~0.69 s froze the page on the first
    홀로그램 / 윗면 프린트 / 아크릴 스탠드 / 눈송이 (measured). warmUp() builds every look once, one per idle moment,
    and compiles it. The throw-away materials are kept alive (never disposed) so their programs stay cached. */
-const WARM_KEEP=[]; const idleCall=f=>window.requestIdleCallback?requestIdleCallback(f,{timeout:3000}):setTimeout(f,150);
+const WARM_KEEP=[]; let warmDone=false;
 function warmUp(){
   const jobs=[];
   for(const m of Object.keys(OPT.mat)) jobs.push({mat:m});
-  for(const c of ["top","stand"]) jobs.push({charPos:c});
+  for(const sh of Object.keys(OPT.shape)) jobs.push({shape:sh});
+  for(const c of ["top","stand","lie"]) jobs.push({charPos:c});
   for(const d of Object.keys(OPT.deco)) for(const dm of Object.keys(OPT.decoMat)) jobs.push({deco:d,decoMat:dm});
   for(const gl of Object.keys(OPT.glitter)) jobs.push({mat:"resin",glitter:gl});
   for(const b of Object.keys(OPT.base)) jobs.push({base:b});
-  const step=()=>{if(!jobs.length) return; if(gesture||PAUSE){idleCall(step); return}
+  // a compile holds the page for tens to hundreds of ms (r128 waits for the GPU), so steps run only while
+  // nothing on screen is moving: the keycap stands still before its self-spin starts, or is scrolled away
+  const step=()=>{if(!jobs.length){warmDone=true; return}
+    const still=!ONSCREEN||(!gesture&&idle>0.4&&!(idle>2.5&&(warmDone||idle>12))&&Math.abs(velY)<1e-3&&Math.abs(pressV)<0.05);
+    if(PAUSE||!still){setTimeout(step,150); return}
     // snapshot the user's settings now (not once at the start): a step must never undo a change they just made
     const tmp=new THREE.Group(), saved=Object.assign({},S);
     try{Object.assign(S,jobs.shift()); const p=PROFILES[S.shape], flat=S.charPos==="top"||S.charPos==="stand", cg=capGeoFor(p,flat);
@@ -644,8 +687,8 @@ function warmUp(){
     catch(e){console.error("warm-up",e)}
     finally{Object.assign(S,saved); scene.remove(tmp);
       tmp.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(m=>{if(!KEEP.has(m)) WARM_KEEP.push(m)})})}
-    idleCall(step)};
-  idleCall(step);
+    setTimeout(step,16)};   // one look per frame
+  setTimeout(step,16);
 }
 
 /* ---------- UI ---------- */
@@ -689,4 +732,4 @@ function readHash(){try{const m=location.hash.match(/#k=(.+)/); if(!m) return; c
 $("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
 function resetRun(){rebuild()}
 readHash(); loadPack(S.sw); setBg(); renderUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
-setTimeout(warmUp,1500);
+setTimeout(warmUp,300);

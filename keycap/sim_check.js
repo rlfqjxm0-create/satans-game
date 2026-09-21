@@ -2,7 +2,7 @@
 const fs=require('fs'); const html=fs.readFileSync('index.html','utf8');
 const js=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].pop()[1];
 const grab=re=>{const m=js.match(re); if(!m) throw new Error('missing '+re); return m[0]};
-const src=[/function section\(kind,n,M\)\{[\s\S]*?\n\}/,/const PROFILES=\{[\s\S]*?\n\};/,/const GLITTERS=\{[\s\S]*?\n\};/,/const GLIT_R=\{[^\n]*/,
+const src=[/function section\(kind,n,M\)\{[\s\S]*?\n\}/,/const PROFILES=\{[\s\S]*?\n\};/,/const FIXED_SEC=\{[^\n]*/,/const GLITTERS=\{[\s\S]*?\n\};/,/const GLIT_R=\{[^\n]*/,
   /const FENCE_N=180[\s\S]*?(?=\nfunction makeParticles)/,/function makeParticles\(p,g\)\{[\s\S]*?\n\}/,
   /function stirParticles\(\)\{[^\n]*/,/function stepParticles\(dt,t\)\{[\s\S]*?\n\}/].map(grab).join('\n');
 const pre=`const lerp=(a,b,t)=>a+(b-a)*t; const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
@@ -19,7 +19,7 @@ function inside(px,pz,sec,w){let c=false; for(let i=0,j=sec.length-1;i<sec.lengt
 let bad=0;
 for(const charPos of ["inside","top"]) for(const glit of Object.keys(GLITTERS)) for(const [name,p] of Object.entries(PROFILES)){S.glitter=glit; S.charPos=charPos;
   partSys=makeParticles(p,null); const G=GLITTERS[glit], flat=charPos!=="inside", fr=GLIT_R[G.shape]*G.scale*1.15;
-  const secs=p.sec==="heart"?[section("heart",0,96)]:[section("se",p.n0,96),section("se",p.n1,96)], F=fenceTable(p);
+  const secs=FIXED_SEC[p.sec]?[section(p.sec,0,96)]:[section("se",p.n0,96),section("se",p.n1,96)], F=fenceTable(p);
   let side=0, topHit=0, bottom=0, minGap=Infinity, minTop=Infinity;
   for(let f=0;f<3000;f++){ if(f%20===0) stirParticles(); stepParticles(1/60,f/60);
     const {pos,rot,N,rad}=partSys; for(let i=0;i<N;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2], w=wallW(p,y);

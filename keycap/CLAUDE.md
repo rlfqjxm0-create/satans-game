@@ -42,9 +42,12 @@ python3 -m http.server 8000 # then open http://localhost:8000  (needed for sound
 Colours: always go through `lin(hex)` (sRGB → linear) before giving them to three.js, otherwise
 pastels wash out.
 
-Transparent things: resin/jelly/acrylic use `transmission` with `depthWrite:false`. Anything that
-must be visible *through* them (character plane, glitter) must be **opaque** (use `alphaTest`, not
-`transparent`), because r128's transmission pass only captures opaque objects.
+Transparent things: resin/jelly/acrylic use `transmission` with `depthWrite:false`. **In r128
+`transmission` is not refraction - it only lowers the surface's alpha** (see meshphysical_frag), so
+whatever sits inside is drawn directly and then blended over. Keep things inside the resin (character
+print, glitter) **opaque** so they sort before the cap, and give cut-out pictures `alphaToCoverage:true`
+(+ a tiny `alphaTest`): a plain alphaTest leaves pixel-stepped outlines, alpha-to-coverage lets the
+antialiasing smooth them.
 
 ## Switch sounds (done)
 
@@ -77,6 +80,14 @@ shake test (all glitter kinds × shapes, thousands of frames) and count flakes o
 - No `preserveDrawingBuffer`: every read (PNG, GIF, `__k.shot`) copies the canvas right after its own
   render in the same task. Keep it that way — reading the canvas later would get a blank image.
 
+## Shapes and character placement
+
+`PROFILES`: 체리, 푸딩 (replaced SA), 동글, 하트, 고양이 얼굴, 토끼 얼굴. **Every top is flat** (dish 0, dome 0) by request.
+The face shapes are polar outlines in `section("cat"|"bunny")` (ears point to the back, -z); shapes
+listed in `FIXED_SEC` use one outline at every height. `charPos`: 레진 속에 세우기 (`inside`) /
+눕히기 (`lie`, sized like the top print) / 윗면 프린트 / 아크릴 스탠드 - the first two and the stand all use the
+same `acrylic()` cut-out piece. The name sticker takes its colours from the keycap colour (`nameSticker`).
+
 ## Glitter (table-driven)
 
 `GLITTERS` has one row per kind: count, size, sink speed, shape, and optionally `glow` (a soft light in
@@ -104,13 +115,23 @@ Ears and horns are seated on the lowest point of the real top under their base (
 with small tops (`fit`, SA). Horns grow straight up from a level base ring just under the surface - never
 clamp their vertices flat again (that shaved the base off). Geometry is cached in `DECO_GEO` via `GEO()`.
 
+## Video export
+
+"돌아가는 영상" replaced the silent 360° GIF: the image card's framing (4:5, `cardOverlay`), one slow
+turn over 8 s with three presses, recorded with `MediaRecorder` (mp4 first, else webm). Every sound goes
+through `outNode(a)` so it can also feed a `MediaStreamDestination`; new sounds must connect there, not
+to `a.destination`. The GIF encoder is no longer part of this page.
+
 ## Caches and first-use warm-up
 
 `CAP_GEO` (cap shapes), `DECO_GEO`, `GLIT_GEO/GLIT_MAT/GLOW_*`, `CHAR_TEX` (the character picture is
 uploaded once per slot; a new picture frees the old one) are all registered with `keep()`, so
-`freeTree()` leaves them alone. `warmUp()` (1.5 s after load, one look per idle moment) builds every
-material look once and compiles it, so the first click on e.g. 홀로그램 no longer freezes (0.37~0.69 s
-measured before). It snapshots `S` at every step - never restore an older snapshot, or it undoes what the
+`freeTree()` leaves them alone. `warmUp()` builds every look once and compiles it, so the first click on
+e.g. 홀로그램 no longer freezes (0.37~0.69 s measured before). **A compile always blocks in r128**
+(`getProgram` reads the uniforms back right away, `checkShaderErrors=false` doesn't change that), so the
+steps only run while nothing moves - the first seconds before the self-spin starts (the spin waits for
+`warmDone`, 12 s at most) or while the view is scrolled away. Running them during the spin was the
+"auto-rotate stutters" report. It snapshots `S` at every step - never restore an older snapshot, or it undoes what the
 user just picked. The compiled programs stay alive because their materials are kept in `WARM_KEEP`.
 
 ## First press

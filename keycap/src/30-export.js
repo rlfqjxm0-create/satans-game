@@ -9,7 +9,7 @@ async function saveFile(name,blob){
 function readURL(f){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f)})}
 const tick=()=>new Promise(r=>setTimeout(r,0));
 function prog(p,m){$("progress").style.display="block"; $("progress").firstElementChild.style.width=(p*100).toFixed(1)+"%"; if(m!=null) $("status").textContent=m}
-function busy(b){["savePng","makeGif"].forEach(id=>$(id).disabled=b)}
+function busy(b){["savePng","makeVid"].forEach(id=>$(id).disabled=b)}
 function snap(W,H){ // render one frame at a given size and hand back a 2D canvas copy
   renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix(); renderer.render(scene,camera);
   const c=document.createElement("canvas"); c.width=W; c.height=H; c.getContext("2d").drawImage(renderer.domElement,0,0,W,H); return c;
@@ -29,34 +29,47 @@ $("savePng").addEventListener("click",async()=>{
     PAUSE=true; const c=snap(1080,1350); restoreSize(); PAUSE=false;
     cardOverlay(c.getContext("2d"),1080,1350);
     const b=await new Promise(r=>c.toBlob(r,"image/png")); outBlob=b; outExt="png";
-    $("outImg").src=await readURL(b); $("out").style.display="block"; saveFile("satan-keycap.png",b);
+    showOut("img",await readURL(b)); saveFile("satan-keycap.png",b);
   }finally{busy(false)}
 });
-$("makeGif").addEventListener("click",async()=>{
+/* The keycap video: the same framing as the saved image card (camera, 4:5, title overlay), one slow full
+   turn with three presses, and the switch sound recorded into it. It replaces the silent 360° GIF. */
+function pickMime(){const list=["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
+  for(const m of list){try{if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m)) return m}catch(e){}} return null}
+function showOut(kind,url){const img=$("outImg"), vid=$("outVid");
+  img.style.display=kind==="img"?"block":"none"; vid.style.display=kind==="video"?"block":"none";
+  if(kind==="img") img.src=url; else {vid.src=url; vid.play().catch(()=>{})}
+  $("out").style.display="block"}
+$("makeVid").addEventListener("click",async()=>{
+  const mime=pickMime(), probe=document.createElement("canvas");
+  if(!mime||!probe.captureStream){toast("이 브라우저는 영상 만들기를 지원하지 않아요. 이미지로 저장해 주세요."); return}
   busy(true); $("out").style.display="none";
+  const W=720, H=900, DUR=8, presses=[1.0,3.4,5.8], keep=rotY; let dest=null, a=null, c=null;
   try{
     try{await document.fonts.load('46px Jua')}catch(e){}
-    const {GIFEncoder,quantize,applyPalette}=window.gifenc;
-    const W=480,H=600,N=48, keep=rotY; PAUSE=true;
-    const frames=[];
-    for(let f=0;f<N;f++){rotY=keep+f/N*Math.PI*2; press=(f===N/2)?0.9:(f===N/2+1?0.4:0); poseAt(T+f*0.08); const c=snap(W,H); cardOverlay(c.getContext("2d"),W,H); frames.push(c.getContext("2d").getImageData(0,0,W,H).data); if(f%4===0){prog(0.02+0.45*f/N,"360도 촬영 중…"); await tick()}}
-    rotY=keep; press=0; restoreSize(); PAUSE=false;
-    const mkSample=()=>{const sm=new Uint8ClampedArray(frames[0].length*4); [0,12,24,36].forEach((k,i)=>sm.set(frames[k],i*frames[0].length)); return sm};
-    // encode in a worker so the page keeps moving; frames are handed over, not copied
-    let bytes=null, sent=false; const job=gifWorker(done=>prog(0.5+0.48*done/N,"움짤 만드는 중…"));
-    if(job){try{await job.start(mkSample(),W,H,60); sent=true; for(let f=0;f<N;f++) job.frame(frames[f]); bytes=await job.finish()}
-      catch(e){console.error("gif worker",e); if(sent) throw e}   // frames already handed over: report it rather than retry
-      finally{job.close()}}
-    if(!bytes){   // no worker (or it failed before any frame was sent): encode here, as before
-    const sample=mkSample();
-    const pal=quantize(sample,255,{format:"rgb565"}), TI=pal.length, palette=pal.concat([[0,0,0]]); const gif=GIFEncoder(); let prev=null;
-    for(let f=0;f<N;f++){const idx=applyPalette(frames[f],pal,"rgb565"); let out=idx; if(prev){out=new Uint8Array(idx.length); for(let i=0;i<idx.length;i++) out[i]=idx[i]===prev[i]?TI:idx[i]}
-      gif.writeFrame(out,W,H,f===0?{palette,delay:60,dispose:1}:{delay:60,transparent:true,transparentIndex:TI,dispose:1}); prev=idx; if(f%4===0){prog(0.5+0.48*f/N,"움짤 만드는 중…"); await tick()}}
-    gif.finish(); bytes=gif.bytes()}
-    outBlob=new Blob([bytes],{type:"image/gif"}); outExt="gif";
-    $("outImg").src=await readURL(outBlob); $("out").style.display="block"; prog(1,`움짤 완성 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
-  }catch(err){console.error(err); $("status").textContent="움짤을 만들지 못했어요."; PAUSE=false; restoreSize()}
-  finally{busy(false)}
+    a=ac(); if(a&&a.state!=="running") try{await a.resume()}catch(e){}
+    const p=loadPack(S.sw); if(p) await p;                          // the recorded clicks have to be ready first
+    c=document.createElement("canvas"); c.width=W; c.height=H; const x=c.getContext("2d");
+    c.style.cssText="position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none"; document.body.appendChild(c);
+    x.fillStyle="#000"; x.fillRect(0,0,W,H);
+    const stream=c.captureStream(30);
+    if(a&&S.sound&&a.createMediaStreamDestination){dest=a.createMediaStreamDestination(); outNode(a).connect(dest); dest.stream.getAudioTracks().forEach(t=>stream.addTrack(t))}
+    const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8e6}), chunks=[];
+    rec.ondataavailable=e=>{if(e.data&&e.data.size) chunks.push(e.data)}; const stopped=new Promise(r=>rec.onstop=r);
+    PAUSE=true; renderer.setPixelRatio(1); renderer.setSize(W,H,false); camera.aspect=W/H; camera.updateProjectionMatrix();
+    rec.start(250); const t0=performance.now(); let next=0;
+    await new Promise(res=>{const loop=()=>{const t=(performance.now()-t0)/1000;
+      if(next<presses.length&&t>=presses[next]){next++; pressKey()}
+      rotY=keep+Math.min(t,DUR)/DUR*Math.PI*2; poseAt(T); renderer.render(scene,camera);
+      x.drawImage(renderer.domElement,0,0,W,H); cardOverlay(x,W,H);
+      prog(Math.min(1,t/DUR),`영상 녹화 중… ${Math.min(100,Math.round(100*t/DUR))}%`);
+      if(t<DUR+0.25) requestAnimationFrame(loop); else res()}; requestAnimationFrame(loop)});
+    rec.stop(); await stopped;
+    outExt=mime.includes("mp4")?"mp4":"webm"; outBlob=new Blob(chunks,{type:mime.split(";")[0]});
+    showOut("video",URL.createObjectURL(outBlob));
+    prog(1,`영상 완성 · ${W}×${H} · ${DUR}초 · ${(outBlob.size/1048576).toFixed(1)}MB`); setTimeout(()=>{$("progress").style.display="none"},500);
+  }catch(err){console.error(err); $("status").textContent="영상을 만들지 못했어요. 이미지로 저장해 주세요."; $("progress").style.display="none"}
+  finally{if(dest) try{outNode(a).disconnect(dest)}catch(e){} if(c) c.remove(); rotY=keep; PAUSE=false; restoreSize(); busy(false)}
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};

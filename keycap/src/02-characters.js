@@ -17,7 +17,6 @@ function drawSatanCat(x){
     x.fillStyle="#FFD45C"; x.beginPath(); x.arc(cx,37,7,0,Math.PI*2); x.fill();
     x.fillStyle="#121317"; x.beginPath(); x.arc(cx+0.3,37.8,5.6,0,Math.PI*2); x.fill();
     x.fillStyle="#FFFFFF"; x.beginPath(); x.arc(cx-1.9,35.2,1.9,0,Math.PI*2); x.fill(); x.beginPath(); x.arc(cx+2.3,40.2,0.9,0,Math.PI*2); x.fill()}
-  x.fillStyle="rgba(255,143,176,.5)"; for(const cx of [14.5,49.5]){x.beginPath(); x.ellipse(cx,45.5,3.2,1.9,0,0,Math.PI*2); x.fill()}
 }
 function makePlaceholder(){const c=document.createElement("canvas"); c.width=320; c.height=300; const x=c.getContext("2d"); x.scale(5,5); drawSatanCat(x); return trimCanvas(c)}
 const PLACEHOLDER={canvas:makePlaceholder(), cutout:true, v:{}};

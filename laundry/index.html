@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>사탄의 세탁 · 사탄의 장난감</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Cellipse cx="14.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3Cellipse cx="49.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1324,7 +1324,6 @@ function drawSatanCat(x){
     x.fillStyle="#FFD45C"; x.beginPath(); x.arc(cx,37,7,0,Math.PI*2); x.fill();
     x.fillStyle="#121317"; x.beginPath(); x.arc(cx+0.3,37.8,5.6,0,Math.PI*2); x.fill();
     x.fillStyle="#FFFFFF"; x.beginPath(); x.arc(cx-1.9,35.2,1.9,0,Math.PI*2); x.fill(); x.beginPath(); x.arc(cx+2.3,40.2,0.9,0,Math.PI*2); x.fill()}
-  x.fillStyle="rgba(255,143,176,.5)"; for(const cx of [14.5,49.5]){x.beginPath(); x.ellipse(cx,45.5,3.2,1.9,0,0,Math.PI*2); x.fill()}
 }
 function makePlaceholder(){const c=document.createElement("canvas"); c.width=320; c.height=300; const x=c.getContext("2d"); x.scale(5,5); drawSatanCat(x); return trimCanvas(c)}
 const PLACEHOLDER={canvas:makePlaceholder(), cutout:true, v:{}};
@@ -2382,7 +2381,7 @@ const GIF_LIMIT=14.3e6; // X/Twitter accepts GIFs up to 15MB
    Colour-matching and compressing every frame used to run on the page itself, so the whole page froze
    while a GIF was being made. The worker gets the same gifenc code this page already carries (read from
    its own <script>), so nothing extra is downloaded. Returns null when workers aren't available; the
-   caller then encodes on the page as before. The same helper lives in keycap/src/25-gifworker.js. */
+   caller then encodes on the page as before. (The keycap page records a video instead, so this is the only copy.) */
 function gifWorkerMain(){ // runs inside the worker
   let gif=null,pal=null,TI=0,prev=null,W=0,H=0,delay=60,first=true;
   onmessage=e=>{const m=e.data;

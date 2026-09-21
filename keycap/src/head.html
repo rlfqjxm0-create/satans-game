@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>사탄의 키캡 · 사탄의 장난감</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Cellipse cx="14.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3Cellipse cx="49.5" cy="45.5" rx="3.2" ry="1.9" fill="#FF8FB0" opacity=".5"/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="#FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="#121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="#FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="#FFFFFF"/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -155,17 +155,17 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       </div>
       <div class="stagebox" style="margin-top:6px">
         <div class="resultcard" style="display:block">
-          <div class="row"><button class="btn sub" id="savePng">이미지 저장</button><button class="btn sub ghost" id="makeGif">360° 움짤</button></div>
+          <div class="row"><button class="btn sub" id="savePng">이미지 저장</button><button class="btn sub ghost" id="makeVid">돌아가는 영상</button></div>
           <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
           <div class="progress" id="progress"><i></i></div>
           <div class="status" id="status"></div>
-          <div id="out"><img id="outImg" alt="키캡 결과"><div class="row"><button class="btn sub" id="saveOut">저장하기</button></div><p class="note">저장 버튼이 안 되면 길게 눌러 저장해 주세요.</p></div>
+          <div id="out"><img id="outImg" alt="키캡 결과"><video id="outVid" playsinline controls loop style="display:none;width:100%;border-radius:18px;margin-bottom:10px"></video><div class="row"><button class="btn sub" id="saveOut">저장하기</button></div><p class="note">저장 버튼이 안 되면 길게 눌러 저장해 주세요.</p></div>
         </div>
       </div>
     </section>
     <section class="controls">
       <div class="group"><h2>캐릭터 넣기</h2><p class="sub">배경이 있는 그림은 넣자마자 배경 지우기 창이 열려요.</p><div class="slots" id="slots"></div><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr" aria-label="그림 파일 고르기"></div>
-      <div class="group"><h2>캐릭터 위치</h2><p class="sub">아크릴 스탠드는 캐릭터 모양대로 잘린 투명 아크릴로 키캡 위에 세워져요.</p><div class="chips" id="posChips"></div></div>
+      <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div></div>
       <div class="group"><h2>키캡 모양</h2><div class="chips" id="shapeChips"></div></div>
       <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
       <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
