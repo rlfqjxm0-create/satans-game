@@ -147,6 +147,12 @@ the sound track at the first click, and every click landed seconds late. Check s
 audio and finding the clicks (they must sit at 1.0/3.4/5.8 s). Image and video use **the preview's own camera** (`camApply()`, the user's zoom/pan and tilt) - a separate card
 camera made the video jump at the start. The title is a die-cut label sticker too (`cardOverlay`).
 
+## Computer layout
+
+From 820 px the menu column (`.controls`) is its own scroll box (`max-height:100vh-100px`, the page's tail below the
+layout is ~87 px), the tabs dock at its top, and the preview column is sized to fit the window. A wheel turn over the
+menus first scrolls the page until the layout is fully on screen, then only the menus move (wheel handler in 15-faces.js).
+
 ## Phones
 
 Below 820 px `.stage` is `display:contents`, so the preview frame is a row of the page grid and docks at the top as a

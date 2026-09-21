@@ -170,6 +170,13 @@ function renderFaceUI(){
   $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:""}); renderFaceUI(); rebuild()};
 }
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
+/* computer: the menu column scrolls on its own. A wheel turn over it first brings the page down until the whole
+   layout is on screen (the title sits above it), then only the menus move - the preview stays where it is. */
+(function(){const c=document.querySelector(".controls"); if(!c) return;
+  c.addEventListener("wheel",e=>{if(getComputedStyle(c).overflowY!=="auto") return;
+    const room=document.documentElement.scrollHeight-innerHeight-scrollY;
+    if(e.deltaY>0&&room>1){e.preventDefault(); scrollBy(0,Math.min(room,e.deltaMode===1?e.deltaY*40:e.deltaY))}
+    else if(e.deltaY<0&&c.scrollTop<=0&&scrollY>0){e.preventDefault(); scrollBy(0,e.deltaMode===1?e.deltaY*40:e.deltaY)}},{passive:false})})();
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
 readHash(); loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
 setTimeout(warmUp,300);
