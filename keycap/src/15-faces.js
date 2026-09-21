@@ -161,7 +161,7 @@ function bleedTex(ct){
 function renderFaceUI(){
   const box=$("animalChips"); box.innerHTML="";
   for(const [k,a] of Object.entries(ANIMALS)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=a.name;
-    b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
+    b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color,eyeColor:""}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
   for(const k of FACE_KEYS) chipGroup(k+"Chips",k,OPT[k]);
   swatches("eyeSw","eyeColor",["","#5A3A2E","#3E6FD8","#3FA36B","#9A5BE0","#E0457B","#E0A03A","#D8323C","#8FD3FF"]);
   const el=$("extraChips"); el.innerHTML="";

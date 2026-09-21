@@ -209,7 +209,7 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
         <div class="group"><h2>귀</h2><div class="chips" id="earsChips"></div></div>
         <div class="group"><h2>눈</h2><div class="chips" id="eyesChips"></div>
           <p class="lab">눈 하이라이트</p><div class="chips" id="shineChips"></div>
-          <p class="lab">눈 색</p><div class="swatches" id="eyeSw" aria-label="눈 색"></div></div>
+          <p class="lab">눈 색 <span style="opacity:.75">· 맨 앞 까만 동그라미가 기본이에요</span></p><div class="swatches" id="eyeSw" aria-label="눈 색"></div></div>
         <div class="group"><h2>코</h2><div class="chips" id="noseChips"></div></div>
         <div class="group"><h2>입</h2><div class="chips" id="mouthChips"></div></div>
         <div class="group"><h2>수염과 무늬</h2><p class="sub">여러 개를 같이 고를 수 있어요.</p><div class="chips" id="extraChips"></div></div>
@@ -1335,7 +1335,7 @@ function chipGroup(id,key,labels,after){const el=$(id); el.innerHTML="";
     b.addEventListener("click",()=>{S[key]=k; if(key==="bg") S.bgImg=null; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(after) after(k); else rebuild(); if(key==="sw") previewSwitch()}); el.appendChild(b)}}
 function swatches(id,key,list){const el=$(id); el.innerHTML="";
   const all=[...S.palette,...list].filter((c,i,a)=>a.indexOf(c)===i);
-  all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); if(col) b.style.background=col; else {b.style.background="conic-gradient(#FFD66B,#FF8FB8,#8FD3FF,#B8A2FF,#FFD66B)"; b.title="기본 색"} b.setAttribute("aria-label",col||"기본 색"); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
+  all.forEach(col=>{const b=document.createElement("button"); b.type="button"; b.className="sw"+(S.palette.includes(col)?" mine":""); if(col) b.style.background=col; else if(key==="eyeColor"){b.style.background="#3B2F37"; b.title="기본 눈 색"} else {b.style.background="conic-gradient(#FFD66B,#FF8FB8,#8FD3FF,#B8A2FF,#FFD66B)"; b.title="기본 색"} b.setAttribute("aria-label",col||"기본 색"); b.setAttribute("aria-pressed",String(S[key]===col)); b.addEventListener("click",()=>{S[key]=col; [...el.children].forEach(c=>c.setAttribute("aria-pressed",String(c===b))); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(b)});
   const pick=document.createElement("input"); pick.type="color"; pick.className="sw pick"; pick.value=S[key]||"#FFD66B"; pick.setAttribute("aria-label","직접 고르기"); pick.addEventListener("input",()=>{S[key]=pick.value.toUpperCase(); if(key==="baseColor") applyBase(); else if(key!=="rgbColor") rebuild()}); el.appendChild(pick);
 }
 function renderUI(){
@@ -1537,7 +1537,7 @@ function bleedTex(ct){
 function renderFaceUI(){
   const box=$("animalChips"); box.innerHTML="";
   for(const [k,a] of Object.entries(ANIMALS)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=a.name;
-    b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
+    b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color,eyeColor:""}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
   for(const k of FACE_KEYS) chipGroup(k+"Chips",k,OPT[k]);
   swatches("eyeSw","eyeColor",["","#5A3A2E","#3E6FD8","#3FA36B","#9A5BE0","#E0457B","#E0A03A","#D8323C","#8FD3FF"]);
   const el=$("extraChips"); el.innerHTML="";
