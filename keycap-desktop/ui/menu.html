@@ -49,6 +49,7 @@ body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-seri
   <g id="g-home" stroke="none"><path d="M-10.4 -0.2 L0 -10 L10.4 -0.2 Z"/><rect x="-7.2" y="-3.2" width="14.4" height="11.8" rx="2"/><rect x="-2" y="2" width="4" height="6.6" rx="1" fill="#fff" opacity=".7"/></g>
   <g id="g-copy" stroke="none"><rect x="-8.6" y="-4.2" width="11.6" height="12.8" rx="2.6"/><rect x="-3" y="-8.8" width="11.6" height="12.8" rx="2.6" opacity=".55"/></g>
   <g id="g-sun" stroke="none"><circle r="4.6"/><g stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M0 -9.4 V-7 M0 7 V9.4 M-9.4 0 H-7 M7 0 H9.4 M-6.6 -6.6 L-5 -5 M5 5 L6.6 6.6 M-6.6 6.6 L-5 5 M5 -5 L6.6 -6.6"/></g></g>
+  <g id="g-lock" stroke="none"><rect x="-7.6" y="-2.2" width="15.2" height="11.4" rx="2.8"/><path d="M-4.6 -2.2 V-4.4 A4.6 4.6 0 0 1 4.6 -4.4 V-2.2 H2 V-4.4 A2 2 0 0 0 -2 -4.4 V-2.2 Z"/><circle cy="3.4" r="1.5" fill="#fff" opacity=".8"/></g>
   <g id="g-x" fill="none" stroke-width="2.8" stroke-linecap="round"><path d="M-6 -6 L6 6 M6 -6 L-6 6"/></g>
   <g id="g-power" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M-5.2 -5.6 A7.6 7.6 0 1 0 5.2 -5.6"/><path d="M0 -9.6 V-1"/></g>
   <g id="cat"><g fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"><path d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/><path d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/></g>
@@ -68,7 +69,7 @@ const ROWS=st.mode==="tray"?[
   ["sep"],["home","home","홈 열기"],["open","folder","키캡 파일 열기"],["site","star","새 키캡 만들러 가기"],["sep"],
   ["login","sun","윈도우를 켤 때 같이 켜기",st.login],["top","pin","키캡을 항상 위에 두기",st.top],["sep"],["band","quit","power","끝내기"]
 ]:[
-  ["sep"],["press","key","딸깍 누르기"],["spin","spin","천천히 돌기",st.spin],["sound","note","타건음",st.sound],["top","pin","항상 위에 두기",st.top],["size","size","크기"],
+  ["sep"],["press","key","딸깍 누르기"],["spin","spin","천천히 돌기",st.spin],["sound","note","타건음",st.sound],["top","pin","항상 위에 두기",st.top],["lock","lock","위치·크기 고정",st.lock],["size","size","크기"],
   ["sep"],["dup","copy","하나 더 띄우기"],["open","folder","다른 키캡 열기"],["site","star","새 키캡 만들러 가기"],["home","home","홈 열기"],["close","x","이 키캡 닫기"],
   ["sep"],["band","quit","power","모두 끝내기"]];
 const box=$("rows");
@@ -86,10 +87,10 @@ const sub=$("sub");
 for(const [k,v] of (st.sizes||[])){const r=document.createElement("div"); r.className="r"; const on=Math.abs(st.width-v)<12;
   r.innerHTML='<span class="t"></span><span class="k'+(on?" on":"")+'"><svg viewBox="0 0 14 14"><path d="M2.5 7.5 L5.8 10.5 L11.5 3.8"/></svg></span>';
   r.querySelector(".t").textContent=k; r.style.paddingLeft="12px"; r.onclick=e=>{e.stopPropagation(); window.ui.act("size",v)}; sub.appendChild(r)}
-let subT=null; const openSub=()=>{clearTimeout(subT); document.documentElement.style.setProperty("--subTop",($("sizeRow").offsetTop-8)+"px"); sub.classList.add("open"); fit()};
+let subT=null; const openSub=()=>{clearTimeout(subT); document.documentElement.style.setProperty("--subTop",($("sizeRow").offsetTop-8)+"px"); sub.classList.add("open")};
 if($("sizeRow")){$("sizeRow").onmouseenter=()=>{subT=setTimeout(openSub,180)}; $("sizeRow").onclick=e=>{e.stopPropagation(); openSub()}}
 document.querySelectorAll(".pm").forEach(p=>p.addEventListener("click",e=>e.stopPropagation()));   // only the see-through margin closes it
-document.querySelectorAll("#main .r:not(#sizeRow)").forEach(r=>r.addEventListener("mouseenter",()=>{clearTimeout(subT); sub.classList.remove("open"); fit()}));
+document.querySelectorAll("#main .r:not(#sizeRow)").forEach(r=>r.addEventListener("mouseenter",()=>{clearTimeout(subT); sub.classList.remove("open")}));
 document.body.addEventListener("click",()=>window.ui.act("dismiss"));   // the see-through margin: a click there closes it
 addEventListener("keydown",e=>{if(e.key==="Escape") window.ui.act("dismiss")});
 function fit(){const m=$("main"); window.ui.size(m.offsetWidth+($("sizeRow")?4+138:0)+20,m.offsetHeight+22)}   // room for the side menu from the start

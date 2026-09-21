@@ -15,7 +15,7 @@ app.setAppUserModelId("com.satansgame.keycap");
 const PAGE=path.join(__dirname,"page"), UI=path.join(__dirname,"ui"), ICON=path.join(__dirname,"build","icon.png");
 const SITE="https://rlfqjxm0-create.github.io/satans-game/keycap/";
 const SIZES=[["작게",200],["보통",270],["크게",370],["아주 크게",500]], MIN_W=150, MAX_W=760, ASPECT=1.05;   // nearly square: the chain swings out sideways
-let state={wins:{},open:[],top:true}, tray=null, home=null, menuWin=null, menuFor=null, menuMode="keycap", quitting=false;
+let state={wins:{},open:[],top:true}, tray=null, home=null, menuWin=null, menuFor=null, menuMode="keycap", menuAt=null, quitting=false;
 const statePath=()=>path.join(app.getPath("userData"),"state.json");
 function loadState(){try{state=Object.assign(state,JSON.parse(fs.readFileSync(statePath(),"utf8")))}catch(e){}}
 let saveT=null;
@@ -52,11 +52,11 @@ function openKeycap(file,copy){
   const win=new BrowserWindow({x,y,width:w,height:h,transparent:true,frame:false,resizable:false,maximizable:false,fullscreenable:false,
     alwaysOnTop:state.top!==false,skipTaskbar:true,hasShadow:false,backgroundColor:"#00000000",show:false,title:"사탄의 키캡",icon:ICON,
     webPreferences:{preload:path.join(__dirname,"preload.js"),contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,spellcheck:false}});
-  win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true};
+  win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true}; win.kcLock=!!saved.lock;
   win.setMenu(null);
   win.loadURL("kc://app/index.html?desktop=1");
   win.once("ready-to-show",()=>win.showInactive());
-  const remember=()=>{if(win.isDestroyed()) return; const b=win.getBounds(); state.wins[key]={x:b.x,y:b.y,w:b.width}; saveState()};
+  const remember=()=>{if(win.isDestroyed()) return; const b=win.getBounds(); state.wins[key]={x:b.x,y:b.y,w:b.width,lock:win.kcLock}; saveState()};
   win.on("moved",remember); win.on("resized",remember);
   win.on("closed",()=>{if(!quitting){state.open=openList().filter(([f,c])=>!(f===(file||null)&&c===copy)); saveState(); refreshHome(); if(!keycaps().length&&!(home&&!home.isDestroyed()&&home.isVisible())) openHome()}});
   if(!openList().some(([f,c])=>f===(file||null)&&c===copy)){state.open=openList().concat([[file||null,copy]]); saveState()}
@@ -89,7 +89,7 @@ function openHome(){
 function openMenu(win,mode){
   if(menuWin&&!menuWin.isDestroyed()) menuWin.close();
   menuFor=win; menuMode=mode||"keycap";
-  const p=testPos(270)||screen.getCursorScreenPoint();
+  const p=menuAt=testPos(270)||screen.getCursorScreenPoint();   // where it was opened - it must not follow the cursor
   menuWin=new BrowserWindow({x:p.x,y:p.y,width:240,height:460,transparent:true,frame:false,resizable:false,skipTaskbar:true,alwaysOnTop:true,
     backgroundColor:"#00000000",show:false,hasShadow:false,webPreferences:{preload:path.join(UI,"ui-preload.js"),contextIsolation:true}});
   menuWin.setAlwaysOnTop(true,"pop-up-menu"); menuWin.setMenu(null);
@@ -98,7 +98,7 @@ function openMenu(win,mode){
   menuWin.on("closed",()=>{menuWin=null});
 }
 ipcMain.on("ui-size",(e,w,h)=>{const m=BrowserWindow.fromWebContents(e.sender); if(!m||m!==menuWin) return;
-  const p=testPos(270)||screen.getCursorScreenPoint(), a=screen.getDisplayNearestPoint(p).workArea;
+  const p=menuAt||screen.getCursorScreenPoint(), a=screen.getDisplayNearestPoint(p).workArea;
   const x=Math.min(p.x,a.x+a.width-w), y=p.y+h>a.y+a.height?Math.max(a.y,p.y-h):p.y;   // stays on the screen
   m.setBounds({x:Math.round(x),y:Math.round(y),width:Math.round(w),height:Math.round(h)});
   if(!m.isVisible()){m.show(); m.focus()}});   // show/focus again on a visible menu blurs it on Windows, and blur closes it
@@ -106,7 +106,7 @@ ipcMain.on("ui-size",(e,w,h)=>{const m=BrowserWindow.fromWebContents(e.sender); 
 ipcMain.on("ui-state",e=>{const from=BrowserWindow.fromWebContents(e.sender);
   if(from&&from===menuWin&&menuMode==="tray"){e.returnValue={mode:"tray",name:"",login:app.getLoginItemSettings().openAtLogin,top:state.top!==false}; return}
   if(from&&from===menuWin&&menuFor&&!menuFor.isDestroyed()){const w=menuFor;
-    e.returnValue={mode:"keycap",name:nameOf(w.kcFile,w.kcCopy),spin:w.kcSt.spin,sound:w.kcSt.sound,top:w.isAlwaysOnTop(),width:w.getBounds().width,sizes:SIZES}; return}
+    e.returnValue={mode:"keycap",name:nameOf(w.kcFile,w.kcCopy),lock:w.kcLock,spin:w.kcSt.spin,sound:w.kcSt.sound,top:w.isAlwaysOnTop(),width:w.getBounds().width,sizes:SIZES}; return}
   e.returnValue={open:keycaps().map(w=>({id:w.id,name:nameOf(w.kcFile,w.kcCopy)})),login:app.getLoginItemSettings().openAtLogin,top:state.top!==false};
 });
 ipcMain.on("ui-act",(e,a,arg)=>{
@@ -123,6 +123,7 @@ ipcMain.on("ui-act",(e,a,arg)=>{
     case "home": done(); openHome(); break;
     case "close": done(); if(w) w.close(); break;
     case "dup": done(); if(w) duplicate(w); break;
+    case "lock": done(); if(w){w.kcLock=!w.kcLock; const b=w.getBounds(); state.wins[w.kcKey]={x:b.x,y:b.y,w:b.width,lock:w.kcLock}; saveState()} break;
     case "dupOne": {const k=BrowserWindow.fromId(arg); if(k) duplicate(k); break}
     case "quit": app.quit(); break;
     case "dismiss": done(); break;
@@ -135,10 +136,10 @@ ipcMain.on("ui-act",(e,a,arg)=>{
 
 /* ---- the keycap windows ---- */
 ipcMain.on("kc-data",e=>{const w=BrowserWindow.fromWebContents(e.sender); e.returnValue=w?w.kcData:null});
-ipcMain.on("kc-move",(e,dx,dy)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w) return; const [x,y]=w.getPosition(); w.setPosition(Math.round(x+dx),Math.round(y+dy))});
+ipcMain.on("kc-move",(e,dx,dy)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w||w.kcLock) return; const [x,y]=w.getPosition(); w.setPosition(Math.round(x+dx),Math.round(y+dy))});
 function setWidth(w,nw){const b=w.getBounds(); nw=Math.round(Math.min(MAX_W,Math.max(MIN_W,nw))); const nh=Math.round(nw*ASPECT);
   w.setBounds({x:Math.round(b.x+(b.width-nw)/2),y:Math.round(b.y+(b.height-nh)/2),width:nw,height:nh})}   // grows around its middle
-ipcMain.on("kc-zoom",(e,dir)=>{const w=BrowserWindow.fromWebContents(e.sender); if(w) setWidth(w,w.getBounds().width*(dir>0?1.08:1/1.08))});
+ipcMain.on("kc-zoom",(e,dir)=>{const w=BrowserWindow.fromWebContents(e.sender); if(w&&!w.kcLock) setWidth(w,w.getBounds().width*(dir>0?1.08:1/1.08))});
 // clicks on the empty part of the window go to whatever is behind it; mouse moves still reach the page (forward)
 ipcMain.on("kc-hit",(e,solid)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w||w.kcSolid===solid) return; w.kcSolid=solid; w.setIgnoreMouseEvents(!solid,{forward:true})});
 ipcMain.on("kc-menu",(e,st)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w) return; w.kcSt=Object.assign(w.kcSt,st); openMenu(w)});

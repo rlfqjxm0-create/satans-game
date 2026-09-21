@@ -29,8 +29,14 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
   always has room for the 크기 side menu (resizing it later didn't take).
 - Several keycaps at once: every file is its own window, and 하나 더 띄우기 opens the same file again as copy n
   (`state.open` keeps `[file, copy]`), placed beside the original on the side with room.
-- Framing in the window: measured over 36 angles (alpha bbox) so the chain, glow and base never touch the edge -
-  `CAM.zoom=1.5, panY=-12`, floor glow 0.36, shadow 0.5, window 1:1.05.
+- Framing in the window (`fitView`, after every rebuild): the unrotated bounding box of everything on the tester is
+  swept around y and its corners projected; zoom and vertical pan are searched so they stay inside a 0.9 NDC margin.
+  Fixed numbers were wrong as soon as a tall stand or a floating heart came along (cut off).
+- 위치·크기 고정 (`kcLock`, saved per window): main ignores kc-move / kc-zoom. The menu window is placed where it was
+  opened (`menuAt`) - re-reading the cursor on every resize made it run away from the cursor.
+- Long runs: no warm-up in the desktop, `powerPreference:low-power`, frames 60/25/30 (cursor over)/10 (animating)/2
+  (still). Measured: two keycaps + menu, presses every 4 s for 2 min - memory 637 → 627 MB (flat after the first
+  minute), ~17% of one core while both spin, ~7% idle. `__k.shot()` sets PAUSE - don't use it before an fps test.
 - `kc://app/…` serves `page/` (and `/ui/…` from `ui/`); `KC_POS="x,y"` puts every window there and `KC_DATA` gives a
   separate state folder - **tests use both, on the Dell monitor** (see ena-mascot/tests/dellmon.py), never the main screen.
 - Releases: upload `dist/SatanKeycap-Setup.exe` to a GitHub release of this repo with exactly that name; the site links

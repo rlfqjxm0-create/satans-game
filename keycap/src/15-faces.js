@@ -190,4 +190,4 @@ function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
 readHash(); if(S.glow&&!S.bgImg) S.bg="glow"; loadPack(S.sw); setBg(); renderUI(); renderFaceUI(); glowLabel(); rebuild();   // sounds start downloading right away (tiny files)
-setTimeout(warmUp,300);
+if(!DESK) setTimeout(warmUp,300);   // the desktop keycap never changes its look - no warm-up (memory, start-up CPU)

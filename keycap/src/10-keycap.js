@@ -35,7 +35,7 @@ const lin=(h)=>new THREE.Color(h).convertSRGBToLinear();
 
 /* ---------- renderer / scene ---------- */
 const cv=$("cv");
-const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:DESK}); if(DESK) renderer.setClearColor(0x000000,0);
+const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:DESK,powerPreference:DESK?"low-power":"default"}); if(DESK) renderer.setClearColor(0x000000,0);
 renderer.outputEncoding=THREE.sRGBEncoding; renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.92;
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 /* r128 asks the GPU "did this shader link?" right after every compile, which makes the page wait for

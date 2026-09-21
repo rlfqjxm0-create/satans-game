@@ -11,11 +11,26 @@ if(DESK){(function(){
   if(F&&F.image){fetch(F.image).then(r=>r.blob()).then(b=>processFile(new File([b],"keycap.png",{type:"image/png"})))
     .then(({it})=>{S.items=[it]; rebuild()}).catch(e=>console.error("keycap picture",e))}
 
-  // the RGB light must fit in the window (it was cut off at the edges): the camera steps back a little and the floor
-  // glow is made smaller, so the whole soft light fades out before the window's edge (the empty part lets clicks through)
-  // the window is nearly square (the chain swings out sideways as it turns and was cut by a tall window)
-  // and the view is moved so the whole turn (chain included, measured over 36 angles) sits in the middle
-  CAM.zoom=1.5; CAM.panY=-12; camApply(); rgbFloor.scale.set(0.36,0.36,1); shadow.scale.set(0.5,0.5,1);   // the floor light and shadow stay under the base
+  // framing: everything on the tester (base, chain, a tall stand, floating decorations, shadow) must fit the window at
+  // every turn angle. The unrotated bounding box is swept around y (a cylinder), its corners projected, and the zoom /
+  // vertical pan searched so they stay inside with a margin. Runs after every rebuild (the picture arrives later).
+  rgbFloor.scale.set(0.36,0.36,1); shadow.scale.set(0.5,0.5,1);   // the floor light and shadow stay under the base
+  const FIT_V=new THREE.Vector3(), FIT_T=new THREE.Vector3();
+  function fitView(){
+    const rx=root.rotation.x, ry=root.rotation.y; root.rotation.set(0,0,0); root.updateMatrixWorld(true);
+    const box=new THREE.Box3(); root.traverse(o=>{if(o.isMesh&&!o.isSprite&&o.visible&&o!==rgbGlow) box.expandByObject(o)}); root.rotation.set(rx,ry,0);
+    if(box.isEmpty()) return;
+    const r=Math.max(Math.hypot(box.min.x,box.min.z),Math.hypot(box.max.x,box.min.z),Math.hypot(box.min.x,box.max.z),Math.hypot(box.max.x,box.max.z))+0.8;
+    const y0=Math.min(box.min.y,shadow.position.y)-0.5, y1=box.max.y+1.6;   // +1.6: floating decorations bob up and down
+    const pts=[]; for(const x of [-r,r]) for(const z of [-r,r]) for(const y of [y0,y1]) pts.push(new THREE.Vector3(x,y,z));
+    const extent=()=>{camApply(); camera.updateMatrixWorld(); let ex=0, ya=1, yb=-1; for(const p of pts){FIT_V.copy(p).project(camera); ex=Math.max(ex,Math.abs(FIT_V.x)); ya=Math.min(ya,FIT_V.y); yb=Math.max(yb,FIT_V.y)} return {ex,ya,yb}};
+    const centre=()=>{for(let k=0;k<3;k++){const e=extent(), dist=camera.position.distanceTo(FIT_T.set(CAM.panX,6+CAM.panY,0)); CAM.panY+=(e.ya+e.yb)/2*dist*Math.tan(camera.fov*Math.PI/360)}};
+    let lo=0.5, hi=6;
+    for(let i=0;i<16;i++){CAM.zoom=(lo+hi)/2; centre(); const e=extent(); if(Math.max(e.ex,-e.ya,e.yb)<=0.9) hi=CAM.zoom; else lo=CAM.zoom}
+    CAM.zoom=hi; centre(); camApply();
+  }
+  const rebuild0=rebuild; rebuild=function(){rebuild0(); fitView()}; fitView();
+  window.__fitView=fitView;
   let down=null, mouse=null, need=false, solid=true;
   const stop=e=>{e.stopImmediatePropagation(); e.preventDefault()};
   addEventListener("pointerdown",e=>{stop(e); down={b:e.button,x:e.screenX,y:e.screenY,lx:e.screenX,ly:e.screenY,moved:false}; idle=0;
@@ -40,8 +55,12 @@ if(DESK){(function(){
       const on=px[3]>70; if(on!==solid){solid=on; D.hit(on)}}};
   window.__deskHit=()=>solid;   // for tests
 
-  // frames: 60 while pressing / dragging, 30 while it turns by itself, 10 when everything has settled
   let lastDraw=0;
-  DRAW_GATE=now=>{const busy=down||press>0.01||Math.abs(pressV)>0.02||idle<3, gap=busy?16:CAM.locked?100:33;
+  // frames: 60 while pressing / dragging, 25 while it turns by itself, 30 while the cursor is over it (the click-through
+  // test needs fresh pixels), otherwise 10 if something still animates (rainbow / breathing light, glow mode, floating
+  // decorations, glitter glow) and 2 when nothing at all moves - a keycap left on the desktop costs almost nothing
+  DRAW_GATE=now=>{const busy=down||press>0.01||Math.abs(pressV)>0.02||idle<3;
+    const anim=S.rgb==="rainbow"||S.rgb==="breath"||S.glow||!!(decoGroup&&(decoGroup.userData.halo||decoGroup.userData.spin))||!!(partSys&&partSys.glow);
+    const gap=busy?16:!CAM.locked?40:mouse?33:anim?100:500;
     if(now-lastDraw>=gap-1){lastDraw=now; return true} return false};
 })()}
