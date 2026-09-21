@@ -1563,7 +1563,7 @@ function faceTex(f,dark){ // dark keycap: the lines stay dark and every part get
     if(gk){const R=u*0.107, hw=gk==="r"?R:R*1.12; x.lineWidth=u*0.016; x.strokeStyle=ink;
       for(const s of [-1,1]){const px=cx+s*ex; x.beginPath();
         if(gk==="r") x.arc(px,ey,R,0,7); else {const w=R*2.24, h=R*1.7, q=R*0.34, L=px-w/2, T=ey-h/2; x.moveTo(L+q,T); x.arcTo(L+w,T,L+w,T+h,q); x.arcTo(L+w,T+h,L,T+h,q); x.arcTo(L,T+h,L,T,q); x.arcTo(L,T,L+w,T,q); x.closePath()}
-        x.stroke(); x.beginPath(); x.moveTo(px+s*hw,ey-R*0.25); x.lineTo(px+s*(hw+u*0.032),ey-R*0.42); x.stroke()}
+        x.stroke()}   // no temples (arms) - just the two lenses and the bridge
       x.beginPath(); x.moveTo(cx-ex+hw,ey-R*0.12); x.quadraticCurveTo(cx,ey-R*0.5,cx+ex-hw,ey-R*0.12); x.stroke()}
     if(ex2.includes("mole")){x.fillStyle=ink; x.beginPath(); x.arc(cx+ex+r*1.5,ey+r*1.35,u*0.009,0,7); x.fill()}
     // nose
