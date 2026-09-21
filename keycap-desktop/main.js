@@ -14,8 +14,8 @@ app.setAppUserModelId("com.satansgame.keycap");
 
 const PAGE=path.join(__dirname,"page"), UI=path.join(__dirname,"ui"), ICON=path.join(__dirname,"build","icon.png");
 const SITE="https://rlfqjxm0-create.github.io/satans-game/keycap/";
-const SIZES=[["작게",180],["보통",240],["크게",340],["아주 크게",460]], MIN_W=140, MAX_W=720;
-let state={wins:{},open:[],top:true}, tray=null, home=null, menuWin=null, menuFor=null, quitting=false;
+const SIZES=[["작게",200],["보통",270],["크게",370],["아주 크게",500]], MIN_W=150, MAX_W=760, ASPECT=1.05;   // nearly square: the chain swings out sideways
+let state={wins:{},open:[],top:true}, tray=null, home=null, menuWin=null, menuFor=null, menuMode="keycap", quitting=false;
 const statePath=()=>path.join(app.getPath("userData"),"state.json");
 function loadState(){try{state=Object.assign(state,JSON.parse(fs.readFileSync(statePath(),"utf8")))}catch(e){}}
 let saveT=null;
@@ -25,7 +25,9 @@ function saveState(){clearTimeout(saveT); saveT=setTimeout(()=>{   // a temp fil
 const testPos=dx=>{if(!process.env.KC_POS) return null; const [x,y]=process.env.KC_POS.split(",").map(Number); return {x:x+dx,y}};   // tests: never on the main screen
 const keycaps=()=>BrowserWindow.getAllWindows().filter(w=>w.kcKey);
 const keyOf=f=>f?path.resolve(f).toLowerCase():"(기본)";
-const nameOf=f=>f?path.basename(f).replace(/\.keycap$/i,""):"기본 키캡";
+const nameOf=(f,c)=>(f?path.basename(f).replace(/\.keycap$/i,""):"기본 키캡")+(c?" ("+(c+1)+")":"");
+// open keycaps are remembered as [file, copy] - the same file can be out several times (하나 더 띄우기)
+const openList=()=>(state.open||[]).map(e=>Array.isArray(e)?e:[e,0]);
 const fileArgs=argv=>argv.slice(1).filter(a=>/\.keycap$/i.test(a)&&fs.existsSync(a));
 function refreshHome(){if(home&&!home.isDestroyed()) home.webContents.send("ui-refresh")}
 
@@ -36,12 +38,12 @@ function readKeycap(file){
   return {hash:d.hash,image:typeof d.image==="string"&&d.image.startsWith("data:image/")?d.image:null};
 }
 
-function openKeycap(file){
-  const key=keyOf(file);
+function openKeycap(file,copy){
+  copy=copy||0; const key=keyOf(file)+(copy?"#"+copy:"");
   for(const w of keycaps()) if(w.kcKey===key){w.show(); return w}   // already open: just bring it up
   let data=null;
   try{data=readKeycap(file)}catch(e){dialog.showErrorBox("사탄의 키캡","이 파일을 열 수 없어요.\n"+(file||"")+"\n\n"+e.message); return null}
-  const saved=state.wins[key]||{}, w=Math.min(MAX_W,Math.max(MIN_W,saved.w||240)), h=Math.round(w*1.25);
+  const saved=state.wins[key]||{}, w=Math.min(MAX_W,Math.max(MIN_W,saved.w||270)), h=Math.round(w*ASPECT);
   const area=screen.getPrimaryDisplay().workArea, n=keycaps().length;
   let x=saved.x, y=saved.y;
   const onScreen=(x,y)=>screen.getAllDisplays().some(d=>x+w/2>=d.bounds.x&&x+w/2<d.bounds.x+d.bounds.width&&y+h/2>=d.bounds.y&&y+h/2<d.bounds.y+d.bounds.height);
@@ -50,20 +52,25 @@ function openKeycap(file){
   const win=new BrowserWindow({x,y,width:w,height:h,transparent:true,frame:false,resizable:false,maximizable:false,fullscreenable:false,
     alwaysOnTop:state.top!==false,skipTaskbar:true,hasShadow:false,backgroundColor:"#00000000",show:false,title:"사탄의 키캡",icon:ICON,
     webPreferences:{preload:path.join(__dirname,"preload.js"),contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,spellcheck:false}});
-  win.kcKey=key; win.kcFile=file; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true};
+  win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true};
   win.setMenu(null);
   win.loadURL("kc://app/index.html?desktop=1");
   win.once("ready-to-show",()=>win.showInactive());
   const remember=()=>{if(win.isDestroyed()) return; const b=win.getBounds(); state.wins[key]={x:b.x,y:b.y,w:b.width}; saveState()};
   win.on("moved",remember); win.on("resized",remember);
-  win.on("closed",()=>{if(!quitting){state.open=state.open.filter(k=>k!==(file||null)); saveState(); refreshHome(); if(!keycaps().length&&!(home&&!home.isDestroyed()&&home.isVisible())) openHome()}});
-  if(!state.open.includes(file||null)){state.open.push(file||null); saveState()}
+  win.on("closed",()=>{if(!quitting){state.open=openList().filter(([f,c])=>!(f===(file||null)&&c===copy)); saveState(); refreshHome(); if(!keycaps().length&&!(home&&!home.isDestroyed()&&home.isVisible())) openHome()}});
+  if(!openList().some(([f,c])=>f===(file||null)&&c===copy)){state.open=openList().concat([[file||null,copy]]); saveState()}
   remember(); refreshHome();
   return win;
 }
+// one more of the same keycap: the next free copy number, placed a little to the side of the original
+function duplicate(w){let c=1; const used=new Set(keycaps().filter(k=>k.kcFile===w.kcFile).map(k=>k.kcCopy)); while(used.has(c)) c++;
+  const had=!!state.wins[keyOf(w.kcFile)+"#"+c], k=openKeycap(w.kcFile,c);
+  if(k&&!had){const b=w.getBounds(), a=screen.getDisplayMatching(b).workArea, step=Math.round(b.width*0.85);   // beside the original, on the side with room
+    let x=b.x-step>=a.x?b.x-step:b.x+step; x=Math.max(a.x,Math.min(x,a.x+a.width-b.width)); k.setPosition(x,b.y)}}
 function openDialog(parent){
   const r=dialog.showOpenDialogSync(parent&&!parent.isDestroyed()?parent:undefined,{title:"키캡 파일 열기",filters:[{name:"사탄의 키캡 파일",extensions:["keycap"]}],properties:["openFile","multiSelections"]});
-  (r||[]).forEach(openKeycap);
+  (r||[]).forEach(f=>openKeycap(f));
 }
 
 /* ---- home: open files (drop or pick), the keycaps that are out, a couple of options ---- */
@@ -79,11 +86,11 @@ function openHome(){
 }
 
 /* ---- the cute right-click menu: its own little window next to the cursor ---- */
-function openMenu(win){
+function openMenu(win,mode){
   if(menuWin&&!menuWin.isDestroyed()) menuWin.close();
-  menuFor=win;
+  menuFor=win; menuMode=mode||"keycap";
   const p=testPos(270)||screen.getCursorScreenPoint();
-  menuWin=new BrowserWindow({x:p.x,y:p.y,width:256,height:470,transparent:true,frame:false,resizable:false,skipTaskbar:true,alwaysOnTop:true,
+  menuWin=new BrowserWindow({x:p.x,y:p.y,width:240,height:460,transparent:true,frame:false,resizable:false,skipTaskbar:true,alwaysOnTop:true,
     backgroundColor:"#00000000",show:false,hasShadow:false,webPreferences:{preload:path.join(UI,"ui-preload.js"),contextIsolation:true}});
   menuWin.setAlwaysOnTop(true,"pop-up-menu"); menuWin.setMenu(null);
   menuWin.loadURL("kc://app/ui/menu.html");
@@ -93,12 +100,14 @@ function openMenu(win){
 ipcMain.on("ui-size",(e,w,h)=>{const m=BrowserWindow.fromWebContents(e.sender); if(!m||m!==menuWin) return;
   const p=testPos(270)||screen.getCursorScreenPoint(), a=screen.getDisplayNearestPoint(p).workArea;
   const x=Math.min(p.x,a.x+a.width-w), y=p.y+h>a.y+a.height?Math.max(a.y,p.y-h):p.y;   // stays on the screen
-  m.setBounds({x:Math.round(x),y:Math.round(y),width:Math.round(w),height:Math.round(h)}); m.show(); m.focus()});
+  m.setBounds({x:Math.round(x),y:Math.round(y),width:Math.round(w),height:Math.round(h)});
+  if(!m.isVisible()){m.show(); m.focus()}});   // show/focus again on a visible menu blurs it on Windows, and blur closes it
 
 ipcMain.on("ui-state",e=>{const from=BrowserWindow.fromWebContents(e.sender);
+  if(from&&from===menuWin&&menuMode==="tray"){e.returnValue={mode:"tray",name:"",login:app.getLoginItemSettings().openAtLogin,top:state.top!==false}; return}
   if(from&&from===menuWin&&menuFor&&!menuFor.isDestroyed()){const w=menuFor;
-    e.returnValue={name:nameOf(w.kcFile),spin:w.kcSt.spin,sound:w.kcSt.sound,top:w.isAlwaysOnTop(),width:w.getBounds().width,sizes:SIZES}; return}
-  e.returnValue={open:keycaps().map(w=>({id:w.id,name:nameOf(w.kcFile)})),login:app.getLoginItemSettings().openAtLogin,top:state.top!==false};
+    e.returnValue={mode:"keycap",name:nameOf(w.kcFile,w.kcCopy),spin:w.kcSt.spin,sound:w.kcSt.sound,top:w.isAlwaysOnTop(),width:w.getBounds().width,sizes:SIZES}; return}
+  e.returnValue={open:keycaps().map(w=>({id:w.id,name:nameOf(w.kcFile,w.kcCopy)})),login:app.getLoginItemSettings().openAtLogin,top:state.top!==false};
 });
 ipcMain.on("ui-act",(e,a,arg)=>{
   const w=menuFor&&!menuFor.isDestroyed()?menuFor:null, from=BrowserWindow.fromWebContents(e.sender), fromMenu=from&&from===menuWin;
@@ -109,15 +118,17 @@ ipcMain.on("ui-act",(e,a,arg)=>{
     case "size": if(w) setWidth(w,arg); done(); break;
     case "top": state.top=!(state.top!==false); saveState(); keycaps().forEach(x=>x.setAlwaysOnTop(state.top)); done(); refreshHome(); break;
     case "open": done(); openDialog(fromMenu?null:from); break;
-    case "openPaths": (arg||[]).forEach(openKeycap); break;
+    case "openPaths": (arg||[]).forEach(f=>openKeycap(f)); break;
     case "site": done(); shell.openExternal(SITE); break;
     case "home": done(); openHome(); break;
     case "close": done(); if(w) w.close(); break;
+    case "dup": done(); if(w) duplicate(w); break;
+    case "dupOne": {const k=BrowserWindow.fromId(arg); if(k) duplicate(k); break}
     case "quit": app.quit(); break;
     case "dismiss": done(); break;
     case "show": {const k=BrowserWindow.fromId(arg); if(k){k.show(); k.moveTop()} break}
     case "closeOne": {const k=BrowserWindow.fromId(arg); if(k) k.close(); break}
-    case "login": app.setLoginItemSettings({openAtLogin:!app.getLoginItemSettings().openAtLogin}); refreshHome(); break;
+    case "login": done(); app.setLoginItemSettings({openAtLogin:!app.getLoginItemSettings().openAtLogin}); refreshHome(); break;
     case "hideHome": if(home) home.close(); break;
   }
 });
@@ -125,7 +136,7 @@ ipcMain.on("ui-act",(e,a,arg)=>{
 /* ---- the keycap windows ---- */
 ipcMain.on("kc-data",e=>{const w=BrowserWindow.fromWebContents(e.sender); e.returnValue=w?w.kcData:null});
 ipcMain.on("kc-move",(e,dx,dy)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w) return; const [x,y]=w.getPosition(); w.setPosition(Math.round(x+dx),Math.round(y+dy))});
-function setWidth(w,nw){const b=w.getBounds(); nw=Math.round(Math.min(MAX_W,Math.max(MIN_W,nw))); const nh=Math.round(nw*1.25);
+function setWidth(w,nw){const b=w.getBounds(); nw=Math.round(Math.min(MAX_W,Math.max(MIN_W,nw))); const nh=Math.round(nw*ASPECT);
   w.setBounds({x:Math.round(b.x+(b.width-nw)/2),y:Math.round(b.y+(b.height-nh)/2),width:nw,height:nh})}   // grows around its middle
 ipcMain.on("kc-zoom",(e,dir)=>{const w=BrowserWindow.fromWebContents(e.sender); if(w) setWidth(w,w.getBounds().width*(dir>0?1.08:1/1.08))});
 // clicks on the empty part of the window go to whatever is behind it; mouse moves still reach the page (forward)
@@ -136,11 +147,10 @@ function makeTray(){
   let img=nativeImage.createFromPath(ICON); if(!img.isEmpty()) img=img.resize({width:16,height:16});
   tray=new Tray(img); tray.setToolTip("사탄의 키캡");
   tray.on("click",openHome);
-  tray.on("right-click",()=>tray.popUpContextMenu(Menu.buildFromTemplate([
-    {label:"🏠 홈 열기",click:openHome},{label:"📂 키캡 파일 열기…",click:()=>openDialog()},{type:"separator"},{label:"👋 끝내기",click:()=>app.quit()}])));
+  tray.on("right-click",()=>openMenu(null,"tray"));   // the same little menu as the keycaps'
 }
 
-app.on("second-instance",(e,argv)=>{const f=fileArgs(argv); if(f.length) f.forEach(openKeycap); else openHome()});
+app.on("second-instance",(e,argv)=>{const f=fileArgs(argv); if(f.length) f.forEach(x=>openKeycap(x)); else openHome()});
 app.on("before-quit",()=>{quitting=true});
 app.on("window-all-closed",()=>{if(!quitting) app.quit()});
 app.whenReady().then(()=>{
@@ -150,7 +160,7 @@ app.whenReady().then(()=>{
     return net.fetch(pathToFileURL(f).toString())});
   loadState(); makeTray();
   const files=fileArgs(process.argv);
-  if(files.length) files.forEach(openKeycap);
-  else{const prev=(state.open||[]).filter(p=>p===null||fs.existsSync(p)); state.open=[];
-    if(prev.length) prev.forEach(openKeycap); else openHome()}   // no file: the keycaps from last time, or the home window
+  if(files.length) files.forEach(f=>openKeycap(f));
+  else{const prev=openList().filter(([p])=>p===null||fs.existsSync(p)); state.open=[];
+    if(prev.length) prev.forEach(([f,c])=>openKeycap(f,c)); else openHome()}   // no file: the keycaps from last time, or the home window
 });

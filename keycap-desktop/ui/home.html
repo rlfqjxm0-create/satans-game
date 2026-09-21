@@ -1,63 +1,85 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><title>사탄의 키캡</title>
-<link rel="stylesheet" href="kc://app/ui/ui.css">
+<!-- Home: the same design as the menus (menu.html) - white card, thin gray ring, one-tone icons in round badges,
+     dotted separators, ticks on the right, a dark gray pill band. -->
 <style>
-body{padding:12px}
-.card{height:calc(100vh - 24px); padding:14px 14px 12px; display:flex; flex-direction:column; gap:10px; -webkit-app-region:drag}
-button,.drop,.list,.sw{-webkit-app-region:no-drag}
-.top{display:flex; align-items:center; gap:10px}
-.top h1{margin:0; font-size:22px}
-.top .x{margin-left:auto; width:30px; height:30px; border-radius:50%; background:var(--pink-soft); font-size:14px}
-.top .x:hover{background:var(--pink); color:#fff}
-.sub{margin:-4px 0 0; color:var(--ink-soft); font-size:12.5px}
-.drop{border:2.5px dashed #B9D6F0; border-radius:18px; padding:18px 12px; text-align:center; background:rgba(230,242,252,.6); transition:all .15s; cursor:pointer}
-.drop.over{border-color:var(--pink); background:var(--pink-soft); transform:scale(1.02)}
-.drop .big{font-size:30px; line-height:1}
-.drop b{display:block; font-family:"Jua",sans-serif; font-weight:400; font-size:17px; margin:6px 0 2px}
-.drop span{font-size:12px; color:var(--ink-soft)}
-h2{margin:2px 2px 0; font-family:"Jua",sans-serif; font-weight:400; font-size:15px}
-.list{flex:1; overflow:auto; display:flex; flex-direction:column; gap:4px; min-height:40px}
-.item{display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:12px; background:#fff; border:1.5px solid var(--line)}
+@font-face{font-family:"Jua"; src:url("kc://app/fonts/Jua.ttf") format("truetype")}
+:root{--badge:#EEEEF0; --hov:#E7E7EA; --press:#D9D9DD; --sep:#C6C6CC; --ring:#D6D6DB; --band:#3B3B41; --bandHov:#2A2A2F; --text:#34343A; --sub:#8C8C94}
+*{box-sizing:border-box}
+html,body{margin:0; background:transparent; overflow:hidden; user-select:none; -webkit-user-select:none}
+body{font-family:"Malgun Gothic","맑은 고딕",sans-serif; font-size:12.5px; font-weight:700; color:var(--text); padding:8px 12px 16px}
+.pm{height:calc(100vh - 24px); background:#fff; border:1px solid var(--ring); border-radius:14px; box-shadow:0 6px 18px rgba(40,30,60,.14);
+  padding:10px 0 12px; display:flex; flex-direction:column; -webkit-app-region:drag}
+.r,.band,.drop,.list,.x,.item button{-webkit-app-region:no-drag}
+.head{display:flex; align-items:center; gap:10px; padding:2px 14px 4px 12px}
+.head h1{margin:0; font-family:"Jua",sans-serif; font-weight:400; font-size:19px}
+.head svg{width:30px; height:30px}
+.x{margin-left:auto; width:26px; height:26px; border-radius:50%; background:var(--badge); display:grid; place-items:center; cursor:pointer; transition:background .1s}
+.x:hover{background:var(--press)} .x svg{width:11px; height:11px; stroke:var(--text); stroke-width:3; stroke-linecap:round; fill:none}
+.subt{margin:0 14px 6px; color:var(--sub); font-size:11.5px; font-weight:400}
+.sep{height:11px; margin:0 20px; flex:none; background:radial-gradient(circle,var(--sep) 1.1px,transparent 1.5px) 0 50%/7px 3px repeat-x}
+.drop{margin:4px 12px 6px; border:2px dashed var(--ring); border-radius:12px; padding:14px 10px; text-align:center; cursor:pointer; transition:background .1s, border-color .1s}
+.drop:hover{background:#F6F6F8} .drop.over{background:var(--hov); border-color:#9A9AA2}
+.drop b{display:block; font-family:"Jua",sans-serif; font-weight:400; font-size:15px; margin:6px 0 2px}
+.drop span{font-size:11px; font-weight:400; color:var(--sub)}
+.drop .ic{width:34px; height:34px; border-radius:50%; background:var(--badge); display:inline-grid; place-items:center}
+.drop .ic svg{width:18px; height:18px; fill:var(--text)}
+.lab{margin:4px 14px 2px; font-size:11.5px; color:var(--sub)}
+.list{flex:1; overflow:auto; min-height:36px; padding:0 6px}
+.item{display:flex; align-items:center; height:32px; padding:0 6px 0 4px; border-radius:8px; gap:0}
+.item:hover{background:#F6F6F8}
 .item .n{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.item button{padding:3px 9px; border-radius:99px; background:var(--accent-soft); font-size:12px}
-.item button.c{background:var(--pink-soft)}
-.empty{color:var(--ink-soft); font-size:12.5px; text-align:center; padding:8px}
-.opts{display:flex; flex-direction:column; gap:2px}
-.opts .row{padding:5px 8px}
-.btns{display:flex; gap:8px}
-.btns button{flex:1; padding:10px; border-radius:99px; font-family:"Jua",sans-serif; font-size:15px; background:var(--accent); color:#fff; box-shadow:0 3px 0 #2F7BBB}
-.btns button.g{background:#fff; color:var(--ink); box-shadow:0 3px 0 #D5E3F0; border:1.5px solid var(--line)}
-.btns button:active{transform:translateY(2px); box-shadow:none}
-.tip{font-size:11.5px; color:var(--ink-soft); text-align:center; line-height:1.5}
+.item button{font:inherit; font-size:11px; color:var(--text); border:0; background:var(--badge); border-radius:99px; padding:3px 8px; margin-left:4px; cursor:pointer}
+.item button:hover{background:var(--press)}
+.empty{color:var(--sub); font-weight:400; font-size:11.5px; text-align:center; padding:10px}
+.r{display:flex; align-items:center; height:30px; margin:0 6px; padding:0 10px 0 4px; border-radius:8px; cursor:pointer; transition:background .1s ease}
+.r:hover{background:var(--hov)} .r:active{background:var(--press)}
+.b{width:21px; height:21px; border-radius:50%; background:var(--badge); display:grid; place-items:center; flex:none; margin-right:10px}
+.b svg{width:13px; height:13px; fill:var(--text); stroke:var(--text)}
+.t{flex:1; white-space:nowrap}
+.k{width:14px; height:14px; flex:none; opacity:0} .k.on{opacity:1}
+.k svg{width:14px; height:14px; fill:none; stroke:var(--text); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
+.band{margin:6px 8px 0; height:30px; border-radius:14px; background:var(--band); color:#fff; display:flex; align-items:center; justify-content:center; gap:7px; cursor:pointer; transition:background .1s; flex:none}
+.band:hover{background:var(--bandHov)} .band svg{width:14px; height:14px; fill:#fff; stroke:#fff}
+.tip{margin:8px 12px 0; font-size:10.5px; font-weight:400; color:var(--sub); text-align:center; line-height:1.55}
 </style></head>
 <body>
-<div class="card">
-  <div class="top"><svg class="cat" viewBox="0 0 64 64" style="width:40px;height:40px"><use href="#c"/></svg><h1 class="jua">사탄의 키캡</h1><button class="x" id="x" title="닫기">✕</button></div>
-  <p class="sub">바탕화면에 내 키캡을 띄워 두고 딸깍딸깍 눌러 보세요.</p>
-  <div class="drop" id="drop"><div class="big">⌨️</div><b>키캡 파일을 여기에 놓기</b><span>눌러서 골라도 돼요 · 사이트에서 '바탕화면 키캡'으로 받아요</span></div>
-  <h2>🧁 떠 있는 키캡</h2>
+<div class="pm">
+  <div class="head"><svg viewBox="0 0 64 64"><use href="#cat"/></svg><h1>사탄의 키캡</h1><div class="x" id="x" title="닫기"><svg viewBox="0 0 12 12"><path d="M2 2 L10 10 M10 2 L2 10"/></svg></div></div>
+  <p class="subt">바탕화면에 내 키캡을 띄워 두고 딸깍딸깍 눌러 보세요.</p>
+  <div class="sep"></div>
+  <div class="drop" id="drop"><span class="ic"><svg viewBox="-10 -10 20 20"><use href="#g-key"/></svg></span><b>키캡 파일을 여기에 놓기</b><span>눌러서 골라도 돼요 · 여러 개를 한꺼번에 골라도 돼요</span></div>
+  <div class="lab">떠 있는 키캡</div>
   <div class="list" id="list"></div>
-  <div class="opts">
-    <button class="row" data-t="login"><span class="ic">🌅</span><span class="t">윈도우를 켤 때 같이 켜기</span><span class="sw" id="sw-login"></span></button>
-    <button class="row" data-t="top"><span class="ic">📌</span><span class="t">키캡을 항상 위에 두기</span><span class="sw" id="sw-top"></span></button>
-  </div>
-  <div class="btns"><button id="site">🎨 새 키캡 만들기</button><button class="g" id="quit">👋 끝내기</button></div>
+  <div class="sep"></div>
+  <div class="r" id="site"><span class="b"><svg viewBox="-10 -10 20 20"><use href="#g-star"/></svg></span><span class="t">새 키캡 만들러 가기</span></div>
+  <div class="r" data-t="login"><span class="b"><svg viewBox="-10 -10 20 20"><use href="#g-sun"/></svg></span><span class="t">윈도우를 켤 때 같이 켜기</span><span class="k" id="k-login"><svg viewBox="0 0 14 14"><path d="M2.5 7.5 L5.8 10.5 L11.5 3.8"/></svg></span></div>
+  <div class="r" data-t="top"><span class="b"><svg viewBox="-10 -10 20 20"><use href="#g-pin"/></svg></span><span class="t">키캡을 항상 위에 두기</span><span class="k" id="k-top"><svg viewBox="0 0 14 14"><path d="M2.5 7.5 L5.8 10.5 L11.5 3.8"/></svg></span></div>
+  <div class="sep"></div>
+  <div class="band" id="quit"><svg viewBox="-10 -10 20 20"><use href="#g-power"/></svg><span>끝내기</span></div>
   <div class="tip">톡 누르면 딸깍 · 끌면 옮겨져요 · 오른쪽 버튼으로 끌면 돌아가요<br>휠로 크기 조절 · 우클릭하면 메뉴</div>
 </div>
-<svg width="0" height="0" style="position:absolute"><defs><g id="c">
-  <g fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"><path d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/><path d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/></g>
-  <path d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/><ellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/>
-  <circle cx="22.5" cy="37" r="7" fill="#FFD45C"/><circle cx="41.5" cy="37" r="7" fill="#FFD45C"/><circle cx="22.8" cy="37.8" r="5.6" fill="#121317"/><circle cx="41.8" cy="37.8" r="5.6" fill="#121317"/>
-  <circle cx="20.6" cy="35.2" r="1.9" fill="#fff"/><circle cx="39.6" cy="35.2" r="1.9" fill="#fff"/></g></defs></svg>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <g id="g-key"><rect x="-8" y="-6.5" width="16" height="14" rx="3.5"/><rect x="-5" y="-8.5" width="10" height="9" rx="2.5" fill="#fff" stroke="none" opacity=".55"/></g>
+  <g id="g-star" stroke="none"><path d="M0 -9.6 L2.6 -2.6 L9.8 -2.4 L4 2 L6.2 9.2 L0 4.9 L-6.2 9.2 L-4 2 L-9.8 -2.4 L-2.6 -2.6 Z"/></g>
+  <g id="g-pin" stroke="none"><path d="M-4.8 -8.6 H4.8 L3.4 -2.4 L6.8 1.4 H-6.8 L-3.4 -2.4 Z"/><rect x="-1.1" y="1" width="2.2" height="8.6" rx="1"/></g>
+  <g id="g-sun" stroke="none"><circle r="4.6"/><g stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M0 -9.4 V-7 M0 7 V9.4 M-9.4 0 H-7 M7 0 H9.4 M-6.6 -6.6 L-5 -5 M5 5 L6.6 6.6 M-6.6 6.6 L-5 5 M5 -5 L6.6 -6.6"/></g></g>
+  <g id="g-power" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M-5.2 -5.6 A7.6 7.6 0 1 0 5.2 -5.6"/><path d="M0 -9.6 V-1"/></g>
+  <g id="cat"><g fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"><path d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/><path d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/></g>
+    <path d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/><ellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/>
+    <circle cx="22.5" cy="37" r="7" fill="#FFD45C"/><circle cx="41.5" cy="37" r="7" fill="#FFD45C"/><circle cx="22.8" cy="37.8" r="5.6" fill="#121317"/><circle cx="41.8" cy="37.8" r="5.6" fill="#121317"/>
+    <circle cx="20.6" cy="35.2" r="1.9" fill="#fff"/><circle cx="39.6" cy="35.2" r="1.9" fill="#fff"/></g>
+</defs></svg>
 <script>
 const $=id=>document.getElementById(id);
 function paint(){const st=window.ui.state();
-  $("sw-login").classList.toggle("on",!!st.login); $("sw-top").classList.toggle("on",!!st.top);
+  $("k-login").classList.toggle("on",!!st.login); $("k-top").classList.toggle("on",!!st.top);
   const L=$("list"); L.innerHTML="";
-  if(!st.open.length){L.innerHTML='<div class="empty">아직 떠 있는 키캡이 없어요 🫧</div>'}
+  if(!st.open.length){L.innerHTML='<div class="empty">아직 떠 있는 키캡이 없어요</div>'}
   for(const it of st.open){const d=document.createElement("div"); d.className="item";
-    d.innerHTML='<span>⌨️</span><span class="n"></span><button>보이기</button><button class="c">닫기</button>'; d.querySelector(".n").textContent=it.name;
-    const [s,c]=d.querySelectorAll("button"); s.onclick=()=>window.ui.act("show",it.id); c.onclick=()=>window.ui.act("closeOne",it.id); L.appendChild(d)}}
+    d.innerHTML='<span class="b"><svg viewBox="-10 -10 20 20"><use href="#g-key"/></svg></span><span class="n"></span><button>하나 더</button><button>보이기</button><button>닫기</button>';
+    d.querySelector(".n").textContent=it.name;
+    const [m,s,c]=d.querySelectorAll("button"); m.onclick=()=>window.ui.act("dupOne",it.id); s.onclick=()=>window.ui.act("show",it.id); c.onclick=()=>window.ui.act("closeOne",it.id); L.appendChild(d)}}
 paint(); window.ui.onRefresh(paint);
 document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>window.ui.act(b.dataset.t));
 $("x").onclick=()=>window.ui.act("hideHome"); $("site").onclick=()=>window.ui.act("site"); $("quit").onclick=()=>window.ui.act("quit");

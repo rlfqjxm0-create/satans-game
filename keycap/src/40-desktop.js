@@ -13,7 +13,9 @@ if(DESK){(function(){
 
   // the RGB light must fit in the window (it was cut off at the edges): the camera steps back a little and the floor
   // glow is made smaller, so the whole soft light fades out before the window's edge (the empty part lets clicks through)
-  CAM.zoom=1.22; camApply(); rgbFloor.scale.set(0.5,0.5,1);
+  // the window is nearly square (the chain swings out sideways as it turns and was cut by a tall window)
+  // and the view is moved so the whole turn (chain included, measured over 36 angles) sits in the middle
+  CAM.zoom=1.5; CAM.panY=-12; camApply(); rgbFloor.scale.set(0.36,0.36,1); shadow.scale.set(0.5,0.5,1);   // the floor light and shadow stay under the base
   let down=null, mouse=null, need=false, solid=true;
   const stop=e=>{e.stopImmediatePropagation(); e.preventDefault()};
   addEventListener("pointerdown",e=>{stop(e); down={b:e.button,x:e.screenX,y:e.screenY,lx:e.screenX,ly:e.screenY,moved:false}; idle=0;

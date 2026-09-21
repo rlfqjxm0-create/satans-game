@@ -1,44 +1,98 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><title>키캡 메뉴</title>
-<link rel="stylesheet" href="kc://app/ui/ui.css">
+<!-- The keycap's right-click menu, drawn like the owner's desktop-timer (ena-mascot) menu: white card, thin ring,
+     one-tone icons in little round badges, dotted separators, ticks on the right, a hover fill that fades in,
+     the last action as a pill band - in dark gray / light gray. -->
 <style>
-body{padding:10px}
-.card{padding:8px; width:236px}
-.head{display:flex; align-items:center; gap:8px; padding:6px 8px 8px; font-size:16px}
-.head small{margin-left:auto; font-family:"Noto Sans KR",sans-serif; font-size:11px; color:var(--ink-soft); max-width:92px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-.card{animation:pop .14s ease-out}
-@keyframes pop{from{transform:scale(.94); opacity:0}}
+@font-face{font-family:"Jua"; src:url("kc://app/fonts/Jua.ttf") format("truetype")}
+*{box-sizing:border-box}
+html,body{margin:0; background:transparent; overflow:hidden; user-select:none; -webkit-user-select:none}
+body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif; font-size:12.5px; font-weight:700; color:var(--text); padding:6px 14px 16px 6px}
+.wrap{display:flex; align-items:flex-start; gap:4px}
+.pm{width:200px; background:#fff; border:1px solid var(--ring); border-radius:12px; padding:8px 0; box-shadow:0 6px 18px rgba(40,30,60,.14)}
+.pm.sub{width:138px; margin-top:var(--subTop,120px); display:none}
+.pm.sub.open{display:block}
+.r{position:relative; display:flex; align-items:center; height:30px; margin:0 6px; padding:0 10px 0 4px; border-radius:8px; cursor:pointer;
+   background:transparent; transition:background .1s ease}
+.r:hover{background:var(--hov)} .r:active{background:var(--press)}
+.b{width:21px; height:21px; border-radius:50%; background:var(--badge); display:grid; place-items:center; flex:none; margin-right:10px}
+.b svg{width:13px; height:13px; fill:var(--text); stroke:var(--text)}
+.t{flex:1; white-space:nowrap}
+.k{width:14px; height:14px; flex:none; opacity:0} .k.on{opacity:1}
+.k svg{width:14px; height:14px; fill:none; stroke:var(--text); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
+.chev{width:10px; height:10px; flex:none; fill:none; stroke:var(--sub); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round}
+.sep{height:11px; margin:0 20px; background:radial-gradient(circle,var(--sep) 1.1px,transparent 1.5px) 0 50%/7px 3px repeat-x}
+.band{margin:4px 8px 0; height:28px; border-radius:13px; background:var(--band); color:#fff; display:flex; align-items:center; justify-content:center; gap:7px; cursor:pointer; transition:background .1s}
+.band:hover{background:var(--bandHov)}
+.band svg{width:14px; height:14px; fill:#fff; stroke:#fff}
+.head{height:30px; margin:0 6px; padding:0 10px 0 4px; display:flex; align-items:center; font-family:"Jua",sans-serif; font-weight:400; font-size:14px}
+.head small{margin-left:auto; font-family:"Malgun Gothic",sans-serif; font-size:11px; font-weight:400; color:var(--sub); max-width:84px; overflow:hidden; text-overflow:ellipsis}
+.pm{animation:pop .12s ease-out} @keyframes pop{from{opacity:0; transform:translateY(-3px)}}
 </style></head>
 <body>
-<div class="card" id="card">
-  <div class="head jua"><svg class="cat" viewBox="0 0 64 64"><use href="#c"/></svg>사탄의 키캡<small id="name"></small></div>
-  <button class="row" data-a="press"><span class="ic">👆</span><span class="t">딸깍 누르기</span></button>
-  <button class="row" data-a="spin"><span class="ic">🌀</span><span class="t">천천히 돌기</span><span class="sw" id="sw-spin"></span></button>
-  <button class="row" data-a="sound"><span class="ic">🔊</span><span class="t">타건음</span><span class="sw" id="sw-sound"></span></button>
-  <button class="row" data-a="top"><span class="ic">📌</span><span class="t">항상 위에 두기</span><span class="sw" id="sw-top"></span></button>
-  <div class="row" style="cursor:default; background:none"><span class="ic">📏</span><span class="t">크기</span></div>
-  <div class="chips" id="sizes"></div>
-  <div class="sep"></div>
-  <button class="row" data-a="open"><span class="ic">📂</span><span class="t">다른 키캡 열기</span></button>
-  <button class="row" data-a="site"><span class="ic">🎨</span><span class="t">새 키캡 만들러 가기</span></button>
-  <button class="row" data-a="home"><span class="ic">🏠</span><span class="t">홈 열기</span></button>
-  <div class="sep"></div>
-  <button class="row danger" data-a="close"><span class="ic">🫥</span><span class="t">이 키캡 닫기</span></button>
-  <button class="row danger" data-a="quit"><span class="ic">👋</span><span class="t">모두 끝내기</span></button>
+<div class="wrap" id="wrap">
+  <div class="pm" id="main">
+    <div class="head"><span class="b" style="background:transparent"><svg viewBox="0 0 64 64" style="width:21px;height:21px"><use href="#cat"/></svg></span>사탄의 키캡<small id="name"></small></div>
+    <div id="rows"></div>
+  </div>
+  <div class="pm sub" id="sub"></div>
 </div>
-<svg width="0" height="0" style="position:absolute"><defs><g id="c">
-  <g fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"><path d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/><path d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/></g>
-  <path d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/><ellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/>
-  <circle cx="22.5" cy="37" r="7" fill="#FFD45C"/><circle cx="41.5" cy="37" r="7" fill="#FFD45C"/><circle cx="22.8" cy="37.8" r="5.6" fill="#121317"/><circle cx="41.8" cy="37.8" r="5.6" fill="#121317"/>
-  <circle cx="20.6" cy="35.2" r="1.9" fill="#fff"/><circle cx="39.6" cy="35.2" r="1.9" fill="#fff"/></g></defs></svg>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <!-- one-tone glyphs in a -10..10 box, like the timer's _pm_glyph -->
+  <g id="g-key"><rect x="-8" y="-6.5" width="16" height="14" rx="3.5"/><rect x="-5" y="-8.5" width="10" height="9" rx="2.5" fill="#fff" stroke="none" opacity=".55"/></g>
+  <g id="g-spin" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M6.2 -4.2 A7 7 0 1 0 7 2.5"/><path d="M7.8 -8.2 L6.6 -3.6 L2.2 -5.2" stroke-linejoin="round"/></g>
+  <g id="g-note" stroke="none"><ellipse cx="-3.8" cy="5.4" rx="3.8" ry="3.3"/><rect x="-1.4" y="-8.6" width="2.6" height="14.2"/><path d="M-1.4 -9.4 L7.8 -5.8 L7.8 -1.6 L-1.4 -5.2 Z"/></g>
+  <g id="g-pin" stroke="none"><path d="M-4.8 -8.6 H4.8 L3.4 -2.4 L6.8 1.4 H-6.8 L-3.4 -2.4 Z"/><rect x="-1.1" y="1" width="2.2" height="8.6" rx="1"/></g>
+  <g id="g-size" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M-8 -3 V-8 H-3"/><path d="M8 3 V8 H3"/><path d="M3 -8 H8 V-3"/><path d="M-3 8 H-8 V3"/></g>
+  <g id="g-folder" stroke="none"><rect x="-9" y="-6.4" width="9" height="5" rx="1.6"/><rect x="-9" y="-3.8" width="18" height="12" rx="2.4"/></g>
+  <g id="g-star" stroke="none"><path d="M0 -9.6 L2.6 -2.6 L9.8 -2.4 L4 2 L6.2 9.2 L0 4.9 L-6.2 9.2 L-4 2 L-9.8 -2.4 L-2.6 -2.6 Z"/></g>
+  <g id="g-home" stroke="none"><path d="M-10.4 -0.2 L0 -10 L10.4 -0.2 Z"/><rect x="-7.2" y="-3.2" width="14.4" height="11.8" rx="2"/><rect x="-2" y="2" width="4" height="6.6" rx="1" fill="#fff" opacity=".7"/></g>
+  <g id="g-copy" stroke="none"><rect x="-8.6" y="-4.2" width="11.6" height="12.8" rx="2.6"/><rect x="-3" y="-8.8" width="11.6" height="12.8" rx="2.6" opacity=".55"/></g>
+  <g id="g-sun" stroke="none"><circle r="4.6"/><g stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M0 -9.4 V-7 M0 7 V9.4 M-9.4 0 H-7 M7 0 H9.4 M-6.6 -6.6 L-5 -5 M5 5 L6.6 6.6 M-6.6 6.6 L-5 5 M5 -5 L6.6 -6.6"/></g></g>
+  <g id="g-x" fill="none" stroke-width="2.8" stroke-linecap="round"><path d="M-6 -6 L6 6 M6 -6 L-6 6"/></g>
+  <g id="g-power" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M-5.2 -5.6 A7.6 7.6 0 1 0 5.2 -5.6"/><path d="M0 -9.6 V-1"/></g>
+  <g id="cat"><g fill="#2A2C33" stroke="#2A2C33" stroke-width="2.4" stroke-linejoin="round"><path d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/><path d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/></g>
+    <path d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="#4B4F5A"/><ellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="#2A2C33"/>
+    <circle cx="22.5" cy="37" r="7" fill="#FFD45C"/><circle cx="41.5" cy="37" r="7" fill="#FFD45C"/><circle cx="22.8" cy="37.8" r="5.6" fill="#121317"/><circle cx="41.8" cy="37.8" r="5.6" fill="#121317"/>
+    <circle cx="20.6" cy="35.2" r="1.9" fill="#fff"/><circle cx="39.6" cy="35.2" r="1.9" fill="#fff"/></g>
+</defs></svg>
 <script>
-const st=window.ui.state();
-document.getElementById("name").textContent=st.name||"";
-for(const k of ["spin","sound","top"]) document.getElementById("sw-"+k).classList.toggle("on",!!st[k]);
-const sz=document.getElementById("sizes");
-for(const [k,v] of st.sizes){const b=document.createElement("button"); b.className="chip"+(Math.abs(st.width-v)<12?" on":""); b.textContent=k; b.onclick=()=>window.ui.act("size",v); sz.appendChild(b)}
-document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>window.ui.act(b.dataset.a));
+const st=window.ui.state(), $=id=>document.getElementById(id);
+// dark gray / light gray (requested) - the same look for every keycap
+const R=document.documentElement.style, P={badge:"#EEEEF0",hov:"#E7E7EA",press:"#D9D9DD",sep:"#C6C6CC",ring:"#D6D6DB",band:"#3B3B41",bandHov:"#2A2A2F",text:"#34343A",sub:"#8C8C94"};
+for(const k in P) R.setProperty("--"+k,P[k]);
+$("name").textContent=st.name||"";
+// the rows: the keycap's right-click menu, or the tray icon's menu - one design for every menu of the program
+const TICK='<svg viewBox="0 0 14 14"><path d="M2.5 7.5 L5.8 10.5 L11.5 3.8"/></svg>';
+const ROWS=st.mode==="tray"?[
+  ["sep"],["home","home","홈 열기"],["open","folder","키캡 파일 열기"],["site","star","새 키캡 만들러 가기"],["sep"],
+  ["login","sun","윈도우를 켤 때 같이 켜기",st.login],["top","pin","키캡을 항상 위에 두기",st.top],["sep"],["band","quit","power","끝내기"]
+]:[
+  ["sep"],["press","key","딸깍 누르기"],["spin","spin","천천히 돌기",st.spin],["sound","note","타건음",st.sound],["top","pin","항상 위에 두기",st.top],["size","size","크기"],
+  ["sep"],["dup","copy","하나 더 띄우기"],["open","folder","다른 키캡 열기"],["site","star","새 키캡 만들러 가기"],["home","home","홈 열기"],["close","x","이 키캡 닫기"],
+  ["sep"],["band","quit","power","모두 끝내기"]];
+const box=$("rows");
+for(const r of ROWS){let el;
+  if(r[0]==="sep"){el=document.createElement("div"); el.className="sep"}
+  else if(r[0]==="band"){el=document.createElement("div"); el.className="band"; el.dataset.a=r[1]; el.innerHTML='<svg viewBox="-10 -10 20 20"><use href="#g-'+r[2]+'"/></svg><span></span>'; el.querySelector("span").textContent=r[3]}
+  else{el=document.createElement("div"); el.className="r"; el.innerHTML='<span class="b"><svg viewBox="-10 -10 20 20"><use href="#g-'+r[1]+'"/></svg></span><span class="t"></span>';
+    el.querySelector(".t").textContent=r[2];
+    if(r[0]==="size"){el.id="sizeRow"; el.insertAdjacentHTML("beforeend",'<svg class="chev" viewBox="0 0 10 10"><path d="M3.5 1.5 L7 5 L3.5 8.5"/></svg>')}
+    else{el.dataset.a=r[0]; if(r.length>3) el.insertAdjacentHTML("beforeend",'<span class="k'+(r[3]?" on":"")+'">'+TICK+'</span>')}}
+  box.appendChild(el)}
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=e=>{e.stopPropagation(); window.ui.act(b.dataset.a)});
+// 크기: a little side menu, like the timer's submenus
+const sub=$("sub");
+for(const [k,v] of (st.sizes||[])){const r=document.createElement("div"); r.className="r"; const on=Math.abs(st.width-v)<12;
+  r.innerHTML='<span class="t"></span><span class="k'+(on?" on":"")+'"><svg viewBox="0 0 14 14"><path d="M2.5 7.5 L5.8 10.5 L11.5 3.8"/></svg></span>';
+  r.querySelector(".t").textContent=k; r.style.paddingLeft="12px"; r.onclick=e=>{e.stopPropagation(); window.ui.act("size",v)}; sub.appendChild(r)}
+let subT=null; const openSub=()=>{clearTimeout(subT); document.documentElement.style.setProperty("--subTop",($("sizeRow").offsetTop-8)+"px"); sub.classList.add("open"); fit()};
+if($("sizeRow")){$("sizeRow").onmouseenter=()=>{subT=setTimeout(openSub,180)}; $("sizeRow").onclick=e=>{e.stopPropagation(); openSub()}}
+document.querySelectorAll(".pm").forEach(p=>p.addEventListener("click",e=>e.stopPropagation()));   // only the see-through margin closes it
+document.querySelectorAll("#main .r:not(#sizeRow)").forEach(r=>r.addEventListener("mouseenter",()=>{clearTimeout(subT); sub.classList.remove("open"); fit()}));
+document.body.addEventListener("click",()=>window.ui.act("dismiss"));   // the see-through margin: a click there closes it
 addEventListener("keydown",e=>{if(e.key==="Escape") window.ui.act("dismiss")});
-const c=document.getElementById("card"); requestAnimationFrame(()=>window.ui.size(c.offsetWidth+20,c.offsetHeight+20));
+function fit(){const m=$("main"); window.ui.size(m.offsetWidth+($("sizeRow")?4+138:0)+20,m.offsetHeight+22)}   // room for the side menu from the start
+fit();
 </script>
 </body></html>

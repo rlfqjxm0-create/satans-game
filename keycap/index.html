@@ -1318,7 +1318,8 @@ function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; const p=loa
   else{burst(a,t,700*deep,2600*deep,0.3,0.04); thump(a,t,230*deep,0.18,0.05)}}
 
 /* ---------- loop ---------- */
-function resize(){const r=cv.getBoundingClientRect(); renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
+function resize(){const r=cv.getBoundingClientRect(); if(DESK){renderer.setSize(r.width,r.height,false); camera.aspect=r.width/Math.max(1,r.height); camera.updateProjectionMatrix(); return}   // desktop: the window's own shape
+  renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(cv); resize();
 let last=performance.now(), T=0;
 const RGB_TMP=new THREE.Color(), RGB_BASE=new THREE.Color(), RGB_NEON=new THREE.Color(), RGB_HSL={h:0,s:0,l:0}, GLOW_P=new THREE.Vector3(), GLOW_D=new THREE.Vector3(); let rgbHex=null;   // reused every frame (no garbage)
@@ -1952,7 +1953,9 @@ if(DESK){(function(){
 
   // the RGB light must fit in the window (it was cut off at the edges): the camera steps back a little and the floor
   // glow is made smaller, so the whole soft light fades out before the window's edge (the empty part lets clicks through)
-  CAM.zoom=1.22; camApply(); rgbFloor.scale.set(0.5,0.5,1);
+  // the window is nearly square (the chain swings out sideways as it turns and was cut by a tall window)
+  // and the view is moved so the whole turn (chain included, measured over 36 angles) sits in the middle
+  CAM.zoom=1.5; CAM.panY=-12; camApply(); rgbFloor.scale.set(0.36,0.36,1); shadow.scale.set(0.5,0.5,1);   // the floor light and shadow stay under the base
   let down=null, mouse=null, need=false, solid=true;
   const stop=e=>{e.stopImmediatePropagation(); e.preventDefault()};
   addEventListener("pointerdown",e=>{stop(e); down={b:e.button,x:e.screenX,y:e.screenY,lx:e.screenX,ly:e.screenY,moved:false}; idle=0;

@@ -639,7 +639,8 @@ function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; const p=loa
   else{burst(a,t,700*deep,2600*deep,0.3,0.04); thump(a,t,230*deep,0.18,0.05)}}
 
 /* ---------- loop ---------- */
-function resize(){const r=cv.getBoundingClientRect(); renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
+function resize(){const r=cv.getBoundingClientRect(); if(DESK){renderer.setSize(r.width,r.height,false); camera.aspect=r.width/Math.max(1,r.height); camera.updateProjectionMatrix(); return}   // desktop: the window's own shape
+  renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(cv); resize();
 let last=performance.now(), T=0;
 const RGB_TMP=new THREE.Color(), RGB_BASE=new THREE.Color(), RGB_NEON=new THREE.Color(), RGB_HSL={h:0,s:0,l:0}, GLOW_P=new THREE.Vector3(), GLOW_D=new THREE.Vector3(); let rgbHex=null;   // reused every frame (no garbage)

@@ -21,8 +21,16 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
 - The RGB light must fit inside the window (it was cut off): in the desktop the camera steps back (`CAM.zoom=1.22`) and
   the floor glow is half size.
 - Frames: 60 while pressing/dragging, 30 while spinning, 10 when settled (`DRAW_GATE`).
-- The right-click menu and the home window are our own small HTML pages (`ui/`, the site's colours, Jua) - the user
-  asked for a cute program, not the plain Windows menu. The menu is its own window next to the cursor, closed on blur.
+- **One menu design for everything** (keycap right-click, tray icon, home window): drawn like the owner's desktop-timer
+  menu (ena-mascot `_pm_open`) - white card, thin ring, one-tone icons in round badges, dotted separators, ticks, a pill
+  band for quitting - in dark gray / light gray (requested; not the keycap colour). `ui/menu.html` builds its rows from
+  `st.mode` ("keycap" | "tray"). The menu is its own window next to the cursor, closed on blur - **don't show()/focus()
+  it again once visible** (Windows blurs it, and blur closes it: the 크기 side menu closed the whole menu). The window
+  always has room for the 크기 side menu (resizing it later didn't take).
+- Several keycaps at once: every file is its own window, and 하나 더 띄우기 opens the same file again as copy n
+  (`state.open` keeps `[file, copy]`), placed beside the original on the side with room.
+- Framing in the window: measured over 36 angles (alpha bbox) so the chain, glow and base never touch the edge -
+  `CAM.zoom=1.5, panY=-12`, floor glow 0.36, shadow 0.5, window 1:1.05.
 - `kc://app/…` serves `page/` (and `/ui/…` from `ui/`); `KC_POS="x,y"` puts every window there and `KC_DATA` gives a
   separate state folder - **tests use both, on the Dell monitor** (see ena-mascot/tests/dellmon.py), never the main screen.
 - Releases: upload `dist/SatanKeycap-Setup.exe` to a GitHub release of this repo with exactly that name; the site links
