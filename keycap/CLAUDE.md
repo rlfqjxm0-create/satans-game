@@ -83,8 +83,10 @@ shake test (all glitter kinds × shapes, thousands of frames) and count flakes o
 ## Shapes and character placement
 
 `PROFILES`: 체리, 푸딩 (replaced SA), 동글, 하트, 고양이 얼굴, 토끼 얼굴. **Every top is flat** (dish 0, dome 0) by request.
-The face shapes are polar outlines in `section("cat"|"bunny")` (ears point to the back, -z); shapes
-listed in `FIXED_SEC` use one outline at every height. `charPos`: 레진 속에 세우기 (`inside`) /
+The face shapes (고양이/토끼 얼굴) are ordinary rounded bodies with `ears`: `capEars()` stands them straight up
+from the back of the flat top, using the cap's own material object (colour, finish, glow apply), plus a
+pink inner ear. Shapes are in `CAP_EARS`. (Ears drawn into the top-down outline lay flat and pointed
+backwards - don't go back to that.) `FIXED_SEC` lists outlines that are the same at every height (heart). `charPos`: 레진 속에 세우기 (`inside`) /
 눕히기 (`lie`, sized like the top print) / 윗면 프린트 / 아크릴 스탠드 - the first two and the stand all use the
 same `acrylic()` cut-out piece. The name sticker takes its colours from the keycap colour (`nameSticker`).
 

@@ -100,14 +100,6 @@ function roundedBox(w,h,d,r){const s=new THREE.Shape(); const x=-w/2,y=-d/2; s.m
 // unit cross-section of a keycap shape (max |x|,|z| = 1)
 function section(kind,n,M){
   const pts=[];
-  if(kind==="cat"||kind==="bunny"){ // a round face seen from above, ears pointing to the back (-z)
-    const ears=kind==="cat"?[{a:-Math.PI/2-0.62,w:0.42,len:0.62},{a:-Math.PI/2+0.62,w:0.42,len:0.62}]
-                          :[{a:-Math.PI/2-0.3,w:0.2,len:1.05,round:1},{a:-Math.PI/2+0.3,w:0.2,len:1.05,round:1}];
-    const raw=[]; for(let i=0;i<M;i++){const t=i/M*Math.PI*2; let r=1;
-      for(const e of ears){const d=Math.atan2(Math.sin(t-e.a),Math.cos(t-e.a)); if(Math.abs(d)<e.w){const u=1-Math.abs(d)/e.w; r+=e.len*(e.round?Math.sin(u*Math.PI/2):u)}}
-      raw.push([Math.cos(t)*r*1.06,Math.sin(t)*r*0.94])}
-    let x0=Infinity,x1=-Infinity,z0=Infinity,z1=-Infinity; raw.forEach(([x,z])=>{x0=Math.min(x0,x); x1=Math.max(x1,x); z0=Math.min(z0,z); z1=Math.max(z1,z)});
-    const cx=(x0+x1)/2, cz=(z0+z1)/2, s=Math.max(x1-x0,z1-z0)/2; return raw.map(([x,z])=>[(x-cx)/s,(z-cz)/s])}
   if(kind==="heart"){const raw=[]; for(let i=0;i<M;i++){const t=i/M*Math.PI*2; raw.push([16*Math.pow(Math.sin(t),3),-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))])}
     let mx=0,mz=0,cz=0; raw.forEach(p=>{mx=Math.max(mx,Math.abs(p[0])); cz+=p[1]}); cz/=raw.length; raw.forEach(p=>mz=Math.max(mz,Math.abs(p[1]-cz))); const s=Math.max(mx,mz);
     // blend toward a circle so the heart reads soft and chubby
@@ -121,10 +113,11 @@ const PROFILES={
   pudding:{sec:"circle",bw:18.6,tw:12.4,h:11,n0:2,n1:2,dish:0,dome:0,bev:2.6,tilt:0},
   round:{sec:"circle",bw:17.5,tw:14.5,h:9.5,n0:2,n1:2,dish:0,dome:0,bev:2.2,tilt:0},
   heart:{sec:"heart",bw:19,tw:16,h:9,n0:0,n1:0,dish:0,dome:0,bev:2.2,tilt:0},
-  catface:{sec:"cat",bw:19,tw:16,h:9,n0:0,n1:0,dish:0,dome:0,bev:1.6,tilt:0},
-  bunnyface:{sec:"bunny",bw:19,tw:16,h:9.5,n0:0,n1:0,dish:0,dome:0,bev:1.6,tilt:0}
+  // animal faces: an ordinary rounded body; the ears stand up from the back of the top (CAP_EARS)
+  catface:{sec:"sq",bw:18.6,tw:15.2,h:9,n0:3.4,n1:3,dish:0,dome:0,bev:1.3,tilt:0,ears:"cat"},
+  bunnyface:{sec:"circle",bw:20.6,tw:17.4,h:10,n0:2.3,n1:2.1,dish:0,dome:0,bev:1.5,tilt:0,ears:"bunny"}
 };
-const FIXED_SEC={heart:1,cat:1,bunny:1};   // one outline at every height (super-ellipses change with height)
+const FIXED_SEC={heart:1};   // one outline at every height (super-ellipses change with height)
 function capGeometry(p,flat){
   const M=96, L=22, K=12, verts=[], idx=[], rings=[];
   const secAt=(v)=>FIXED_SEC[p.sec]?section(p.sec,0,M):section("se",lerp(p.n0,p.n1,v),M);
@@ -466,7 +459,7 @@ function fenceTable(p){const key=p.sec+p.n0+"/"+p.n1; if(FENCES[key]) return FEN
     for(const sec of secs) for(let i=0;i<sec.length;i++){const [x1,z1]=sec[i],[x2,z2]=sec[(i+1)%sec.length], ex=x2-x1, ez=z2-z1, den=ex*dz-dx*ez; if(Math.abs(den)<1e-12) continue;
       const t=(ex*z1-x1*ez)/den, u=(dx*z1-dz*x1)/den; if(t>0&&u>=0&&u<1&&t<best) best=t}
     R[k]=best}
-  const win=p.sec==="bunny"?14:FIXED_SEC[p.sec]?9:0, E=new Float32Array(FENCE_N);   // the bunny's ears leave a narrow gap
+  const win=FIXED_SEC[p.sec]?9:0, E=new Float32Array(FENCE_N);
   for(let k=0;k<FENCE_N;k++){let m=R[k]; for(let j=-win;j<=win;j++) m=Math.min(m,R[(k+j+FENCE_N)%FENCE_N]); E[k]=m}
   return (FENCES[key]={R,E})}
 function fenceAt(T,a){const f=((a/(Math.PI*2))%1+1)%1*FENCE_N, i=Math.floor(f)%FENCE_N; return lerp(T[i],T[(i+1)%FENCE_N],f-Math.floor(f))}
@@ -524,12 +517,32 @@ function stepParticles(dt,t){
   if(glow){glow.instanceMatrix.needsUpdate=true; glow.instanceColor.needsUpdate=true}
 }
 
+/* Face-shaped caps: ears stand straight up from the back of the flat top, made of the cap's own
+   material (the same object, so colour, finish and glow mode apply to them too), with a pink inner ear.
+   cat: pointed; bunny: long, round and parallel. x/z/size are fractions of the flat top's half-width. */
+const CAP_EARS={
+  cat:{x:0.52,z:-0.34,build:()=>{const s=new THREE.Shape(), w=2.5, h=5.6; s.moveTo(-w,0); s.quadraticCurveTo(-w*0.82,h*0.58,-0.28,h*0.96); s.quadraticCurveTo(0,h*1.05,0.28,h*0.96); s.quadraticCurveTo(w*0.82,h*0.58,w,0); s.lineTo(-w,0); return s},
+       inner:()=>{const s=new THREE.Shape(), w=1.35, h=4.1, y=0.8; s.moveTo(-w,y); s.quadraticCurveTo(-w*0.8,y+h*0.58,-0.14,y+h*0.96); s.quadraticCurveTo(0,y+h*1.04,0.14,y+h*0.96); s.quadraticCurveTo(w*0.8,y+h*0.58,w,y); s.lineTo(-w,y); return s}},
+  bunny:{x:0.41,z:-0.3,build:()=>{const s=new THREE.Shape(), w=1.7, h=9.2; s.moveTo(-w*0.8,0); s.bezierCurveTo(-w*1.3,h*0.36,-w*1.2,h,0,h); s.bezierCurveTo(w*1.2,h,w*1.3,h*0.36,w*0.8,0); s.lineTo(-w*0.8,0); return s},
+       inner:()=>{const s=new THREE.Shape(), w=0.9, h=7, y=1; s.moveTo(-w*0.75,y); s.bezierCurveTo(-w*1.3,y+h*0.36,-w*1.2,y+h,0,y+h); s.bezierCurveTo(w*1.2,y+h,w*1.3,y+h*0.36,w*0.75,y); s.lineTo(-w*0.75,y); return s}}
+};
+function capEars(p,g,mat){
+  const E=CAP_EARS[p.ears], grp=new THREE.Group(), w=g.userData.topW, top=g.userData.topY, D=2.0;
+  const body=GEO("capear."+p.ears,()=>{const g2=new THREE.ExtrudeGeometry(E.build(),{depth:D,bevelEnabled:true,bevelThickness:0.6,bevelSize:0.45,bevelSegments:6,curveSegments:28}); g2.translate(0,0,-D/2); return flatBase(g2)});
+  const inner=GEO("capear.in."+p.ears,()=>{const g2=new THREE.ExtrudeGeometry(E.inner(),{depth:0.3,bevelEnabled:true,bevelThickness:0.15,bevelSize:0.12,bevelSegments:4,curveSegments:24}); g2.translate(0,0,D/2+0.45); return flatBase(g2)});
+  const pink=surfMat(S.mat==="matte"?"matte":"gloss","#FFB8C9");
+  for(const sd of [-1,1]){const x=sd*w*E.x, z=w*E.z;
+    const b=new THREE.Mesh(body,mat); b.position.set(x,top,z); b.renderOrder=2; grp.add(b);
+    const n=new THREE.Mesh(inner,pink); n.position.set(x,top,z); grp.add(n)}
+  return grp;
+}
 function rebuild(){
   const p=PROFILES[S.shape], flat=S.charPos==="top"||S.charPos==="stand";
   capGroup.children.forEach(freeTree);
   while(capGroup.children.length) capGroup.remove(capGroup.children[0]);
   capGeo=capGeoFor(p,flat);
   capMesh=new THREE.Mesh(capGeo,capMaterial()); capMesh.renderOrder=2; capMesh.userData.col=lin(S.color); capGroup.add(capMesh);
+  if(p.ears) capGroup.add(capEars(p,capGeo,capMesh.material));
   if(S.charPos!=="none"){charGroup=buildChar(p,capGeo); capGroup.add(charGroup)}
   partSys=makeParticles(p,capGeo); if(partSys){capGroup.add(partSys.mesh); if(partSys.glow) capGroup.add(partSys.glow); stepParticles(0.001,0)}
   decoGroup=buildDeco(p,capGeo); capGroup.add(decoGroup);
