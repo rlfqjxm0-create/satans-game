@@ -82,11 +82,21 @@ shake test (all glitter kinds × shapes, thousands of frames) and count flakes o
 
 ## Shapes and character placement
 
-`PROFILES`: 체리, 푸딩 (replaced SA), 동글, 하트, 고양이 얼굴, 토끼 얼굴. **Every top is flat** (dish 0, dome 0) by request.
-The face shapes (고양이/토끼 얼굴) are ordinary rounded bodies with `ears`: `capEars()` stands them straight up
-from the back of the flat top, using the cap's own material object (colour, finish, glow apply), plus a
-pink inner ear. Shapes are in `CAP_EARS`. (Ears drawn into the top-down outline lay flat and pointed
-backwards - don't go back to that.) `FIXED_SEC` lists outlines that are the same at every height (heart). `charPos`: 레진 속에 세우기 (`inside`) /
+`PROFILES`: 체리, 푸딩 (replaced SA), 동글, 하트, 말랑 (`soft`, a wide body with a big flat top - made for faces).
+**Every top is flat** (dish 0, dome 0) by request. Old links with `catface`/`bunnyface` open as 말랑 + that ear preset.
+
+## 얼굴 만들기 (the second tab, `src/15-faces.js`)
+
+Presets in `OPT.ears/eyes/shine/nose/mouth/extra` plus `S.eyeColor` ("" = the line colour), `ANIMALS` fills them
+all (and a colour) in one tap. The face is a canvas (`faceTex`) laid on the top like the top print; **its "up" is the
+back of the key (-z)**, so the camera looks from higher up (`camApply`) and the ears (`buildEars`) grow out of the
+**back wall** (`backZ` finds it from the fence table), pointing backwards and tilted up - never stuck into the top
+(rejected) or laid into the outline (rejected). Ears use the cap's own material object; dog ears hang at the sides.
+Keep every face part within 0.42 of the canvas centre (the top outline clips the rest - whiskers/blush were cut
+before). Lines turn pale on dark keycaps (`faceInk`). The share link carries the face as `fe`. `15-faces.js` also
+runs the start-up (`readHash … rebuild … warmUp`) because it must come after everything it uses.
+
+`FIXED_SEC` lists outlines that are the same at every height (heart). `charPos`: 레진 속에 세우기 (`inside`) /
 눕히기 (`lie`, sized like the top print) / 윗면 프린트 / 아크릴 스탠드 - the first two and the stand all use the
 same `acrylic()` cut-out piece. The name sticker takes its colours from the keycap colour (`nameSticker`).
 

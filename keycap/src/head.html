@@ -96,6 +96,14 @@ h1{font-family:"Jua",sans-serif; font-weight:400; font-size:clamp(30px,8.4vw,46p
 .chip[aria-pressed="true"]{background:var(--accent); color:#fff}
 .chip .dot{width:15px; height:15px; border-radius:50%; box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.18)}
 .chip small{font-size:12px; opacity:.8}
+.tabs{display:flex; gap:6px; background:var(--card); border-radius:999px; padding:6px; box-shadow:var(--shadow); position:sticky; top:8px; z-index:5}
+.tabs button{flex:1; border:0; background:transparent; color:var(--ink); font-family:"Jua",sans-serif; font-size:17px; padding:10px 8px; border-radius:999px; cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent); color:#fff}
+.tabs button:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+.pane{display:flex; flex-direction:column; gap:12px}
+.pane[hidden]{display:none}
+.group .lab{margin:14px 0 8px; font-size:13.5px; color:var(--ink-soft)}
+.group .lab:first-of-type{margin-top:4px}
 .textrow{display:flex; align-items:center; gap:10px}
 input[type=text]{flex:1; min-width:0; font:inherit; font-size:16px; color:var(--ink); background:var(--accent-soft); border:0; border-radius:14px; padding:11px 13px}
 .count{font-size:13px; color:var(--ink-soft); min-width:2.6em; text-align:right}
@@ -164,6 +172,8 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       </div>
     </section>
     <section class="controls">
+      <div class="tabs" role="tablist" aria-label="꾸미기 메뉴"><button type="button" role="tab" id="tabMain" aria-selected="true">키캡 꾸미기</button><button type="button" role="tab" id="tabFace" aria-selected="false">🐾 얼굴 만들기</button></div>
+      <div class="pane" id="paneMain" role="tabpanel">
       <div class="group"><h2>캐릭터 넣기</h2><p class="sub">배경이 있는 그림은 넣자마자 배경 지우기 창이 열려요.</p><div class="slots" id="slots"></div><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr" aria-label="그림 파일 고르기"></div>
       <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div></div>
       <div class="group"><h2>키캡 모양</h2><div class="chips" id="shapeChips"></div></div>
@@ -180,6 +190,18 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
       <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">밤하늘 배경에서 키캡과 반짝이가 은은하게 빛나요.</p>
         <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
         <input type="file" id="bgFile" accept="image/*" class="sr" aria-label="배경 이미지 고르기"></div>
+      </div>
+      <div class="pane" id="paneFace" role="tabpanel" hidden>
+        <div class="group"><h2>동물 고르기</h2><p class="sub">누르면 귀·눈·코·입·색이 한 번에 바뀌어요. 그다음 아래에서 하나씩 바꿔 보세요. 얼굴은 윗면에 그려지고, 귀는 키캡 뒤쪽 옆면에 붙어요.</p><div class="chips" id="animalChips"></div>
+          <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="faceClear">얼굴 지우기</button></div></div>
+        <div class="group"><h2>귀</h2><div class="chips" id="earsChips"></div></div>
+        <div class="group"><h2>눈</h2><div class="chips" id="eyesChips"></div>
+          <p class="lab">눈 하이라이트</p><div class="chips" id="shineChips"></div>
+          <p class="lab">눈 색</p><div class="swatches" id="eyeSw" aria-label="눈 색"></div></div>
+        <div class="group"><h2>코</h2><div class="chips" id="noseChips"></div></div>
+        <div class="group"><h2>입</h2><div class="chips" id="mouthChips"></div></div>
+        <div class="group"><h2>수염과 무늬</h2><p class="sub">여러 개를 같이 고를 수 있어요.</p><div class="chips" id="extraChips"></div></div>
+      </div>
     </section>
   </div>
   <footer>그림은 이 기기 안에서만 쓰여요. 어디에도 올라가지 않아요.</footer>

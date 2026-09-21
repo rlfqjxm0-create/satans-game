@@ -14,6 +14,7 @@ MODULES = [
     "01-shapes.js",      # 2D canvas helpers: rrect, star4/5, heart, speech bubble ... (shared with other games)
     "02-characters.js",  # character image handling, black-cat placeholder, drawChar, warpSource
     "10-keycap.js",      # ★ the keycap maker: three.js scene, geometry, materials, deco, glitter, RGB, sounds, UI
+    "15-faces.js",       # 얼굴 만들기: ear presets on the back wall, a face drawn on the top, the face tab (+ start-up)
     "20-files.js",       # file upload -> character item (+ background cleanup)
     "21-eraser.js",      # background-eraser modal
     "30-export.js",      # PNG card, video with sound, save/download
