@@ -59,15 +59,15 @@ function buildEars(p,g,mat){
 
 /* the face, drawn in a 1024 square that maps onto the top (canvas top edge = back of the key).
    Everything is kept within 0.42 of the centre so nothing is clipped by the top's outline. */
-function faceTex(f,ink){
-  return canvasTex(1024,1024,(x,u)=>{x.lineCap="round"; x.lineJoin="round";
-    x.translate(u/2,u*0.63); x.scale(1.3,1.3); x.translate(-u/2,-u*0.56);
+function faceTex(f,dark){ // dark keycap: the lines stay dark and every part gets a pale sticker rim (pale lines vanished on the cream mask)
+  const ink="#3B2F37"; return canvasTex(1024,1024,(b,u)=>{const fc=document.createElement("canvas"); fc.width=fc.height=u; const x=fc.getContext("2d");   // b: base layer (mask, blush), x: the parts
+    for(const c of [b,x]){c.lineCap="round"; c.lineJoin="round"; c.translate(u/2,u*0.63); c.scale(1.3,1.3); c.translate(-u/2,-u*0.56)}
     const cx=u/2, ey=u*0.5, ex=u*0.18, r=u*0.052, ny=u*0.585, ex2=f.extra||[];
     const cream="rgba(255,248,238,.96)";
-    if(ex2.includes("fox")){x.fillStyle=cream; x.beginPath(); x.moveTo(cx-u*0.31,u*0.49); x.quadraticCurveTo(cx-u*0.17,u*0.55,cx,u*0.56); x.quadraticCurveTo(cx+u*0.17,u*0.55,cx+u*0.31,u*0.49); x.quadraticCurveTo(cx+u*0.26,u*0.74,cx,u*0.76); x.quadraticCurveTo(cx-u*0.26,u*0.74,cx-u*0.31,u*0.49); x.fill()}
-    if(ex2.includes("muzzle")){x.fillStyle=cream; x.beginPath(); x.ellipse(cx,u*0.62,u*0.15,u*0.105,0,0,7); x.fill()}
-    if(ex2.includes("blush")){x.fillStyle="rgba(255,120,150,.5)"; for(const s of [-1,1]){x.beginPath(); x.ellipse(cx+s*u*0.25,u*0.585,u*0.055,u*0.03,0,0,7); x.fill()}}
-    if(ex2.includes("freckle")){x.fillStyle="rgba(150,90,70,.75)"; for(const s of [-1,1]) for(const [dx,dy] of [[0.22,0.57],[0.26,0.59],[0.24,0.61]]){x.beginPath(); x.arc(cx+s*u*dx,u*dy,u*0.008,0,7); x.fill()}}
+    if(ex2.includes("fox")){b.fillStyle=cream; b.beginPath(); b.moveTo(cx-u*0.31,u*0.49); b.quadraticCurveTo(cx-u*0.17,u*0.55,cx,u*0.56); b.quadraticCurveTo(cx+u*0.17,u*0.55,cx+u*0.31,u*0.49); b.quadraticCurveTo(cx+u*0.26,u*0.74,cx,u*0.76); b.quadraticCurveTo(cx-u*0.26,u*0.74,cx-u*0.31,u*0.49); b.fill()}
+    if(ex2.includes("muzzle")){b.fillStyle=cream; b.beginPath(); b.ellipse(cx,u*0.62,u*0.15,u*0.105,0,0,7); b.fill()}
+    if(ex2.includes("blush")){b.fillStyle="rgba(255,120,150,.5)"; for(const s of [-1,1]){b.beginPath(); b.ellipse(cx+s*u*0.25,u*0.585,u*0.055,u*0.03,0,0,7); b.fill()}}
+    if(ex2.includes("freckle")){b.fillStyle="rgba(150,90,70,.75)"; for(const s of [-1,1]) for(const [dx,dy] of [[0.22,0.57],[0.26,0.59],[0.24,0.61]]){b.beginPath(); b.arc(cx+s*u*dx,u*dy,u*0.008,0,7); b.fill()}}
     if(ex2.includes("whisker")){x.strokeStyle=ink; x.lineWidth=u*0.011;   // two short, slightly curved whiskers a side
       for(const s of [-1,1]) for(const dy of [-0.012,0.018]){x.beginPath(); x.moveTo(cx+s*u*0.21,u*(0.6+dy)); x.quadraticCurveTo(cx+s*u*0.25,u*(0.593+dy*1.3),cx+s*u*0.29,u*(0.598+dy*1.8)); x.stroke()}}
     // eyes
@@ -117,10 +117,15 @@ function faceTex(f,ink){
       x.quadraticCurveTo(R-u*0.004,top+u*0.098,cx,top+u*0.1); x.quadraticCurveTo(L+u*0.004,top+u*0.098,L,yT); x.fill();
       x.fillStyle="#FF8FA3"; x.beginPath(); x.ellipse(cx,top+u*0.078,u*0.028,u*0.018,0,0,7); x.fill(); x.fillStyle=ink;
       omega()}
+    b.setTransform(1,0,0,1,0,0);
+    if(dark){const o=document.createElement("canvas"); o.width=o.height=u; const oc=o.getContext("2d"), R=u*0.012;
+      for(let k=0;k<16;k++){const a=k/16*Math.PI*2; oc.drawImage(fc,Math.cos(a)*R,Math.sin(a)*R)}
+      oc.globalCompositeOperation="source-in"; oc.fillStyle="#FFF4F8"; oc.fillRect(0,0,u,u); b.drawImage(o,0,0)}
+    b.drawImage(fc,0,0);
   },true);
 }
 const hasFace=()=>S.eyes!=="none"||S.nose!=="none"||S.mouth!=="none"||(S.extra&&S.extra.length);
-function faceInk(){const c=new THREE.Color(S.color); return (0.299*c.r+0.587*c.g+0.114*c.b)<0.4?"#FFF4F8":"#3B2F37"}   // pale lines on dark keycaps
+function faceDark(){const c=new THREE.Color(S.color); return (0.299*c.r+0.587*c.g+0.114*c.b)<0.4}   // dark keycap: parts get a pale rim
 function buildFace(p,g){
   const sec=g.userData.sec, w=g.userData.topW*0.96, shape=new THREE.Shape(); sec.forEach(([ux,uz],i)=>{const X=ux*w, Y=-uz*w; i?shape.lineTo(X,Y):shape.moveTo(X,Y)});
   const sg=new THREE.ShapeGeometry(shape,1), pos=sg.attributes.position, uv=[]; for(let i=0;i<pos.count;i++) uv.push(pos.getX(i)/(2*w)+0.5,pos.getY(i)/(2*w)+0.5); sg.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2)); sg.rotateX(-Math.PI/2);
@@ -134,9 +139,9 @@ function buildFace(p,g){
    stays 0), spread out 31 px with a few jump-flood passes, so filtering and mipmaps only ever blend in the right colour. */
 const FACE_TEX=new Map();   // every rebuild (any option) remakes the face mesh; the picture is only redrawn when the face changes
 function faceTexCached(){
-  const ink=faceInk(), key=[ink,S.eyes,S.shine,S.nose,S.mouth,S.extra.slice().sort().join("."),S.eyeColor].join("|");
+  const dark=faceDark(), key=[dark,S.eyes,S.shine,S.nose,S.mouth,S.extra.slice().sort().join("."),S.eyeColor].join("|");
   let t=FACE_TEX.get(key); if(t){FACE_TEX.delete(key); FACE_TEX.set(key,t); return t}
-  t=keep(bleedTex(faceTex(S,ink))); FACE_TEX.set(key,t);
+  t=keep(bleedTex(faceTex(S,dark))); FACE_TEX.set(key,t);
   if(FACE_TEX.size>6){const [k0,old]=FACE_TEX.entries().next().value; FACE_TEX.delete(k0); KEEP.delete(old); old.dispose()}
   return t;
 }
