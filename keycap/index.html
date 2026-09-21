@@ -1303,22 +1303,23 @@ function sfx(kind){if(!S.sound) return; const a=ac(); if(!a) return; const p=loa
 function resize(){const r=cv.getBoundingClientRect(); renderer.setSize(r.width,r.width*5/4,false); camera.aspect=4/5; camera.updateProjectionMatrix()}
 new ResizeObserver(resize).observe(cv); resize();
 let last=performance.now(), T=0;
-const RGB_TMP=new THREE.Color(), RGB_BASE=new THREE.Color(), GLOW_P=new THREE.Vector3(), GLOW_D=new THREE.Vector3(); let rgbHex=null;   // reused every frame (no garbage)
+const RGB_TMP=new THREE.Color(), RGB_BASE=new THREE.Color(), RGB_NEON=new THREE.Color(), RGB_HSL={h:0,s:0,l:0}, GLOW_P=new THREE.Vector3(), GLOW_D=new THREE.Vector3(); let rgbHex=null;   // reused every frame (no garbage)
 function applyRGB(t){
   if(rgbHex!==S.rgbColor){RGB_BASE.copy(lin(S.rgbColor)); rgbHex=S.rgbColor}
   let on=S.rgb!=="off", col=RGB_BASE, k=1;
   if(S.rgb==="rainbow") col=RGB_TMP.setHSL((t*0.12)%1,0.9,0.6).convertSRGBToLinear();
   if(S.rgb==="breath") k=0.35+0.65*(0.5+0.5*Math.sin(t*2.2));
-  rgbLight.color.copy(col); rgbLight.intensity=on?2.4*k:0;
-  rgbGlow.material.color.copy(col); rgbGlow.material.opacity=on?0.55*k:0;
+  let boost=1; if(S.glow&&on){col.getHSL(RGB_HSL); col=RGB_NEON.setHSL(RGB_HSL.h,1,0.5); boost=3.6}   // 야광: 쨍한 형광색, past the dimmed exposure
+  rgbLight.color.copy(col); rgbLight.intensity=on?2.4*k*boost:0;
+  rgbGlow.material.color.copy(col).multiplyScalar(boost); rgbGlow.material.opacity=on?Math.min(1,0.55*k*(boost>1?1.5:1)):0;
   // An opaque base hides the light, and the glow card (which always faces the camera) cut through its walls
   // in a hard diagonal. There the glow sits right behind the base instead, so it shows as a soft halo around it.
   const see=S.base==="clear"||S.base==="tint";
   if(see){rgbGlow.position.set(0,-2,0); rgbGlow.scale.set(34,34,1)}
   else{root.updateMatrixWorld(); GLOW_P.set(0,-4,0); root.localToWorld(GLOW_P); GLOW_D.copy(GLOW_P).sub(camera.position).normalize(); GLOW_P.addScaledVector(GLOW_D,17); root.worldToLocal(GLOW_P);
     rgbGlow.position.copy(GLOW_P); rgbGlow.scale.set(48,48,1); rgbGlow.material.opacity=on?0.7*k:0}
-  rgbFloor.material.color.copy(col); rgbFloor.material.opacity=on?0.45*k:0;
-  if(clearMat.emissive) clearMat.emissive.copy(col).multiplyScalar(on?(see?0.18:0.05)*k:0);   // opaque: a faint tint, like light bleeding through
+  rgbFloor.material.color.copy(col).multiplyScalar(boost); rgbFloor.material.opacity=on?Math.min(1,0.45*k*(boost>1?1.6:1)):0;
+  if(clearMat.emissive) clearMat.emissive.copy(col).multiplyScalar(on?(see?0.18:0.05)*k*boost:0);   // opaque: a faint tint, like light bleeding through
 }
 /* 야광 모드: the lights dim and the cap (in its own colour) and the glitter glow from inside, breathing slowly */
 const NEON=new THREE.Color("#39FF6A").convertSRGBToLinear();
@@ -1430,8 +1431,15 @@ $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.tar
     S.bgSrc=c; S.bgBlur="0"; applyBgBlur(); [...$("bgChips").children].forEach(b=>b.setAttribute("aria-pressed","false")); toast("배경 이미지를 넣었어요")}catch(err){toast("이미지를 읽지 못했어요")}});
 function applyBgBlur(){if(!S.bgSrc) return; const src=S.bgSrc, W=src.width, H=src.height, rad={"0":0,"1":9,"2":24}[S.bgBlur]||0; let out=src;
   if(rad){out=document.createElement("canvas"); out.width=W; out.height=H; const x=out.getContext("2d");
-    x.drawImage(src,0,0);   // the sharp picture underneath keeps the edges from fading out
-    if("filter" in CanvasRenderingContext2D.prototype){x.filter=`blur(${rad}px)`; x.drawImage(src,0,0); x.filter="none"}
+    x.drawImage(src,0,0);
+    if("filter" in CanvasRenderingContext2D.prototype){
+      // blur a copy with a margin of the picture's own colours around it, then cut the middle out: blurring the picture
+      // alone mixes in the empty space outside, so the edges stayed sharp (the preview's border)
+      const P=rad*3, big=document.createElement("canvas"); big.width=W+2*P; big.height=H+2*P; const b=big.getContext("2d");
+      b.drawImage(src,0,0,big.width,big.height); b.drawImage(src,P,P);
+      for(const [sx,sy,sw,sh,dx,dy,dw,dh] of [[0,0,W,1,P,0,W,P],[0,H-1,W,1,P,H+P,W,P],[0,0,1,H,0,P,P,H],[W-1,0,1,H,W+P,P,P,H]]) b.drawImage(src,sx,sy,sw,sh,dx,dy,dw,dh);   // stretch the edge rows outwards
+      const bl=document.createElement("canvas"); bl.width=big.width; bl.height=big.height; const bx=bl.getContext("2d"); bx.filter=`blur(${rad}px)`; bx.drawImage(big,0,0);
+      x.drawImage(bl,P,P,W,H,0,0,W,H)}
     else{ // no canvas filter (older Safari): shrink step by step, then grow step by step - smooth, not blocky
       let cur=src, w=W, h=H; const steps=[]; const goal=rad>12?1/24:1/9;
       while(w>W*goal*1.5){w=Math.max(2,Math.round(w/2)); h=Math.max(2,Math.round(h/2)); const c=document.createElement("canvas"); c.width=w; c.height=h; const cx=c.getContext("2d"); cx.imageSmoothingQuality="high"; cx.drawImage(cur,0,0,w,h); cur=c; steps.push([w,h])}
