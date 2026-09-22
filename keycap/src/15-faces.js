@@ -75,11 +75,11 @@ function faceTex(f,dark){ // dark keycap: the parts themselves are white (no rim
       for(const s of [-1,1]) for(const dy of [-0.012,0.018]){x.beginPath(); x.moveTo(cx+s*u*0.21,u*(0.6+dy)); x.quadraticCurveTo(cx+s*u*0.25,u*(0.593+dy*1.3),cx+s*u*0.29,u*(0.598+dy*1.8)); x.stroke()}}
     // eyes
     const n=f.shine==="none"?0:f.shine==="one"?1:3;
-    const shine=(px,py,rr)=>{x.fillStyle=hi; if(n>=1){x.beginPath(); x.arc(px-rr*0.3,py-rr*0.32,rr*0.3,0,7); x.fill()}
+    const shine=(px,py,rr)=>{x.fillStyle="#FFFFFF"; if(n>=1){x.beginPath(); x.arc(px-rr*0.3,py-rr*0.32,rr*0.3,0,7); x.fill()}
       if(n>=3){x.beginPath(); x.arc(px+rr*0.32,py+rr*0.26,rr*0.14,0,7); x.fill(); x.beginPath(); x.arc(px-rr*0.02,py+rr*0.5,rr*0.08,0,7); x.fill()} x.fillStyle=ink};
     // eye colour: a chosen colour is drawn like an anime iris - darker at the top, the colour below
-    let ec=f.eyeColor; const eye=(py,R)=>{if(!ec) return ink; const g=x.createLinearGradient(0,py-R,0,py+R); g.addColorStop(0,mixHex(ec,"#1E1A24",0.55)); g.addColorStop(0.55,ec); g.addColorStop(1,mixHex(ec,"#FFFFFF",0.25)); return g};
-    const ring=()=>{if(ec){x.lineWidth=u*0.006; x.strokeStyle=ink; x.stroke()}};
+    let ec=f.eyeColor; const eye=(py,R)=>{if(!ec) return dark?"#15131A":ink; const g=x.createLinearGradient(0,py-R,0,py+R); g.addColorStop(0,mixHex(ec,"#1E1A24",0.55)); g.addColorStop(0.55,ec); g.addColorStop(1,mixHex(ec,"#FFFFFF",0.25)); return g};
+    const ring=()=>{if(ec||dark){x.lineWidth=u*0.006; x.strokeStyle=ink; x.stroke()}};   // a thin pale ring keeps black eyes readable on a dark keycap
     x.strokeStyle=ink;
     for(const s of [-1,1]){ec=(f.odd&&s>0)?f.eyeColor2:f.eyeColor;   // 오드아이: the eye on the right has its own colour
       const px=cx+s*ex, py=ey; x.fillStyle=eye(py,r*1.3);

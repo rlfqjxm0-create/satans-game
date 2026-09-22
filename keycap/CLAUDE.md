@@ -93,7 +93,8 @@ back of the key (-z)**, so the camera looks from higher up (`camApply`) and the 
 **back wall** (`backZ` finds it from the fence table), pointing backwards and tilted up - never stuck into the top
 (rejected) or laid into the outline (rejected). Ears lie flat (level with the top, reaching back); they use the cap's own material object; dog ears hang at the sides.
 Keep every face part within 0.42 of the canvas centre (the top outline clips the rest - whiskers/blush were cut
-before). On a dark keycap (`faceDark`) the parts themselves are white and the eye highlights / nose shine dark (`ink`/`hi`);
+before). On a dark keycap (`faceDark`) the parts themselves are white; eyes with no colour chosen stay pitch-black with white
+highlights and a thin pale ring (requested), the nose shine turns dark (`hi`);
 the cream fox mask and muzzle become a faint light patch so white parts still read on them. (A pale rim around dark
 parts was tried and rejected as ugly.) Ear sliders 간격·앞뒤·크기 (`S.earGap/earBack/earSize`, share link `fe[8..10]`). Soft edges: the face texture is a `DataTexture` whose empty pixels take the
 nearest drawn colour (`bleedTex`, alpha stays 0) - canvas transparent-black otherwise filters into a dark jagged rim - and
