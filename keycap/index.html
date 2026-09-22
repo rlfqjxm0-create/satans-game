@@ -203,9 +203,24 @@ html.desk .layout{display:block!important; height:100vh!important; padding:0!imp
 html.desk .stage{display:block!important; position:static!important; height:100vh!important; overflow:hidden!important}
 html.desk .frame{position:static!important; margin:0!important; padding:0!important; border:0!important; background:transparent!important; box-shadow:none!important; border-radius:0!important; display:block!important; width:100vw!important; height:100vh!important}
 html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important; max-width:none!important; border-radius:0!important; background:transparent!important; cursor:pointer}
+.ic{width:15px; height:15px; vertical-align:-2px; margin-right:1px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <!-- one-tone button icons (currentColor) - no coloured emoji on the page -->
+  <g id="i-unlock"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5 V7.5 A4 4 0 0 1 16 7.5"/></g>
+  <g id="i-lock"><rect x="4" y="10.5" width="16" height="10" rx="2.5"/><path d="M8 10.5 V7.5 A4 4 0 0 1 16 7.5 V10.5"/></g>
+  <g id="i-reset"><path d="M4 12 A8 8 0 1 0 6.5 6.3"/><path d="M4 3.5 V8 H8.5"/></g>
+  <g id="i-dice"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.3" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.3" fill="currentColor"/></g>
+  <g id="i-desk"><rect x="3" y="4" width="18" height="12" rx="2.5"/><path d="M9 20 H15 M12 16 V20"/></g>
+  <g id="i-paw"><circle cx="7" cy="9" r="1.8"/><circle cx="17" cy="9" r="1.8"/><circle cx="10" cy="5.5" r="1.8"/><circle cx="14" cy="5.5" r="1.8"/><path d="M12 11 C8.5 11 6.5 15 8 17.5 C9.2 19.5 11 18.5 12 18.5 C13 18.5 14.8 19.5 16 17.5 C17.5 15 15.5 11 12 11 Z"/></g>
+  <g id="i-moon"><path d="M15.5 3.5 A8.5 8.5 0 1 0 20.5 13.5 A6.5 6.5 0 0 1 15.5 3.5 Z"/></g>
+  <g id="i-image"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4.5 17 L10 12.5 L13.5 15.5 L16 13.5 L19.5 17"/></g>
+  <g id="i-sound"><path d="M4 9.5 H7.5 L12 6 V18 L7.5 14.5 H4 Z"/><path d="M15.5 9 A4 4 0 0 1 15.5 15 M18 6.5 A8 8 0 0 1 18 17.5"/></g>
+  <g id="i-mute"><path d="M4 9.5 H7.5 L12 6 V18 L7.5 14.5 H4 Z"/><path d="M16 9.5 L20.5 14.5 M20.5 9.5 L16 14.5"/></g>
+  <g id="i-eyes"><circle cx="7.5" cy="12" r="4"/><circle cx="16.5" cy="12" r="4"/><circle cx="8.3" cy="12.5" r="1.4" fill="currentColor"/><circle cx="17.3" cy="12.5" r="1.4" fill="currentColor"/></g>
+</defs></svg>
 <div class="wrap">
   <header class="top">
   <a class="back" id="backLink" href="../index.html" hidden aria-label="목록으로" title="목록으로"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M3 11.2 L12 3.8 L21 11.2" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.6 10.4 V20 H10 V14.6 H14 V20 H18.4 V10.4" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/></svg></a>
@@ -217,16 +232,16 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
     <section class="stage" aria-label="키캡 미리보기">
       <div class="frame"><canvas id="cv" aria-label="3D 키캡. 드래그하면 돌아가고 탭하면 눌려요"></canvas></div>
       <p class="hint"><span class="hl">드래그로 돌리기 · 두 손가락(또는 휠)로 확대 · 두 손가락 이동(또는 우클릭 드래그)으로 위치 옮기기 · 톡 누르면 딸깍!</span><span class="hs">드래그로 돌리기 · 두 손가락으로 확대 · 톡 누르면 딸깍!</span></p>
-      <div class="tools" style="margin-bottom:6px"><button type="button" class="chip" id="camLock" aria-pressed="false">🔓 카메라 고정</button><button type="button" class="chip" id="camReset">↺ 원래 위치로</button></div>
+      <div class="tools" style="margin-bottom:6px"><button type="button" class="chip" id="camLock" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-unlock"/></svg> 카메라 고정</button><button type="button" class="chip" id="camReset"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-reset"/></svg> 원래 위치로</button></div>
       <div class="tools">
         <button class="btn sub" id="pressBtn">딸깍 눌러 보기</button>
         <button class="btn sub ghost" id="lookalike">캐릭터 색으로 칠하기</button>
-        <button class="btn sub ghost" id="dice">🎲 랜덤</button>
+        <button class="btn sub ghost" id="dice"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-dice"/></svg> 랜덤</button>
       </div>
       <div class="stagebox" style="margin-top:6px">
         <div class="resultcard" style="display:block">
           <div class="row"><button class="btn sub" id="savePng">이미지 저장</button><button class="btn sub ghost" id="makeVid">돌아가는 영상</button></div>
-          <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="deskFile">🖥 바탕화면 키캡</button><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
+          <div class="row" style="margin-top:8px"><button class="btn sub ghost" id="deskFile"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-desk"/></svg> 바탕화면 키캡</button><button class="btn sub ghost" id="share">조합 링크 복사</button></div>
           <p class="note deskNote">'바탕화면 키캡'으로 받은 파일을 <a href="https://github.com/rlfqjxm0-create/satans-game/releases/latest/download/SatanKeycap-Setup.exe">사탄의 키캡 프로그램(윈도우)</a>으로 열면 바탕화면에 키캡이 떠요.</p>
           <div class="progress" id="progress"><i></i></div>
           <div class="status" id="status"></div>
@@ -235,7 +250,7 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
       </div>
     </section>
     <section class="controls">
-      <div class="tabs" role="tablist" aria-label="꾸미기 메뉴"><button type="button" role="tab" id="tabMain" aria-selected="true">키캡 꾸미기</button><button type="button" role="tab" id="tabFace" aria-selected="false">🐾 얼굴 만들기</button></div>
+      <div class="tabs" role="tablist" aria-label="꾸미기 메뉴"><button type="button" role="tab" id="tabMain" aria-selected="true">키캡 꾸미기</button><button type="button" role="tab" id="tabFace" aria-selected="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-paw"/></svg> 얼굴 만들기</button></div>
       <div class="pane" id="paneMain" role="tabpanel">
       <div class="group"><h2>캐릭터 넣기</h2><p class="sub">배경이 있는 그림은 넣자마자 배경 지우기 창이 열려요.</p><div class="slots" id="slots"></div><input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif" class="sr" aria-label="그림 파일 고르기"></div>
       <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div>
@@ -254,8 +269,8 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
       <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div>
         <label class="slider" id="baseOpRow" style="margin:12px 0 0"><span class="lbl">불투명도</span><input type="range" id="baseOp" min="10" max="100" step="5" value="14" aria-label="받침대 불투명도"></label></div>
       <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
-      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">불을 끈 듯 어두워지고, 키캡과 장식·반짝이가 형광 초록으로 빛나요.</p>
-        <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
+      <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-moon"/></svg> 야광 모드</button></div><p class="sub" style="margin-top:6px">불을 끈 듯 어두워지고, 키캡과 장식·반짝이가 형광 초록으로 빛나요.</p>
+        <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-image"/></svg> 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-sound"/></svg> 타건음 켜짐</button></div>
         <div id="bgBlurRow" hidden style="margin-top:12px"><p class="sub" style="margin:0 0 8px">배경 흐리기</p><div class="chips" id="bgBlurChips"></div></div>
         <input type="file" id="bgFile" accept="image/*" class="sr" aria-label="배경 이미지 고르기"></div>
       </div>
@@ -273,7 +288,7 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
         <div class="group"><h2>눈</h2><div class="chips" id="eyesChips"></div>
           <p class="lab">눈 하이라이트</p><div class="chips" id="shineChips"></div>
           <p class="lab"><span id="eyeLab">눈 색</span> <span style="opacity:.75">· 맨 앞 까만 동그라미가 기본이에요</span></p><div class="swatches" id="eyeSw" aria-label="눈 색"></div>
-          <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="oddBtn" aria-pressed="false">👀 오드아이</button></div>
+          <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="oddBtn" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-eyes"/></svg> 오드아이</button></div>
           <div id="oddBox" hidden><p class="lab">오른쪽 눈 색</p><div class="swatches" id="eyeSw2" aria-label="오른쪽 눈 색"></div></div></div>
         <div class="group"><h2>코</h2><div class="chips" id="noseChips"></div></div>
         <div class="group"><h2>입</h2><div class="chips" id="mouthChips"></div></div>
@@ -693,6 +708,7 @@ function motion(res,t,k){ // returns offsets
 
 /* ================= 사탄의 키캡 v3 ================= */
 const $=id=>document.getElementById(id);
+const ICO=n=>'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-'+n+'"/></svg> ';   // one-tone button icons (sprite in head.html)
 /* 바탕화면 키캡 (keycap-desktop): the same page, opened by the desktop program with ?desktop=1 - a transparent
    background, no menus, only the keycap. 40-desktop.js does the rest. */
 const DESK=/[?&]desktop=1/.test(location.search); if(DESK) document.documentElement.classList.add("desk");
@@ -878,7 +894,7 @@ const chain=new THREE.Group(); root.add(chain);
   const gate=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,gl+0.5,10),metal); gate.position.copy(e1).add(e2).multiplyScalar(0.5); gate.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),gv.normalize()); clasp.add(gate);
   for(const e of [e1,e2]){const bead=new THREE.Mesh(new THREE.SphereGeometry(0.42,12,10),metal); bead.position.copy(e); clasp.add(bead)}
   clasp.position.set(end.x+0.4,end.y-2.4,end.z); clasp.rotation.z=-0.3; chain.add(clasp);
-  const kr=new THREE.Mesh(new THREE.TorusGeometry(3.8,0.4,14,44),metal); kr.position.set(end.x+1.6,end.y-7.6,end.z+0.4); kr.rotation.set(0.25,0.6,0.2); chain.add(kr)})();
+  const kr=new THREE.Mesh(new THREE.TorusGeometry(3.8,0.4,14,44),metal); kr.position.set(end.x+0.4,end.y-2.4-3.1,end.z); kr.rotation.set(0.12,Math.PI/2+0.35,0.1); chain.add(kr)})();   // through the clasp's loop, in the plane across it
 // RGB light under the switch
 const rgbLight=new THREE.PointLight(0xff66cc,0,40,1.6); rgbLight.position.set(0,-3,0); root.add(rgbLight);
 const glowTex=canvasTex(128,128,(x)=>{const g=x.createRadialGradient(64,64,6,64,64,64); g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.4,"rgba(255,255,255,.4)"); g.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle=g; x.fillRect(0,0,128,128)});
@@ -1472,11 +1488,11 @@ $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); r
   S.shape=pk(OPT.shape); S.mat=pk(OPT.mat); S.deco=pk(OPT.deco); S.decoMat=pk(OPT.decoMat); S.glitter=pk(OPT.glitter); S.sw=pk(OPT.sw); S.rgb=pk(OPT.rgb); loadPack(S.sw);
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
-function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.textContent=S.glow?"🌙 야광 켜짐":"🌙 야광 모드"}
+function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.innerHTML=ICO("moon")+(S.glow?"야광 켜짐":"야광 모드")}
 $("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(!S.bgImg){if(S.glow){S.bg0=S.bg; S.bg="glow"} else S.bg=S.bg0&&S.bg0!=="glow"?S.bg0:"peach"; setBg(); renderUI()} glowLabel(); writeHash()});
-$("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
+$("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.innerHTML=S.sound?ICO("sound")+"타건음 켜짐":ICO("mute")+"타건음 꺼짐"});
 $("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
-$("camLock").addEventListener("click",e=>{CAM.locked=!CAM.locked; velY=0; e.currentTarget.setAttribute("aria-pressed",String(CAM.locked)); e.currentTarget.textContent=CAM.locked?"🔒 카메라 고정됨":"🔓 카메라 고정"});
+$("camLock").addEventListener("click",e=>{CAM.locked=!CAM.locked; velY=0; e.currentTarget.setAttribute("aria-pressed",String(CAM.locked)); e.currentTarget.innerHTML=CAM.locked?ICO("lock")+"카메라 고정됨":ICO("unlock")+"카메라 고정"});
 $("camReset").addEventListener("click",()=>{resetView(); toast("원래 위치로 돌아왔어요")});
 $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.target.value=""; if(!f) return;
   try{const img=await new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=r.result}; r.onerror=rej; r.readAsDataURL(f)});
@@ -1704,7 +1720,7 @@ function renderFaceUI(){
   $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false,earGap:1,earBack:0,earSize:1,earRot:0,earInner:true}); renderFaceUI(); rebuild()};
   $("oddBtn").onclick=()=>{S.odd=!S.odd; if(S.odd&&S.eyeColor2===S.eyeColor) S.eyeColor2=S.eyeColor==="#3E6FD8"?"#E0A03A":"#3E6FD8"; renderFaceUI(); rebuild()};
 }
-function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.textContent=S.odd?"👀 오드아이 켜짐":"👀 오드아이"; $("oddBox").hidden=!S.odd;
+function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.innerHTML=ICO("eyes")+(S.odd?"오드아이 켜짐":"오드아이"); $("oddBox").hidden=!S.odd;
   $("eyeLab").textContent=S.odd?"왼쪽 눈 색":"눈 색"}
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));

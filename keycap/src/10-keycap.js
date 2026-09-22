@@ -1,5 +1,6 @@
 /* ================= 사탄의 키캡 v3 ================= */
 const $=id=>document.getElementById(id);
+const ICO=n=>'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-'+n+'"/></svg> ';   // one-tone button icons (sprite in head.html)
 /* 바탕화면 키캡 (keycap-desktop): the same page, opened by the desktop program with ?desktop=1 - a transparent
    background, no menus, only the keycap. 40-desktop.js does the rest. */
 const DESK=/[?&]desktop=1/.test(location.search); if(DESK) document.documentElement.classList.add("desk");
@@ -185,7 +186,7 @@ const chain=new THREE.Group(); root.add(chain);
   const gate=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,gl+0.5,10),metal); gate.position.copy(e1).add(e2).multiplyScalar(0.5); gate.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),gv.normalize()); clasp.add(gate);
   for(const e of [e1,e2]){const bead=new THREE.Mesh(new THREE.SphereGeometry(0.42,12,10),metal); bead.position.copy(e); clasp.add(bead)}
   clasp.position.set(end.x+0.4,end.y-2.4,end.z); clasp.rotation.z=-0.3; chain.add(clasp);
-  const kr=new THREE.Mesh(new THREE.TorusGeometry(3.8,0.4,14,44),metal); kr.position.set(end.x+1.6,end.y-7.6,end.z+0.4); kr.rotation.set(0.25,0.6,0.2); chain.add(kr)})();
+  const kr=new THREE.Mesh(new THREE.TorusGeometry(3.8,0.4,14,44),metal); kr.position.set(end.x+0.4,end.y-2.4-3.1,end.z); kr.rotation.set(0.12,Math.PI/2+0.35,0.1); chain.add(kr)})();   // through the clasp's loop, in the plane across it
 // RGB light under the switch
 const rgbLight=new THREE.PointLight(0xff66cc,0,40,1.6); rgbLight.position.set(0,-3,0); root.add(rgbLight);
 const glowTex=canvasTex(128,128,(x)=>{const g=x.createRadialGradient(64,64,6,64,64,64); g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(0.4,"rgba(255,255,255,.4)"); g.addColorStop(1,"rgba(255,255,255,0)"); x.fillStyle=g; x.fillRect(0,0,128,128)});
@@ -779,11 +780,11 @@ $("dice").addEventListener("click",()=>{const pk=(o)=>{const k=Object.keys(o); r
   S.shape=pk(OPT.shape); S.mat=pk(OPT.mat); S.deco=pk(OPT.deco); S.decoMat=pk(OPT.decoMat); S.glitter=pk(OPT.glitter); S.sw=pk(OPT.sw); S.rgb=pk(OPT.rgb); loadPack(S.sw);
   const cols=[...S.palette,...BASE_COLORS]; S.color=cols[Math.floor(Math.random()*cols.length)]; const dc=[...S.palette,...DECO_COLORS]; S.decoColor=dc[Math.floor(Math.random()*dc.length)];
   renderUI(); rebuild(); pressKey()});
-function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.textContent=S.glow?"🌙 야광 켜짐":"🌙 야광 모드"}
+function glowLabel(){const b=$("glowBtn"); b.setAttribute("aria-pressed",String(S.glow)); b.innerHTML=ICO("moon")+(S.glow?"야광 켜짐":"야광 모드")}
 $("glowBtn").addEventListener("click",()=>{S.glow=!S.glow; if(!S.bgImg){if(S.glow){S.bg0=S.bg; S.bg="glow"} else S.bg=S.bg0&&S.bg0!=="glow"?S.bg0:"peach"; setBg(); renderUI()} glowLabel(); writeHash()});
-$("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.textContent=S.sound?"🔊 타건음 켜짐":"🔇 타건음 꺼짐"});
+$("snd").addEventListener("click",e=>{S.sound=!S.sound; e.currentTarget.setAttribute("aria-pressed",String(S.sound)); e.currentTarget.innerHTML=S.sound?ICO("sound")+"타건음 켜짐":ICO("mute")+"타건음 꺼짐"});
 $("pressBtn").addEventListener("click",()=>{ac(); pressKey()});
-$("camLock").addEventListener("click",e=>{CAM.locked=!CAM.locked; velY=0; e.currentTarget.setAttribute("aria-pressed",String(CAM.locked)); e.currentTarget.textContent=CAM.locked?"🔒 카메라 고정됨":"🔓 카메라 고정"});
+$("camLock").addEventListener("click",e=>{CAM.locked=!CAM.locked; velY=0; e.currentTarget.setAttribute("aria-pressed",String(CAM.locked)); e.currentTarget.innerHTML=CAM.locked?ICO("lock")+"카메라 고정됨":ICO("unlock")+"카메라 고정"});
 $("camReset").addEventListener("click",()=>{resetView(); toast("원래 위치로 돌아왔어요")});
 $("bgFile").addEventListener("change",async e=>{const f=e.target.files[0]; e.target.value=""; if(!f) return;
   try{const img=await new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=r.result}; r.onerror=rej; r.readAsDataURL(f)});

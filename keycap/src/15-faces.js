@@ -187,7 +187,7 @@ function renderFaceUI(){
   $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false,earGap:1,earBack:0,earSize:1,earRot:0,earInner:true}); renderFaceUI(); rebuild()};
   $("oddBtn").onclick=()=>{S.odd=!S.odd; if(S.odd&&S.eyeColor2===S.eyeColor) S.eyeColor2=S.eyeColor==="#3E6FD8"?"#E0A03A":"#3E6FD8"; renderFaceUI(); rebuild()};
 }
-function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.textContent=S.odd?"👀 오드아이 켜짐":"👀 오드아이"; $("oddBox").hidden=!S.odd;
+function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.innerHTML=ICO("eyes")+(S.odd?"오드아이 켜짐":"오드아이"); $("oddBox").hidden=!S.odd;
   $("eyeLab").textContent=S.odd?"왼쪽 눈 색":"눈 색"}
 function showTab(face){$("paneMain").hidden=face; $("paneFace").hidden=!face; $("tabMain").setAttribute("aria-selected",String(!face)); $("tabFace").setAttribute("aria-selected",String(face))}
 $("tabMain").addEventListener("click",()=>showTab(false)); $("tabFace").addEventListener("click",()=>showTab(true));
