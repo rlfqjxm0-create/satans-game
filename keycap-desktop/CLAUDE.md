@@ -32,6 +32,11 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
 - Framing in the window (`fitView`, after every rebuild): the unrotated bounding box of everything on the tester is
   swept around y and its corners projected; zoom and vertical pan are searched so they stay inside a 0.9 NDC margin.
   Fixed numbers were wrong as soon as a tall stand or a floating heart came along (cut off).
+- **Dragging is done by main** (`kc-drag` on/off → a 12 ms cursor-follow interval) and every move sets the window's
+  remembered logical size (`kcW`) with `setBounds` - `setPosition` let Electron re-derive the size on a 150% monitor and the
+  window grew a little per step (271x284 → 273x329 after 30 moves); one IPC per mouse event flickered. The page draws no
+  frames during a left drag. After a drag one more setBounds (80 ms) applies the new monitor's DPI.
+- 프로그램 제거 in the home window runs `Uninstall 사탄의 키캡.exe` next to the exe (NSIS) after a confirm.
 - 위치·크기 고정 (`kcLock`, saved per window): main ignores kc-move / kc-zoom. The menu window is placed where it was
   opened (`menuAt`) - re-reading the cursor on every resize made it run away from the cursor.
 - Long runs: no warm-up in the desktop, `powerPreference:low-power`, frames 60/25/30 (cursor over)/10 (animating)/2

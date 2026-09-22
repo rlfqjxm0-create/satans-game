@@ -52,11 +52,11 @@ function openKeycap(file,copy){
   const win=new BrowserWindow({x,y,width:w,height:h,transparent:true,frame:false,resizable:false,maximizable:false,fullscreenable:false,
     alwaysOnTop:state.top!==false,skipTaskbar:true,hasShadow:false,backgroundColor:"#00000000",show:false,title:"사탄의 키캡",icon:ICON,
     webPreferences:{preload:path.join(__dirname,"preload.js"),contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,spellcheck:false}});
-  win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true}; win.kcLock=!!saved.lock; win.kcChain=saved.chain!==false;
+  win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcW=w; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true}; win.kcLock=!!saved.lock; win.kcChain=saved.chain!==false;
   win.setMenu(null);
   win.loadURL("kc://app/index.html?desktop=1");
   win.once("ready-to-show",()=>win.showInactive());
-  const remember=()=>{if(win.isDestroyed()) return; const b=win.getBounds(); state.wins[key]={x:b.x,y:b.y,w:b.width,lock:win.kcLock,chain:win.kcChain}; saveState()};
+  const remember=()=>{if(win.isDestroyed()) return; const b=win.getBounds(); state.wins[key]={x:b.x,y:b.y,w:win.kcW,lock:win.kcLock,chain:win.kcChain}; saveState()};
   win.on("moved",remember); win.on("resized",remember);
   win.on("closed",()=>{if(!quitting){state.open=openList().filter(([f,c])=>!(f===(file||null)&&c===copy)); saveState(); refreshHome(); if(!keycaps().length&&!(home&&!home.isDestroyed()&&home.isVisible())) openHome()}});
   if(!openList().some(([f,c])=>f===(file||null)&&c===copy)){state.open=openList().concat([[file||null,copy]]); saveState()}
@@ -154,15 +154,32 @@ ipcMain.on("ui-act",(e,a,arg)=>{
     case "closeOne": {const k=BrowserWindow.fromId(arg); if(k) k.close(); break}
     case "login": done(); app.setLoginItemSettings({openAtLogin:!app.getLoginItemSettings().openAtLogin}); refreshHome(); break;
     case "hideHome": if(home) home.close(); break;
+    case "uninstall": {const un=path.join(path.dirname(app.getPath("exe")),"Uninstall 사탄의 키캡.exe");
+      if(!fs.existsSync(un)){dialog.showMessageBoxSync(from,{type:"info",title:"사탄의 키캡",message:"설치한 프로그램에서만 제거할 수 있어요.",buttons:["확인"]}); break}
+      const r=dialog.showMessageBoxSync(from,{type:"question",title:"사탄의 키캡",message:"사탄의 키캡 프로그램을 제거할까요?",detail:"키캡 파일(.keycap)은 지워지지 않아요. 다시 설치하면 그대로 쓸 수 있어요.",buttons:["제거하기","취소"],defaultId:1,cancelId:1});
+      if(r===0){shell.openPath(un); setTimeout(()=>app.quit(),300)} break}
   }
 });
 
 /* ---- the keycap windows ---- */
 ipcMain.on("kc-data",e=>{const w=BrowserWindow.fromWebContents(e.sender); e.returnValue=w&&w.kcData?Object.assign({chain:w.kcChain!==false},w.kcData):(w&&w.kcKey?{hash:"",image:null,chain:w.kcChain!==false}:null)});
-ipcMain.on("kc-move",(e,dx,dy)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w||w.kcLock) return; const [x,y]=w.getPosition(); w.setPosition(Math.round(x+dx),Math.round(y+dy))});
-function setWidth(w,nw){const b=w.getBounds(); nw=Math.round(Math.min(MAX_W,Math.max(MIN_W,nw))); const nh=Math.round(nw*ASPECT);
+/* Dragging: the page only says "drag started / ended"; main follows the cursor itself every 12 ms and always sets the
+   window's remembered logical size with the position. Moving with setPosition let Electron re-derive the size on a
+   150% monitor and the window grew a little with every step (271x284 → 273x329 after 30 moves); one IPC per mouse
+   event also made it flicker. */
+const DRAGS=new Map();
+ipcMain.on("kc-drag",(e,on)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w) return;
+  const cur=DRAGS.get(w); if(cur){clearInterval(cur); DRAGS.delete(w); const b=w.getBounds(); setTimeout(()=>{if(!w.isDestroyed()) w.setBounds({x:b.x,y:b.y,width:w.kcW,height:Math.round(w.kcW*ASPECT)},false)},80)}   // once more after the DPI settles (crossing monitors)
+  if(!on||w.kcLock) return;
+  const p0=screen.getCursorScreenPoint(), b0=w.getBounds(), off={x:p0.x-b0.x,y:p0.y-b0.y}, W=w.kcW, H=Math.round(W*ASPECT); let lx=b0.x, ly=b0.y;
+  const t=setInterval(()=>{if(w.isDestroyed()){clearInterval(t); return} const p=screen.getCursorScreenPoint(), x=Math.round(p.x-off.x), y=Math.round(p.y-off.y);
+    if(x!==lx||y!==ly){lx=x; ly=y; w.setBounds({x,y,width:W,height:H},false)}},12);
+  DRAGS.set(w,t);
+});
+ipcMain.on("kc-move",(e,dx,dy)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w||w.kcLock) return; const b=w.getBounds(); w.setBounds({x:Math.round(b.x+dx),y:Math.round(b.y+dy),width:w.kcW,height:Math.round(w.kcW*ASPECT)},false)});
+function setWidth(w,nw){const b=w.getBounds(); nw=Math.round(Math.min(MAX_W,Math.max(MIN_W,nw))); const nh=Math.round(nw*ASPECT); w.kcW=nw;
   w.setBounds({x:Math.round(b.x+(b.width-nw)/2),y:Math.round(b.y+(b.height-nh)/2),width:nw,height:nh})}   // grows around its middle
-ipcMain.on("kc-zoom",(e,dir)=>{const w=BrowserWindow.fromWebContents(e.sender); if(w&&!w.kcLock) setWidth(w,w.getBounds().width*(dir>0?1.08:1/1.08))});
+ipcMain.on("kc-zoom",(e,dir)=>{const w=BrowserWindow.fromWebContents(e.sender); if(w&&!w.kcLock) setWidth(w,w.kcW*(dir>0?1.08:1/1.08))});
 // clicks on the empty part of the window go to whatever is behind it; mouse moves still reach the page (forward)
 ipcMain.on("kc-hit",(e,solid)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w||w.kcSolid===solid) return; w.kcSolid=solid; w.setIgnoreMouseEvents(!solid,{forward:true})});
 ipcMain.on("kc-menu",(e,st)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w) return; w.kcSt=Object.assign(w.kcSt,st); openMenu(w)});
