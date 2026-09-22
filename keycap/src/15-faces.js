@@ -43,7 +43,7 @@ function buildEars(p,g,mat){
     const geo=GEO("ear.dog",()=>{const s=new THREE.Shape(); s.moveTo(0,0); s.bezierCurveTo(1.9,-0.4,2.5,-4.2,1.5,-6.2); s.bezierCurveTo(0.8,-7.2,-0.9,-7.1,-1.4,-5.9); s.bezierCurveTo(-2.1,-4.1,-1.6,-0.4,0,0);
       const g2=new THREE.ExtrudeGeometry(s,{depth:0.9,bevelEnabled:true,bevelThickness:0.45,bevelSize:0.4,bevelSegments:6,curveSegments:28}); g2.translate(0,0,-0.45); return g2});
     const earMat=mat.clone(); earMat.color=earMat.color.clone().lerp(lin("#6B4A3A"),0.35);
-    for(const sd of [-1,1]){const W=wallW(p,top-1), pivot=new THREE.Group(); pivot.position.set(sd*(W-0.7)*S.earGap,top-0.3,backZ(F,sd*0.62)*W*0.7+S.earBack); pivot.rotation.set(0,0,sd*0.55); pivot.scale.setScalar(S.earSize);
+    for(const sd of [-1,1]){const W=wallW(p,top-1), pivot=new THREE.Group(); pivot.position.set(sd*(W-0.7)*S.earGap,top-0.3,backZ(F,sd*0.62)*W*0.7+S.earBack); pivot.rotation.set(0,0,sd*(0.55+S.earRot*Math.PI/180)); pivot.scale.setScalar(S.earSize);
       const o=new THREE.Mesh(geo,earMat); o.scale.x=sd; o.renderOrder=2; pivot.add(o); grp.add(pivot)}
     return grp;
   }
@@ -54,9 +54,9 @@ function buildEars(p,g,mat){
   const y=top-(D/2+0.55), W=wallW(p,top-p.bev);               // the ear's upper face is level with the top
   for(const sd of [-1,1]){const xu=sd*E.x, pivot=new THREE.Group();
     pivot.position.set(xu*W*S.earGap,y,backZ(F,Math.max(-0.95,Math.min(0.95,xu*S.earGap)))*W+p.bev+0.4+S.earBack); pivot.scale.setScalar(S.earSize);   // 간격·앞뒤·크기 sliders           // starts inside the rounded edge, so no dip shows
-    pivot.rotation.order="YXZ"; pivot.rotation.set(-Math.PI/2,sd*E.yaw,0);   // lying flat, pointing back, turned out a touch
+    pivot.rotation.order="YXZ"; pivot.rotation.set(-Math.PI/2,sd*(E.yaw+S.earRot*Math.PI/180),0);   // 회전: turned out (+) or in (-)   // lying flat, pointing back, turned out a touch
     const o=new THREE.Mesh(outer,mat); o.renderOrder=2; pivot.add(o);
-    pivot.add(new THREE.Mesh(inner,pink)); grp.add(pivot)}
+    if(S.earInner) pivot.add(new THREE.Mesh(inner,pink)); grp.add(pivot)}   // 안쪽 귀 can be left off
   return grp;
 }
 
@@ -174,14 +174,17 @@ function renderFaceUI(){
   for(const [k,a] of Object.entries(ANIMALS)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=a.name;
     b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color,eyeColor:"",odd:false}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
   for(const k of FACE_KEYS) chipGroup(k+"Chips",k,OPT[k]);
-  let earJob=0; for(const [id,key,div] of [["earGap","earGap",100],["earBack","earBack",10],["earSize","earSize",100]]){const el=$(id); el.value=Math.round(S[key]*div);
-    el.oninput=()=>{S[key]=(+el.value)/div; if(!earJob) earJob=requestAnimationFrame(()=>{earJob=0; rebuild()})}}
+  let earJob=0; const EARS_UI=[["earGap",100,v=>v+"%"],["earBack",10,v=>(v>0?"+":"")+v],["earSize",100,v=>v+"%"],["earRot",1,v=>(v>0?"+":"")+v+"°"]];
+  for(const [key,div,fmt] of EARS_UI){const el=$(key), out=$(key+"V"); el.value=Math.round(S[key]*div); out.textContent=fmt(+el.value);
+    el.oninput=()=>{S[key]=(+el.value)/div; out.textContent=fmt(+el.value); if(!earJob) earJob=requestAnimationFrame(()=>{earJob=0; rebuild()})}}
+  $("earInner").setAttribute("aria-pressed",String(S.earInner)); $("earInner").onclick=()=>{S.earInner=!S.earInner; $("earInner").setAttribute("aria-pressed",String(S.earInner)); rebuild()};
+  $("earReset").onclick=()=>{Object.assign(S,{earGap:1,earBack:0,earSize:1,earRot:0,earInner:true}); renderFaceUI(); rebuild()};
   const EYE_COLS=["","#5A3A2E","#3E6FD8","#3FA36B","#9A5BE0","#E0457B","#E0A03A","#D8323C","#8FD3FF"];
   swatches("eyeSw","eyeColor",EYE_COLS); swatches("eyeSw2","eyeColor2",EYE_COLS); oddUI();
   const el=$("extraChips"); el.innerHTML="";
   for(const k of Object.keys(OPT.extra)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=OPT.extra[k]; b.setAttribute("aria-pressed",String(S.extra.includes(k)));
     b.addEventListener("click",()=>{const i=S.extra.indexOf(k); if(i>=0) S.extra.splice(i,1); else {S.extra.push(k); const other={rglass:"sglass",sglass:"rglass"}[k]; if(other&&S.extra.includes(other)){S.extra.splice(S.extra.indexOf(other),1); renderFaceUI()}} b.setAttribute("aria-pressed",String(i<0)); rebuild()}); el.appendChild(b)}
-  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false,earGap:1,earBack:0,earSize:1}); renderFaceUI(); rebuild()};
+  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false,earGap:1,earBack:0,earSize:1,earRot:0,earInner:true}); renderFaceUI(); rebuild()};
   $("oddBtn").onclick=()=>{S.odd=!S.odd; if(S.odd&&S.eyeColor2===S.eyeColor) S.eyeColor2=S.eyeColor==="#3E6FD8"?"#E0A03A":"#3E6FD8"; renderFaceUI(); rebuild()};
 }
 function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.textContent=S.odd?"👀 오드아이 켜짐":"👀 오드아이"; $("oddBox").hidden=!S.odd;

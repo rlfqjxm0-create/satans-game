@@ -190,6 +190,10 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   .frame #cv{width:min(100%, max(240px, calc((100vh - 400px) * .8)))}
   footer{margin-top:6px; flex:none; font-size:12px}
 }
+.earCtl{display:grid; gap:6px; margin-top:12px}
+.earCtl label{display:grid; grid-template-columns:2.6em 1fr 3.4em; align-items:center; gap:10px; font-size:13px; color:var(--ink-soft)}
+.earCtl input{min-width:0; accent-color:var(--accent)}
+.earCtl b{font-weight:400; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink)}
 .deskNote{font-size:12.5px; color:var(--ink-soft); margin:8px 2px 0; text-align:center} .deskNote a{color:var(--accent)}
 /* 바탕화면 키캡: only the keycap on a transparent window */
 html.desk,html.desk body{background:transparent!important; background-image:none!important; height:100%!important; overflow:hidden!important; margin:0}
@@ -259,9 +263,13 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
         <div class="group"><h2>동물 고르기</h2><p class="sub">누르면 귀·눈·코·입·색이 한 번에 바뀌어요. 그다음 아래에서 하나씩 바꿔 보세요. 얼굴은 윗면에 그려지고, 귀는 키캡 뒤쪽 옆면에 붙어요.</p><div class="chips" id="animalChips"></div>
           <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="faceClear">얼굴 지우기</button></div></div>
         <div class="group"><h2>귀</h2><div class="chips" id="earsChips"></div>
-          <label class="slider" style="margin:12px 0 0"><span class="lbl">간격</span><input type="range" id="earGap" min="60" max="150" step="5" value="100" aria-label="귀 간격"></label>
-          <label class="slider" style="margin:6px 0 0"><span class="lbl">앞뒤</span><input type="range" id="earBack" min="-40" max="40" step="5" value="0" aria-label="귀 앞뒤 위치"></label>
-          <label class="slider" style="margin:6px 0 0"><span class="lbl">크기</span><input type="range" id="earSize" min="70" max="140" step="5" value="100" aria-label="귀 크기"></label></div>
+          <div class="earCtl">
+            <label><span>간격</span><input type="range" id="earGap" min="60" max="150" step="5" value="100" aria-label="귀 간격"><b id="earGapV"></b></label>
+            <label><span>앞뒤</span><input type="range" id="earBack" min="-40" max="40" step="5" value="0" aria-label="귀 앞뒤 위치"><b id="earBackV"></b></label>
+            <label><span>크기</span><input type="range" id="earSize" min="70" max="140" step="5" value="100" aria-label="귀 크기"><b id="earSizeV"></b></label>
+            <label><span>회전</span><input type="range" id="earRot" min="-45" max="45" step="5" value="0" aria-label="귀 회전"><b id="earRotV"></b></label>
+          </div>
+          <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="earInner" aria-pressed="true">안쪽 귀</button><button type="button" class="chip" id="earReset">처음으로</button></div></div>
         <div class="group"><h2>눈</h2><div class="chips" id="eyesChips"></div>
           <p class="lab">눈 하이라이트</p><div class="chips" id="shineChips"></div>
           <p class="lab"><span id="eyeLab">눈 색</span> <span style="opacity:.75">· 맨 앞 까만 동그라미가 기본이에요</span></p><div class="swatches" id="eyeSw" aria-label="눈 색"></div>

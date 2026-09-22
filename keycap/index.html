@@ -190,6 +190,10 @@ footer{margin-top:26px; font-size:13px; color:var(--ink-soft); text-align:center
   .frame #cv{width:min(100%, max(240px, calc((100vh - 400px) * .8)))}
   footer{margin-top:6px; flex:none; font-size:12px}
 }
+.earCtl{display:grid; gap:6px; margin-top:12px}
+.earCtl label{display:grid; grid-template-columns:2.6em 1fr 3.4em; align-items:center; gap:10px; font-size:13px; color:var(--ink-soft)}
+.earCtl input{min-width:0; accent-color:var(--accent)}
+.earCtl b{font-weight:400; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink)}
 .deskNote{font-size:12.5px; color:var(--ink-soft); margin:8px 2px 0; text-align:center} .deskNote a{color:var(--accent)}
 /* 바탕화면 키캡: only the keycap on a transparent window */
 html.desk,html.desk body{background:transparent!important; background-image:none!important; height:100%!important; overflow:hidden!important; margin:0}
@@ -259,9 +263,13 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
         <div class="group"><h2>동물 고르기</h2><p class="sub">누르면 귀·눈·코·입·색이 한 번에 바뀌어요. 그다음 아래에서 하나씩 바꿔 보세요. 얼굴은 윗면에 그려지고, 귀는 키캡 뒤쪽 옆면에 붙어요.</p><div class="chips" id="animalChips"></div>
           <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="faceClear">얼굴 지우기</button></div></div>
         <div class="group"><h2>귀</h2><div class="chips" id="earsChips"></div>
-          <label class="slider" style="margin:12px 0 0"><span class="lbl">간격</span><input type="range" id="earGap" min="60" max="150" step="5" value="100" aria-label="귀 간격"></label>
-          <label class="slider" style="margin:6px 0 0"><span class="lbl">앞뒤</span><input type="range" id="earBack" min="-40" max="40" step="5" value="0" aria-label="귀 앞뒤 위치"></label>
-          <label class="slider" style="margin:6px 0 0"><span class="lbl">크기</span><input type="range" id="earSize" min="70" max="140" step="5" value="100" aria-label="귀 크기"></label></div>
+          <div class="earCtl">
+            <label><span>간격</span><input type="range" id="earGap" min="60" max="150" step="5" value="100" aria-label="귀 간격"><b id="earGapV"></b></label>
+            <label><span>앞뒤</span><input type="range" id="earBack" min="-40" max="40" step="5" value="0" aria-label="귀 앞뒤 위치"><b id="earBackV"></b></label>
+            <label><span>크기</span><input type="range" id="earSize" min="70" max="140" step="5" value="100" aria-label="귀 크기"><b id="earSizeV"></b></label>
+            <label><span>회전</span><input type="range" id="earRot" min="-45" max="45" step="5" value="0" aria-label="귀 회전"><b id="earRotV"></b></label>
+          </div>
+          <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="earInner" aria-pressed="true">안쪽 귀</button><button type="button" class="chip" id="earReset">처음으로</button></div></div>
         <div class="group"><h2>눈</h2><div class="chips" id="eyesChips"></div>
           <p class="lab">눈 하이라이트</p><div class="chips" id="shineChips"></div>
           <p class="lab"><span id="eyeLab">눈 색</span> <span style="opacity:.75">· 맨 앞 까만 동그라미가 기본이에요</span></p><div class="swatches" id="eyeSw" aria-label="눈 색"></div>
@@ -698,7 +706,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, standSize:1, bgBlur:"0", bgSrc:null, capOp:null, baseOp:null, swColor:"", earGap:1, earBack:0, earSize:1, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, standSize:1, bgBlur:"0", bgSrc:null, capOp:null, baseOp:null, swColor:"", earGap:1, earBack:0, earSize:1, earRot:0, earInner:true, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -1493,7 +1501,7 @@ function applyBgBlur(){if(!S.bgSrc) return; const src=S.bgSrc, W=src.width, H=sr
   S.bgImg=texOf(out); setBg(); chipGroup("bgBlurChips","bgBlur",{"0":"안 흐리게","1":"살짝","2":"많이"},()=>applyBgBlur())}
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
 let standJob=0; $("standSize").addEventListener("input",e=>{S.standSize=(+e.target.value)/100; if(!standJob) standJob=requestAnimationFrame(()=>{standJob=0; rebuild()})});
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),co:S.capOp,bo:S.baseOp,wc:S.swColor,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":"",Math.round(S.earGap*100),Math.round(S.earBack*10),Math.round(S.earSize*100)]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),co:S.capOp,bo:S.baseOp,wc:S.swColor,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":"",Math.round(S.earGap*100),Math.round(S.earBack*10),Math.round(S.earSize*100),Math.round(S.earRot),S.earInner?1:0]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=((window.KEYCAP_FILE&&window.KEYCAP_FILE.hash)||location.hash).match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
@@ -1502,7 +1510,7 @@ function readHash(){try{const m=((window.KEYCAP_FILE&&window.KEYCAP_FILE.hash)||
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
   if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],""); S.odd=!!fe[7]; S.eyeColor2=fe[7]==="0"?"":col(fe[7],"#3E6FD8");
-    const num=(v,lo,hi,d)=>(typeof v==="number"&&v>=lo&&v<=hi)?v:d; S.earGap=num(fe[8],60,150,100)/100; S.earBack=num(fe[9],-40,40,0)/10; S.earSize=num(fe[10],70,140,100)/100}
+    const num=(v,lo,hi,d)=>(typeof v==="number"&&v>=lo&&v<=hi)?v:d; S.earGap=num(fe[8],60,150,100)/100; S.earBack=num(fe[9],-40,40,0)/10; S.earSize=num(fe[10],70,140,100)/100; S.earRot=num(fe[11],-45,45,0); S.earInner=fe[12]!==0}
   $("name").value=S.name}catch(e){}}
 $("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
 function resetRun(){rebuild()}
@@ -1552,7 +1560,7 @@ function buildEars(p,g,mat){
     const geo=GEO("ear.dog",()=>{const s=new THREE.Shape(); s.moveTo(0,0); s.bezierCurveTo(1.9,-0.4,2.5,-4.2,1.5,-6.2); s.bezierCurveTo(0.8,-7.2,-0.9,-7.1,-1.4,-5.9); s.bezierCurveTo(-2.1,-4.1,-1.6,-0.4,0,0);
       const g2=new THREE.ExtrudeGeometry(s,{depth:0.9,bevelEnabled:true,bevelThickness:0.45,bevelSize:0.4,bevelSegments:6,curveSegments:28}); g2.translate(0,0,-0.45); return g2});
     const earMat=mat.clone(); earMat.color=earMat.color.clone().lerp(lin("#6B4A3A"),0.35);
-    for(const sd of [-1,1]){const W=wallW(p,top-1), pivot=new THREE.Group(); pivot.position.set(sd*(W-0.7)*S.earGap,top-0.3,backZ(F,sd*0.62)*W*0.7+S.earBack); pivot.rotation.set(0,0,sd*0.55); pivot.scale.setScalar(S.earSize);
+    for(const sd of [-1,1]){const W=wallW(p,top-1), pivot=new THREE.Group(); pivot.position.set(sd*(W-0.7)*S.earGap,top-0.3,backZ(F,sd*0.62)*W*0.7+S.earBack); pivot.rotation.set(0,0,sd*(0.55+S.earRot*Math.PI/180)); pivot.scale.setScalar(S.earSize);
       const o=new THREE.Mesh(geo,earMat); o.scale.x=sd; o.renderOrder=2; pivot.add(o); grp.add(pivot)}
     return grp;
   }
@@ -1563,9 +1571,9 @@ function buildEars(p,g,mat){
   const y=top-(D/2+0.55), W=wallW(p,top-p.bev);               // the ear's upper face is level with the top
   for(const sd of [-1,1]){const xu=sd*E.x, pivot=new THREE.Group();
     pivot.position.set(xu*W*S.earGap,y,backZ(F,Math.max(-0.95,Math.min(0.95,xu*S.earGap)))*W+p.bev+0.4+S.earBack); pivot.scale.setScalar(S.earSize);   // 간격·앞뒤·크기 sliders           // starts inside the rounded edge, so no dip shows
-    pivot.rotation.order="YXZ"; pivot.rotation.set(-Math.PI/2,sd*E.yaw,0);   // lying flat, pointing back, turned out a touch
+    pivot.rotation.order="YXZ"; pivot.rotation.set(-Math.PI/2,sd*(E.yaw+S.earRot*Math.PI/180),0);   // 회전: turned out (+) or in (-)   // lying flat, pointing back, turned out a touch
     const o=new THREE.Mesh(outer,mat); o.renderOrder=2; pivot.add(o);
-    pivot.add(new THREE.Mesh(inner,pink)); grp.add(pivot)}
+    if(S.earInner) pivot.add(new THREE.Mesh(inner,pink)); grp.add(pivot)}   // 안쪽 귀 can be left off
   return grp;
 }
 
@@ -1683,14 +1691,17 @@ function renderFaceUI(){
   for(const [k,a] of Object.entries(ANIMALS)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=a.name;
     b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color,eyeColor:"",odd:false}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
   for(const k of FACE_KEYS) chipGroup(k+"Chips",k,OPT[k]);
-  let earJob=0; for(const [id,key,div] of [["earGap","earGap",100],["earBack","earBack",10],["earSize","earSize",100]]){const el=$(id); el.value=Math.round(S[key]*div);
-    el.oninput=()=>{S[key]=(+el.value)/div; if(!earJob) earJob=requestAnimationFrame(()=>{earJob=0; rebuild()})}}
+  let earJob=0; const EARS_UI=[["earGap",100,v=>v+"%"],["earBack",10,v=>(v>0?"+":"")+v],["earSize",100,v=>v+"%"],["earRot",1,v=>(v>0?"+":"")+v+"°"]];
+  for(const [key,div,fmt] of EARS_UI){const el=$(key), out=$(key+"V"); el.value=Math.round(S[key]*div); out.textContent=fmt(+el.value);
+    el.oninput=()=>{S[key]=(+el.value)/div; out.textContent=fmt(+el.value); if(!earJob) earJob=requestAnimationFrame(()=>{earJob=0; rebuild()})}}
+  $("earInner").setAttribute("aria-pressed",String(S.earInner)); $("earInner").onclick=()=>{S.earInner=!S.earInner; $("earInner").setAttribute("aria-pressed",String(S.earInner)); rebuild()};
+  $("earReset").onclick=()=>{Object.assign(S,{earGap:1,earBack:0,earSize:1,earRot:0,earInner:true}); renderFaceUI(); rebuild()};
   const EYE_COLS=["","#5A3A2E","#3E6FD8","#3FA36B","#9A5BE0","#E0457B","#E0A03A","#D8323C","#8FD3FF"];
   swatches("eyeSw","eyeColor",EYE_COLS); swatches("eyeSw2","eyeColor2",EYE_COLS); oddUI();
   const el=$("extraChips"); el.innerHTML="";
   for(const k of Object.keys(OPT.extra)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=OPT.extra[k]; b.setAttribute("aria-pressed",String(S.extra.includes(k)));
     b.addEventListener("click",()=>{const i=S.extra.indexOf(k); if(i>=0) S.extra.splice(i,1); else {S.extra.push(k); const other={rglass:"sglass",sglass:"rglass"}[k]; if(other&&S.extra.includes(other)){S.extra.splice(S.extra.indexOf(other),1); renderFaceUI()}} b.setAttribute("aria-pressed",String(i<0)); rebuild()}); el.appendChild(b)}
-  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false,earGap:1,earBack:0,earSize:1}); renderFaceUI(); rebuild()};
+  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false,earGap:1,earBack:0,earSize:1,earRot:0,earInner:true}); renderFaceUI(); rebuild()};
   $("oddBtn").onclick=()=>{S.odd=!S.odd; if(S.odd&&S.eyeColor2===S.eyeColor) S.eyeColor2=S.eyeColor==="#3E6FD8"?"#E0A03A":"#3E6FD8"; renderFaceUI(); rebuild()};
 }
 function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.textContent=S.odd?"👀 오드아이 켜짐":"👀 오드아이"; $("oddBox").hidden=!S.odd;

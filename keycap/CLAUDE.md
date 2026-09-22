@@ -96,7 +96,8 @@ Keep every face part within 0.42 of the canvas centre (the top outline clips the
 before). On a dark keycap (`faceDark`) the parts themselves are white; eyes with no colour chosen stay pitch-black with white
 highlights and a thin pale ring (requested), the nose shine turns dark (`hi`);
 the cream fox mask and muzzle become a faint light patch so white parts still read on them. (A pale rim around dark
-parts was tried and rejected as ugly.) Ear sliders 간격·앞뒤·크기 (`S.earGap/earBack/earSize`, share link `fe[8..10]`). Soft edges: the face texture is a `DataTexture` whose empty pixels take the
+parts was tried and rejected as ugly.) Ear controls 간격·앞뒤·크기·회전 + 안쪽 귀 on/off + 처음으로 (`S.earGap/earBack/earSize/earRot/earInner`,
+share link `fe[8..12]`, `.earCtl` rows with a live value readout). Soft edges: the face texture is a `DataTexture` whose empty pixels take the
 nearest drawn colour (`bleedTex`, alpha stays 0) - canvas transparent-black otherwise filters into a dark jagged rim - and
 the face mesh doesn't write depth and draws after the cap (depth made the resin stop at a hard stepped line). The picture
 is cached per face (`FACE_TEX`, 6 kept) because every rebuild remakes the mesh. The share link carries the face as `fe`. `15-faces.js` also

@@ -13,7 +13,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, standSize:1, bgBlur:"0", bgSrc:null, capOp:null, baseOp:null, swColor:"", earGap:1, earBack:0, earSize:1, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, standSize:1, bgBlur:"0", bgSrc:null, capOp:null, baseOp:null, swColor:"", earGap:1, earBack:0, earSize:1, earRot:0, earInner:true, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -808,7 +808,7 @@ function applyBgBlur(){if(!S.bgSrc) return; const src=S.bgSrc, W=src.width, H=sr
   S.bgImg=texOf(out); setBg(); chipGroup("bgBlurChips","bgBlur",{"0":"안 흐리게","1":"살짝","2":"많이"},()=>applyBgBlur())}
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
 let standJob=0; $("standSize").addEventListener("input",e=>{S.standSize=(+e.target.value)/100; if(!standJob) standJob=requestAnimationFrame(()=>{standJob=0; rebuild()})});
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),co:S.capOp,bo:S.baseOp,wc:S.swColor,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":"",Math.round(S.earGap*100),Math.round(S.earBack*10),Math.round(S.earSize*100)]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),co:S.capOp,bo:S.baseOp,wc:S.swColor,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":"",Math.round(S.earGap*100),Math.round(S.earBack*10),Math.round(S.earSize*100),Math.round(S.earRot),S.earInner?1:0]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=((window.KEYCAP_FILE&&window.KEYCAP_FILE.hash)||location.hash).match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
@@ -817,7 +817,7 @@ function readHash(){try{const m=((window.KEYCAP_FILE&&window.KEYCAP_FILE.hash)||
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
   if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],""); S.odd=!!fe[7]; S.eyeColor2=fe[7]==="0"?"":col(fe[7],"#3E6FD8");
-    const num=(v,lo,hi,d)=>(typeof v==="number"&&v>=lo&&v<=hi)?v:d; S.earGap=num(fe[8],60,150,100)/100; S.earBack=num(fe[9],-40,40,0)/10; S.earSize=num(fe[10],70,140,100)/100}
+    const num=(v,lo,hi,d)=>(typeof v==="number"&&v>=lo&&v<=hi)?v:d; S.earGap=num(fe[8],60,150,100)/100; S.earBack=num(fe[9],-40,40,0)/10; S.earSize=num(fe[10],70,140,100)/100; S.earRot=num(fe[11],-45,45,0); S.earInner=fe[12]!==0}
   $("name").value=S.name}catch(e){}}
 $("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
 function resetRun(){rebuild()}
