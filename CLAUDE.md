@@ -45,7 +45,9 @@ laundry 는 손으로 고치는 한 파일이고, keycap 은 원본이 `src/`에
 - 게임 스크립트는 전부 IIFE(`(function(){"use strict"; … })()`) 안에 있다. 전역 오염 금지.
   디버그용으로 마지막에 `window.__w={...}` 만 내보낸다.
 - **디자인 토큰은 두 파일이 같은 이름을 쓴다** — `--bg --ink --ink-soft --card --line
-  --shadow --accent --accent-soft --dot`. 다크 모드는 `prefers-color-scheme` +
+  --shadow --accent --accent-soft --accent-ink`. 2026-09-22 개편: 흰 배경, 도트 무늬 없음, 강조색은 진회색(#4A4D57)·
+  연회색(#EEEFF2)이고 다크 모드는 연회색 강조 + 진한 글자(`--accent-ink`). 세탁의 세탁기 색은 세탁기에만
+  남고 페이지 강조색은 안 바꾼다(`applyTheme` 빈 함수). '목록으로'는 둥근 홈 아이콘 버튼(`.back`). 다크 모드는 `prefers-color-scheme` +
   `:root[data-theme="dark"]` 두 갈래를 **항상 같이** 적는다(한쪽만 고치면 어긋난다).
 - 글꼴: 제목·버튼은 `Jua`, 본문은 `Noto Sans KR`. 본문 글은 전부 한국어 존댓말.
 - 모바일이 주 사용처다 — `viewport-fit=cover` + `env(safe-area-inset-*)`,
