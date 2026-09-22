@@ -47,8 +47,10 @@ body{font-family:"Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-seri
   <g id="g-folder" stroke="none"><rect x="-9" y="-6.4" width="9" height="5" rx="1.6"/><rect x="-9" y="-3.8" width="18" height="12" rx="2.4"/></g>
   <g id="g-star" stroke="none"><path d="M0 -9.6 L2.6 -2.6 L9.8 -2.4 L4 2 L6.2 9.2 L0 4.9 L-6.2 9.2 L-4 2 L-9.8 -2.4 L-2.6 -2.6 Z"/></g>
   <g id="g-home" stroke="none"><path d="M-10.4 -0.2 L0 -10 L10.4 -0.2 Z"/><rect x="-7.2" y="-3.2" width="14.4" height="11.8" rx="2"/><rect x="-2" y="2" width="4" height="6.6" rx="1" fill="#fff" opacity=".7"/></g>
+  <g id="g-pen" stroke="none"><path d="M-8.6 5.2 L-8.6 8.6 L-5.2 8.6 L5.8 -2.4 L2.4 -5.8 Z"/><path d="M3.8 -7.2 L5.6 -9 A1.4 1.4 0 0 1 7.6 -9 L9 -7.6 A1.4 1.4 0 0 1 9 -5.6 L7.2 -3.8 Z"/></g>
   <g id="g-copy" stroke="none"><rect x="-8.6" y="-4.2" width="11.6" height="12.8" rx="2.6"/><rect x="-3" y="-8.8" width="11.6" height="12.8" rx="2.6" opacity=".55"/></g>
   <g id="g-sun" stroke="none"><circle r="4.6"/><g stroke-width="2.4" stroke-linecap="round" fill="none"><path d="M0 -9.4 V-7 M0 7 V9.4 M-9.4 0 H-7 M7 0 H9.4 M-6.6 -6.6 L-5 -5 M5 5 L6.6 6.6 M-6.6 6.6 L-5 5 M5 -5 L6.6 -6.6"/></g></g>
+  <g id="g-chain" fill="none" stroke-width="2.6" stroke-linecap="round"><rect x="-9" y="-4" width="9.5" height="8" rx="4"/><rect x="-0.5" y="-4" width="9.5" height="8" rx="4"/></g>
   <g id="g-lock" stroke="none"><rect x="-7.6" y="-2.2" width="15.2" height="11.4" rx="2.8"/><path d="M-4.6 -2.2 V-4.4 A4.6 4.6 0 0 1 4.6 -4.4 V-2.2 H2 V-4.4 A2 2 0 0 0 -2 -4.4 V-2.2 Z"/><circle cy="3.4" r="1.5" fill="#fff" opacity=".8"/></g>
   <g id="g-x" fill="none" stroke-width="2.8" stroke-linecap="round"><path d="M-6 -6 L6 6 M6 -6 L-6 6"/></g>
   <g id="g-power" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M-5.2 -5.6 A7.6 7.6 0 1 0 5.2 -5.6"/><path d="M0 -9.6 V-1"/></g>
@@ -69,8 +71,8 @@ const ROWS=st.mode==="tray"?[
   ["sep"],["home","home","홈 열기"],["open","folder","키캡 파일 열기"],["site","star","새 키캡 만들러 가기"],["sep"],
   ["login","sun","윈도우를 켤 때 같이 켜기",st.login],["top","pin","키캡을 항상 위에 두기",st.top],["sep"],["band","quit","power","끝내기"]
 ]:[
-  ["sep"],["press","key","딸깍 누르기"],["spin","spin","천천히 돌기",st.spin],["sound","note","타건음",st.sound],["top","pin","항상 위에 두기",st.top],["lock","lock","위치·크기 고정",st.lock],["size","size","크기"],
-  ["sep"],["dup","copy","하나 더 띄우기"],["open","folder","다른 키캡 열기"],["site","star","새 키캡 만들러 가기"],["home","home","홈 열기"],["close","x","이 키캡 닫기"],
+  ["sep"],["press","key","딸깍 누르기"],["spin","spin","천천히 돌기",st.spin],["sound","note","타건음",st.sound],["top","pin","항상 위에 두기",st.top],["lock","lock","위치·크기 고정",st.lock],["chain","chain","연결고리",st.chain],["size","size","크기"],
+  ["sep"],["edit","pen","키캡 수정하기"],["dup","copy","하나 더 띄우기"],["open","folder","다른 키캡 열기"],["site","star","새 키캡 만들러 가기"],["home","home","홈 열기"],["close","x","이 키캡 닫기"],
   ["sep"],["band","quit","power","모두 끝내기"]];
 const box=$("rows");
 for(const r of ROWS){let el;

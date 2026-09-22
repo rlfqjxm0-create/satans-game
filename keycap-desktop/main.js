@@ -52,11 +52,11 @@ function openKeycap(file,copy){
   const win=new BrowserWindow({x,y,width:w,height:h,transparent:true,frame:false,resizable:false,maximizable:false,fullscreenable:false,
     alwaysOnTop:state.top!==false,skipTaskbar:true,hasShadow:false,backgroundColor:"#00000000",show:false,title:"사탄의 키캡",icon:ICON,
     webPreferences:{preload:path.join(__dirname,"preload.js"),contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,spellcheck:false}});
-  win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true}; win.kcLock=!!saved.lock;
+  win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true}; win.kcLock=!!saved.lock; win.kcChain=saved.chain!==false;
   win.setMenu(null);
   win.loadURL("kc://app/index.html?desktop=1");
   win.once("ready-to-show",()=>win.showInactive());
-  const remember=()=>{if(win.isDestroyed()) return; const b=win.getBounds(); state.wins[key]={x:b.x,y:b.y,w:b.width,lock:win.kcLock}; saveState()};
+  const remember=()=>{if(win.isDestroyed()) return; const b=win.getBounds(); state.wins[key]={x:b.x,y:b.y,w:b.width,lock:win.kcLock,chain:win.kcChain}; saveState()};
   win.on("moved",remember); win.on("resized",remember);
   win.on("closed",()=>{if(!quitting){state.open=openList().filter(([f,c])=>!(f===(file||null)&&c===copy)); saveState(); refreshHome(); if(!keycaps().length&&!(home&&!home.isDestroyed()&&home.isVisible())) openHome()}});
   if(!openList().some(([f,c])=>f===(file||null)&&c===copy)){state.open=openList().concat([[file||null,copy]]); saveState()}
@@ -68,6 +68,27 @@ function duplicate(w){let c=1; const used=new Set(keycaps().filter(k=>k.kcFile==
   const had=!!state.wins[keyOf(w.kcFile)+"#"+c], k=openKeycap(w.kcFile,c);
   if(k&&!had){const b=w.getBounds(), a=screen.getDisplayMatching(b).workArea, step=Math.round(b.width*0.85);   // beside the original, on the side with room
     let x=b.x-step>=a.x?b.x-step:b.x+step; x=Math.max(a.x,Math.min(x,a.x+a.width-b.width)); k.setPosition(x,b.y)}}
+/* 키캡 수정하기: the full website page (the local copy) in a normal window, with this keycap's options and picture
+   already loaded. Its "바탕화면 키캡" button sends the .keycap JSON here (kc-save), which is written over the keycap's
+   own file, and every window showing that file reloads. So: edit on the page, press the button, done. */
+function openEditor(w){
+  for(const e of BrowserWindow.getAllWindows()) if(e.kcEditor&&e.kcEditFile===w.kcFile){e.show(); e.focus(); return}
+  const area=screen.getDisplayMatching(w.getBounds()).workArea, W=Math.min(1100,area.width-40), H=Math.min(860,area.height-40), tp=testPos(300);
+  const ed=new BrowserWindow({width:W,height:H,x:tp?tp.x:Math.round(area.x+(area.width-W)/2),y:tp?tp.y:Math.round(area.y+(area.height-H)/2),title:"키캡 수정하기 · 사탄의 키캡",icon:ICON,
+    backgroundColor:"#FFFFFF",autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,"preload.js"),contextIsolation:true,nodeIntegration:false,additionalArguments:["--kc-edit"]}});
+  ed.kcEditor=true; ed.kcEditFile=w.kcFile; ed.kcData=w.kcData; ed.setMenu(null);
+  ed.loadURL("kc://app/index.html");
+}
+// the editor page's "바탕화면 키캡" button hands the file's JSON over IPC (a blob download from the kc:// scheme ends
+// "interrupted" in Chromium): written over the keycap's own file, then every window showing it reloads
+ipcMain.on("kc-save",(e,json)=>{const ed=BrowserWindow.fromWebContents(e.sender); if(process.env.KC_DATA) console.log("kc-save",!!ed,ed&&ed.kcEditor,ed&&ed.kcEditFile,typeof json,json&&json.length); if(!ed||!ed.kcEditor) return;
+  let target=ed.kcEditFile;
+  if(!target){target=dialog.showSaveDialogSync(ed,{title:"키캡 파일로 저장",defaultPath:path.join(app.getPath("desktop"),"나의-키캡.keycap"),filters:[{name:"사탄의 키캡 파일",extensions:["keycap"]}]}); if(!target) return}
+  try{fs.writeFileSync(target+".tmp",json); fs.renameSync(target+".tmp",target)}catch(err){dialog.showErrorBox("사탄의 키캡","파일을 저장하지 못했어요.\n"+err.message); return}
+  if(!ed.kcEditFile){ed.kcEditFile=target; openKeycap(target); return}
+  let data=null; try{data=readKeycap(target)}catch(err){return}
+  for(const k of keycaps()) if(k.kcFile===target){k.kcData=data; k.reload()}   // the new look, right away
+});
 function openDialog(parent){
   const r=dialog.showOpenDialogSync(parent&&!parent.isDestroyed()?parent:undefined,{title:"키캡 파일 열기",filters:[{name:"사탄의 키캡 파일",extensions:["keycap"]}],properties:["openFile","multiSelections"]});
   (r||[]).forEach(f=>openKeycap(f));
@@ -106,7 +127,7 @@ ipcMain.on("ui-size",(e,w,h)=>{const m=BrowserWindow.fromWebContents(e.sender); 
 ipcMain.on("ui-state",e=>{const from=BrowserWindow.fromWebContents(e.sender);
   if(from&&from===menuWin&&menuMode==="tray"){e.returnValue={mode:"tray",name:"",login:app.getLoginItemSettings().openAtLogin,top:state.top!==false}; return}
   if(from&&from===menuWin&&menuFor&&!menuFor.isDestroyed()){const w=menuFor;
-    e.returnValue={mode:"keycap",name:nameOf(w.kcFile,w.kcCopy),lock:w.kcLock,spin:w.kcSt.spin,sound:w.kcSt.sound,top:w.isAlwaysOnTop(),width:w.getBounds().width,sizes:SIZES}; return}
+    e.returnValue={mode:"keycap",name:nameOf(w.kcFile,w.kcCopy),lock:w.kcLock,chain:w.kcChain,spin:w.kcSt.spin,sound:w.kcSt.sound,top:w.isAlwaysOnTop(),width:w.getBounds().width,sizes:SIZES}; return}
   e.returnValue={open:keycaps().map(w=>({id:w.id,name:nameOf(w.kcFile,w.kcCopy)})),login:app.getLoginItemSettings().openAtLogin,top:state.top!==false};
 });
 ipcMain.on("ui-act",(e,a,arg)=>{
@@ -123,6 +144,8 @@ ipcMain.on("ui-act",(e,a,arg)=>{
     case "home": done(); openHome(); break;
     case "close": done(); if(w) w.close(); break;
     case "dup": done(); if(w) duplicate(w); break;
+    case "edit": done(); if(w) openEditor(w); break;
+    case "chain": done(); if(w){w.kcChain=!w.kcChain; w.webContents.send("kc-cmd",w.kcChain?"chain-on":"chain-off"); const b=w.getBounds(); state.wins[w.kcKey]={x:b.x,y:b.y,w:b.width,lock:w.kcLock,chain:w.kcChain}; saveState()} break;
     case "lock": done(); if(w){w.kcLock=!w.kcLock; const b=w.getBounds(); state.wins[w.kcKey]={x:b.x,y:b.y,w:b.width,lock:w.kcLock}; saveState()} break;
     case "dupOne": {const k=BrowserWindow.fromId(arg); if(k) duplicate(k); break}
     case "quit": app.quit(); break;
@@ -135,7 +158,7 @@ ipcMain.on("ui-act",(e,a,arg)=>{
 });
 
 /* ---- the keycap windows ---- */
-ipcMain.on("kc-data",e=>{const w=BrowserWindow.fromWebContents(e.sender); e.returnValue=w?w.kcData:null});
+ipcMain.on("kc-data",e=>{const w=BrowserWindow.fromWebContents(e.sender); e.returnValue=w&&w.kcData?Object.assign({chain:w.kcChain!==false},w.kcData):(w&&w.kcKey?{hash:"",image:null,chain:w.kcChain!==false}:null)});
 ipcMain.on("kc-move",(e,dx,dy)=>{const w=BrowserWindow.fromWebContents(e.sender); if(!w||w.kcLock) return; const [x,y]=w.getPosition(); w.setPosition(Math.round(x+dx),Math.round(y+dy))});
 function setWidth(w,nw){const b=w.getBounds(); nw=Math.round(Math.min(MAX_W,Math.max(MIN_W,nw))); const nh=Math.round(nw*ASPECT);
   w.setBounds({x:Math.round(b.x+(b.width-nw)/2),y:Math.round(b.y+(b.height-nh)/2),width:nw,height:nh})}   // grows around its middle

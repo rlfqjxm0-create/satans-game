@@ -13,7 +13,7 @@ const KEEP=new WeakSet(), keep=o=>{KEEP.add(o); return o};
 const TEX_SLOTS=["map","alphaMap","bumpMap","normalMap","roughnessMap","metalnessMap","emissiveMap","clearcoatMap"];
 function freeMat(m){if(!m||KEEP.has(m)) return; for(const k of TEX_SLOTS){const t=m[k]; if(t&&!KEEP.has(t)) t.dispose()} m.dispose()}
 function freeTree(o){o.traverse(n=>{if(n.geometry&&!KEEP.has(n.geometry)) n.geometry.dispose(); if(n.material) (Array.isArray(n.material)?n.material:[n.material]).forEach(freeMat); if(n.isInstancedMesh&&n.dispose) n.dispose()})}
-const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, standSize:1, bgBlur:"0", bgSrc:null, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
+const S={items:[], shape:"cherry", mat:"resin", color:"#FFB8D0", charPos:"inside", deco:"cat", decoMat:"gloss", decoColor:"#FFFFFF", glitter:"star", base:"clear", baseColor:"#CFE3FF", sw:"mango", rgb:"rainbow", rgbColor:"#FF6FB5", bg:"peach", bgImg:null, name:"", palette:[], sound:true, glitColor:"", glow:false, standSize:1, bgBlur:"0", bgSrc:null, capOp:null, baseOp:null, swColor:"", earGap:1, earBack:0, earSize:1, ears:"none", eyes:"none", shine:"many", nose:"none", mouth:"none", extra:[], eyeColor:"", odd:false, eyeColor2:"#3E6FD8"};
 const OPT={
   shape:{cherry:"체리",pudding:"푸딩",round:"동글",heart:"하트",soft:"말랑"},
   mat:{resin:"투명 레진",jelly:"젤리",gloss:"유광",matte:"무광",holo:"홀로그램"},
@@ -22,7 +22,7 @@ const OPT={
   base:{clear:"투명",tint:"컬러 투명",gloss:"유광",matte:"무광",holo:"홀로그램"},
   decoMat:{gloss:"유광",matte:"무광",holo:"홀로그램"},
   glitter:{none:"없음",star:"별가루",snow:"눈송이",heart:"하트",aurora:"오로라",pearl:"진주",sakura:"벚꽃잎",confetti:"하트 컨페티"},
-  sw:{mango:"망고스틴축",frog:"개구리축",tico:"저소음축",violet:"바이올렛축",black:"흑축"},
+  sw:{mango:"망고스틴축",frog:"개구리축",tico:"저소음축",violet:"바이올렛축",caramel:"카라멜마끼아또축",black:"흑축"},
   rgb:{off:"끄기",solid:"고정",breath:"숨쉬기",rainbow:"무지개"},
   bg:{peach:"피치 노을",lilac:"라일락",soda:"소다",sunset:"핑크 선셋",night:"밤하늘"}
 };
@@ -30,7 +30,8 @@ const BASE_COLORS=["#FFB8D0","#FFD9A0","#FFF1A8","#BDEBD2","#A8D8FF","#C9B8FF","
 const DECO_COLORS=["#FFFFFF","#FF8FB0","#FFD45C","#7FC8F0","#9BE39A","#B28CFF","#2C2F36","#E3344B"];
 const BGS={peach:["#FFE3D3","#FFC9DE","#E7D3FF"],lilac:["#F3E8FF","#D9CCFF","#BFD5FF"],soda:["#E4FFF6","#BFEFFF","#D8D3FF"],sunset:["#FFD6E7","#FFB4C8","#B9A4FF"],night:["#12143A","#2E2766","#6A4C9C"],glow:["#020403","#06100A","#020403"]};   // glow: 야광 (lights off)
 // stem colour of each switch (연핑크 · 연초록 · 파랑 · 보라 · 검정)
-const SWC={mango:"#FFB3CE",frog:"#A6E3B4",tico:"#3E8EEB",violet:"#9B6BFF",black:"#26282E"};
+const SWC={mango:"#FFB3CE",frog:"#A6E3B4",tico:"#3E8EEB",violet:"#9B6BFF",caramel:"#D9A066",black:"#26282E"};
+const swColor=()=>S.swColor||SWC[S.sw];   // the stem colour: the switch's own, or one the user picked
 const lin=(h)=>new THREE.Color(h).convertSRGBToLinear();
 
 /* ---------- renderer / scene ---------- */
@@ -73,18 +74,23 @@ function spriteTex(kind){return canvasTex(64,64,(x)=>{x.translate(32,32);
 const SPRITES={star:spriteTex("star"),aurora:spriteTex("star"),snow:spriteTex("snow"),heart:spriteTex("heart")};
 
 /* hologram: view-dependent rainbow sheen injected into the standard shader */
-function holoize(mat){
+/* hologram: a soft pastel rainbow (pink / mint / lavender) breathing over the surface. `vivid` is the old strong
+   rainbow, kept for the aurora / heart glitter; the keycap and base use the pastel one (the strong one was ugly). */
+function holoize(mat,vivid){
+  const body=vivid?`vec3 rb=0.55+0.45*cos(6.2831*(f*1.3+vec3(0.0,0.33,0.67)+vViewPosition.y*0.02));
+      gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*0.35+rb*0.8,0.55*f+0.22);`
+   :`vec3 rb=0.86+0.14*cos(6.2831*(f*0.9+vec3(0.0,0.33,0.67)+vViewPosition.y*0.015));
+      vec3 pastel=mix(vec3(1.0),rb,0.85);
+      gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*0.45+pastel*0.62,0.42*f+0.18);`;
   mat.onBeforeCompile=(sh)=>{sh.fragmentShader=sh.fragmentShader.replace("#include <tonemapping_fragment>",`
-    { vec3 vd=normalize(vViewPosition); float f=1.0-abs(dot(normalize(normal),vd));
-      vec3 rb=0.55+0.45*cos(6.2831*(f*1.3+vec3(0.0,0.33,0.67)+vViewPosition.y*0.02));
-      gl_FragColor.rgb=mix(gl_FragColor.rgb,gl_FragColor.rgb*0.35+rb*0.8,0.55*f+0.22); }
+    { vec3 vd=normalize(vViewPosition); float f=1.0-abs(dot(normalize(normal),vd)); ${body} }
     #include <tonemapping_fragment>`)};
-  mat.customProgramCacheKey=()=>"holo"; return mat;
+  mat.customProgramCacheKey=()=>vivid?"holoV":"holo"; return mat;
 }
 function surfMat(kind,hex,extra){
   const col=lin(hex), o=Object.assign({color:col},extra||{});
   if(kind==="matte") return new THREE.MeshStandardMaterial(Object.assign(o,{roughness:0.78,metalness:0,bumpMap:NOISE,bumpScale:0.035}));
-  if(kind==="holo") return holoize(new THREE.MeshPhysicalMaterial(Object.assign(o,{roughness:0.18,metalness:0.25,clearcoat:1,clearcoatRoughness:0.08})));
+  if(kind==="holo") return holoize(new THREE.MeshPhysicalMaterial(Object.assign(o,{roughness:0.16,metalness:0.08,clearcoat:1,clearcoatRoughness:0.06})));
   return new THREE.MeshPhysicalMaterial(Object.assign(o,{roughness:0.2,clearcoat:1,clearcoatRoughness:0.06}));
 }
 
@@ -158,7 +164,7 @@ for(const [x,z] of [[-3.2,-2.2],[1.6,-3.8]]){const pin=new THREE.Mesh(new THREE.
 const topHousingGeo=(()=>{const p={sec:"sq",bw:15,tw:11.4,h:4.2,n0:8,n1:6,dish:0,dome:0,bev:0.8,tilt:0}; return capGeometry(p,true)})();
 const topHousing=new THREE.Mesh(topHousingGeo,new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.08,transmission:0.9,transparent:true,clearcoat:1,depthWrite:false})); topHousing.position.y=0; topHousing.scale.y=0.82; topHousing.renderOrder=2; sw.add(topHousing);
 const spring=(()=>{const pts=[]; for(let i=0;i<=120;i++){const a=i/120*Math.PI*2*6; pts.push(new THREE.Vector3(Math.cos(a)*1.6,-3.6+i/120*5.4,Math.sin(a)*1.6))} return new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),240,0.18,6,false),metal)})(); sw.add(spring);
-const stemMat=new THREE.MeshPhysicalMaterial({color:lin(SWC[S.sw]),roughness:0.35,clearcoat:0.5});
+const stemMat=new THREE.MeshPhysicalMaterial({color:lin(swColor()),roughness:0.35,clearcoat:0.5});
 const stem=new THREE.Group(); const stemBase=new THREE.Mesh(roundedBox(6,2.4,6,0.8),stemMat); stemBase.position.y=2.6; stem.add(stemBase);
 {const s1=new THREE.Mesh(new THREE.BoxGeometry(4.2,3.2,1.25),stemMat); s1.position.set(0,4.6,0); stem.add(s1); const s2=new THREE.Mesh(new THREE.BoxGeometry(1.25,3.2,4.2),stemMat); s2.position.set(0,4.6,0); stem.add(s2)}
 sw.add(stem);
@@ -173,7 +179,11 @@ const chain=new THREE.Group(); root.add(chain);
     const m=new THREE.Mesh(linkGeo,metal); m.position.copy(p); q.setFromUnitVectors(up,t); q2.setFromAxisAngle(t,i%2?Math.PI/2:0); m.quaternion.copy(q2.multiply(q)); chain.add(m)}
   const end=curve.getPointAt(1);
   const clasp=new THREE.Group(); const body=new THREE.Mesh(new THREE.TorusGeometry(1.3,0.42,12,28,Math.PI*1.75),metal); body.scale.set(1,1.5,1); clasp.add(body);
-  const gate=new THREE.Mesh(new THREE.CylinderGeometry(0.22,0.22,1.8,10),metal); gate.position.set(1.05,-0.4,0); gate.rotation.z=0.3; clasp.add(gate);
+  // the arc (radius 1.3, stretched 1.5 in y) opens between angle 0 and 315°: its ends are (1.3,0) and (0.919,-1.379).
+  // The gate bridges exactly those two points, and a bead at each end hides the tube's flat cuts (the seam looked broken).
+  const e1=new THREE.Vector3(1.3,0,0), e2=new THREE.Vector3(1.3*Math.cos(Math.PI*1.75),1.3*Math.sin(Math.PI*1.75)*1.5,0), gv=e1.clone().sub(e2), gl=gv.length();
+  const gate=new THREE.Mesh(new THREE.CylinderGeometry(0.24,0.24,gl+0.5,10),metal); gate.position.copy(e1).add(e2).multiplyScalar(0.5); gate.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),gv.normalize()); clasp.add(gate);
+  for(const e of [e1,e2]){const bead=new THREE.Mesh(new THREE.SphereGeometry(0.42,12,10),metal); bead.position.copy(e); clasp.add(bead)}
   clasp.position.set(end.x+0.4,end.y-2.4,end.z); clasp.rotation.z=-0.3; chain.add(clasp);
   const kr=new THREE.Mesh(new THREE.TorusGeometry(3.8,0.4,14,44),metal); kr.position.set(end.x+1.6,end.y-7.6,end.z+0.4); kr.rotation.set(0.25,0.6,0.2); chain.add(kr)})();
 // RGB light under the switch
@@ -186,11 +196,16 @@ const rgbFloor=new THREE.Mesh(new THREE.PlaneGeometry(60,60),new THREE.MeshBasic
 /* ---------- keycap ---------- */
 const capGroup=new THREE.Group(); capGroup.position.y=5.2; root.add(capGroup);
 let capMesh=null, charGroup=null, decoGroup=null, parts=null, partSys=null, capGeo=null;
+/* 불투명도: how much of the resin / jelly / clear base is body rather than see-through. Defaults per material; the
+   desktop program adds 0.2 (over a real desktop the glassy look had no weight - requested), capped at 0.95. */
+const OP_DEF={resin:0.45,jelly:0.7,clear:0.14,tint:0.3};
+const capOp=()=>Math.min(0.95,(S.capOp==null?OP_DEF[S.mat]||0.5:S.capOp/100)+(DESK?0.2:0));
+const baseOp=()=>Math.min(0.95,(S.baseOp==null?OP_DEF[S.base]||0.5:S.baseOp/100)+(DESK?0.2:0));
 function capMaterial(){
   const col=lin(S.color);
   switch(S.mat){
-    case "resin": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.04,transmission:0.62,transparent:true,clearcoat:1,clearcoatRoughness:0.03,side:THREE.DoubleSide,envMapIntensity:1.6,depthWrite:false});
-    case "jelly": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.32,transmission:0.3,transparent:true,clearcoat:0.8,clearcoatRoughness:0.2,side:THREE.DoubleSide,envMapIntensity:1.3,depthWrite:false});
+    case "resin": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.04,transmission:1-capOp(),transparent:true,clearcoat:1,clearcoatRoughness:0.03,side:THREE.DoubleSide,envMapIntensity:1.6,depthWrite:false});
+    case "jelly": return new THREE.MeshPhysicalMaterial({color:col,roughness:0.32,transmission:1-capOp(),transparent:true,clearcoat:0.8,clearcoatRoughness:0.2,side:THREE.DoubleSide,envMapIntensity:1.3,depthWrite:false});
     case "holo": return surfMat("holo",S.color);
     case "matte": return surfMat("matte",S.color);
     default: return surfMat("gloss",S.color);
@@ -219,7 +234,7 @@ function buildChar(p,g){
     const cut=acrylicOutline(it), W=H*cut.ar, piece=new THREE.Group();
     const shape=new THREE.Shape(); cut.pts.forEach(([u,v],i)=>{const x=(u-0.5)*W, y=(1-v)*H; i?shape.lineTo(x,y):shape.moveTo(x,y)}); shape.closePath();
     const bev=Math.min(0.18,T*0.2), body=new THREE.ExtrudeGeometry(shape,{depth:T,bevelEnabled:true,bevelThickness:bev,bevelSize:bev,bevelSegments:3,curveSegments:6}); body.translate(0,0,-T/2);
-    const acr=new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.03,transmission:0.9,transparent:true,clearcoat:1,clearcoatRoughness:0.02,envMapIntensity:2.2,depthWrite:false});
+    const acr=new THREE.MeshPhysicalMaterial({color:lin("#F4F8FF"),roughness:0.03,transmission:DESK?0.65:0.85,transparent:true,clearcoat:1,clearcoatRoughness:0.02,envMapIntensity:2.2,depthWrite:false});
     const m=new THREE.Mesh(body,acr); m.renderOrder=order; piece.add(m);
     const printMat=new THREE.MeshPhysicalMaterial({map:charTex("stand",cut.img),alphaTest:0.02,alphaToCoverage:true,roughness:0.12,clearcoat:1,clearcoatRoughness:0.04,envMapIntensity:1.1,side:THREE.FrontSide});
     const front=new THREE.Mesh(new THREE.PlaneGeometry(W,H),printMat); front.position.set(0,H/2,T/2-0.06); piece.add(front);
@@ -364,11 +379,11 @@ let nameMesh=null;
 function baseMaterial(){
   const c=lin(S.baseColor);
   switch(S.base){
-    case "tint": return new THREE.MeshPhysicalMaterial({color:c,roughness:0.05,transmission:0.8,transparent:true,clearcoat:1,envMapIntensity:1.5,depthWrite:false,side:THREE.DoubleSide});
+    case "tint": return new THREE.MeshPhysicalMaterial({color:c,roughness:0.05,transmission:1-baseOp(),transparent:true,clearcoat:1,envMapIntensity:1.5,depthWrite:false,side:THREE.DoubleSide});
     case "gloss": return surfMat("gloss",S.baseColor);
     case "matte": return surfMat("matte",S.baseColor);
     case "holo": return surfMat("holo",S.baseColor);
-    default: return new THREE.MeshPhysicalMaterial({color:lin("#EEF4FF"),roughness:0.04,transmission:0.95,transparent:true,clearcoat:1,clearcoatRoughness:0.03,envMapIntensity:1.6,depthWrite:false,side:THREE.DoubleSide});
+    default: return new THREE.MeshPhysicalMaterial({color:lin("#EEF4FF"),roughness:0.04,transmission:1-baseOp(),transparent:true,clearcoat:1,clearcoatRoughness:0.03,envMapIntensity:1.6,depthWrite:false,side:THREE.DoubleSide});
   }
 }
 function applyBase(){
@@ -431,11 +446,11 @@ function glitterMat(kind){
   const col=lin(S.glitColor||GLIT_BASE[kind]); let m;
   if(kind==="star") m=new THREE.MeshStandardMaterial({color:col,metalness:0.75,roughness:0.18,emissive:col,emissiveIntensity:0.85});
   else if(kind==="snow") m=new THREE.MeshPhysicalMaterial({color:col,metalness:0,roughness:0.28,clearcoat:1,clearcoatRoughness:0.1,emissive:S.glitColor?col:lin("#E6F1FF"),emissiveIntensity:0.6});
-  else if(kind==="heart") m=holoize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.25,roughness:0.14,clearcoat:1,emissive:col,emissiveIntensity:0.2}));
+  else if(kind==="heart") m=holoize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.25,roughness:0.14,clearcoat:1,emissive:col,emissiveIntensity:0.2}),true);
   else if(kind==="pearl") m=pearlize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.05,roughness:0.16,clearcoat:1,clearcoatRoughness:0.05,emissive:col,emissiveIntensity:0.1}));
   else if(kind==="sakura") m=new THREE.MeshPhysicalMaterial({color:col,metalness:0,roughness:0.45,clearcoat:0.4,side:THREE.DoubleSide,emissive:col,emissiveIntensity:0.14});
   else if(kind==="confetti") m=new THREE.MeshStandardMaterial({color:0xffffff,metalness:0.1,roughness:0.5,side:THREE.DoubleSide,emissive:0x000000});
-  else m=holoize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.7,roughness:0.1,clearcoat:1}));
+  else m=holoize(new THREE.MeshPhysicalMaterial({color:col,metalness:0.7,roughness:0.1,clearcoat:1}),true);
   // star dust and snowflakes light up themselves (not just a rim of light around them)
   if(kind==="star"){m.emissiveIntensity=1.25; m.metalness=0.35; m.toneMapped=false}
   if(kind==="snow"){m.emissiveIntensity=0.95; m.toneMapped=false}
@@ -555,9 +570,13 @@ function rebuild(){
   partSys=makeParticles(p,capGeo); if(partSys){capGroup.add(partSys.mesh); if(partSys.glow) capGroup.add(partSys.glow); stepParticles(0.001,0)}
   decoGroup=buildDeco(p,capGeo); capGroup.add(decoGroup);
   applyBase();
-  stemMat.color.copy(lin(SWC[S.sw]));
-  writeHash(); $("standRow").hidden=S.charPos!=="stand";
+  stemMat.color.copy(lin(swColor()));
+  writeHash(); $("standRow").hidden=S.charPos!=="stand"; syncOpUI();
 }
+function syncOpUI(){$("capOpRow").hidden=!(S.mat==="resin"||S.mat==="jelly"); $("baseOpRow").hidden=!(S.base==="clear"||S.base==="tint");
+  $("capOp").value=Math.round((S.capOp==null?OP_DEF[S.mat]||0.5:S.capOp/100)*100); $("baseOp").value=Math.round((S.baseOp==null?OP_DEF[S.base]||0.5:S.baseOp/100)*100)}
+let opJob=0; $("capOp").addEventListener("input",e=>{S.capOp=+e.target.value; if(!opJob) opJob=requestAnimationFrame(()=>{opJob=0; rebuild()})});
+$("baseOp").addEventListener("input",e=>{S.baseOp=+e.target.value; applyBase(); writeHash()});
 
 /* ---------- interaction: turn, pinch/scroll zoom, two-finger / right-drag pan, tap to press ---------- */
 let rotY=-0.55, rotX=0.0, velY=0, idle=0, press=0, pressV=0, pressed=false, PAUSE=false;
@@ -601,7 +620,7 @@ function chime(a,t0){[1568,2093,2637].forEach((f,i)=>{const o=a.createOscillator
    Every press plays a different key - now and then a space/enter/shift/backspace - so pressing the
    keycap sounds like typing instead of one clip on repeat. gain evens the packs out (key RMS 841~1216). */
 const PACKS={mango:{keys:10,spec:1,gain:1.1},frog:{keys:10,spec:1,gain:0.96},tico:{keys:24,spec:4,gain:0.8},
-  violet:{keys:10,spec:1,gain:1.12},black:{keys:10,spec:1,gain:1.04}};
+  violet:{keys:10,spec:1,gain:1.12},caramel:{keys:10,spec:1,gain:1.01},black:{keys:10,spec:1,gain:1.04}};
 const PACK_BUF={}, PACK_LOAD={}, PACK_DONE={};
 function loadPack(id){
   if(PACK_LOAD[id]||!PACKS[id]) return PACK_LOAD[id]; const P=PACKS[id], names=[];
@@ -749,8 +768,9 @@ function swatches(id,key,list){const el=$(id); el.innerHTML="";
 }
 function renderUI(){
   chipGroup("shapeChips","shape",OPT.shape); chipGroup("matChips","mat",OPT.mat); chipGroup("posChips","charPos",OPT.charPos); chipGroup("decoChips","deco",OPT.deco); chipGroup("decoMatChips","decoMat",OPT.decoMat);
-  chipGroup("glitChips","glitter",OPT.glitter,()=>{rebuild(); pressKey()}); chipGroup("baseChips","base",OPT.base,()=>applyBase()); swatches("baseSw","baseColor",["#CFE3FF","#FFD1E3","#FFF1B8","#CDEFE0","#DCCBFF","#FFFFFF","#2C2F36"]); chipGroup("swChips","sw",OPT.sw); chipGroup("rgbChips","rgb",OPT.rgb,()=>{}); chipGroup("bgChips","bg",OPT.bg,()=>setBg());
+  chipGroup("glitChips","glitter",OPT.glitter,()=>{rebuild(); pressKey()}); chipGroup("baseChips","base",OPT.base,()=>{applyBase(); writeHash(); syncOpUI()}); swatches("baseSw","baseColor",["#CFE3FF","#FFD1E3","#FFF1B8","#CDEFE0","#DCCBFF","#FFFFFF","#2C2F36"]); chipGroup("swChips","sw",OPT.sw); chipGroup("rgbChips","rgb",OPT.rgb,()=>{}); chipGroup("bgChips","bg",OPT.bg,()=>setBg());
   swatches("glitSw","glitColor",["","#FFD66B","#FFFFFF","#FF8FB8","#8FD3FF","#B8A2FF","#9BE3B0","#FFB38A"]);
+  swatches("swSw","swColor",["","#FFB3CE","#A6E3B4","#3E8EEB","#9B6BFF","#D9A066","#26282E","#FFFFFF","#FF6B6B","#FFD66B"]);
   swatches("colSw","color",BASE_COLORS); swatches("decoSw","decoColor",DECO_COLORS); swatches("rgbSw","rgbColor",["#FF6FB5","#FF4D4D","#FFB547","#6BFF9E","#4DC3FF","#8C6BFF","#FFFFFF"]);
 }
 $("name").addEventListener("input",e=>{S.name=e.target.value.trim(); $("count").textContent=`${[...e.target.value].length}/6`; applyBase(); writeHash()});
@@ -788,15 +808,16 @@ function applyBgBlur(){if(!S.bgSrc) return; const src=S.bgSrc, W=src.width, H=sr
   S.bgImg=texOf(out); setBg(); chipGroup("bgBlurChips","bgBlur",{"0":"안 흐리게","1":"살짝","2":"많이"},()=>applyBgBlur())}
 $("bgPick").addEventListener("click",()=>$("bgFile").click());
 let standJob=0; $("standSize").addEventListener("input",e=>{S.standSize=(+e.target.value)/100; if(!standJob) standJob=requestAnimationFrame(()=>{standJob=0; rebuild()})});
-function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":""]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
+function writeHash(){try{const o={bs:S.base,bc:S.baseColor,s:S.shape,m:S.mat,c:S.color,p:S.charPos,d:S.deco,dm:S.decoMat,dc:S.decoColor,g:S.glitter,w:S.sw,r:S.rgb,rc:S.rgbColor,b:S.bg,n:S.name,gc:S.glitColor,gl:S.glow?1:0,ss:Math.round(S.standSize*100),co:S.capOp,bo:S.baseOp,wc:S.swColor,fe:[S.ears,S.eyes,S.shine,S.nose,S.mouth,S.extra.join("."),S.eyeColor,S.odd?S.eyeColor2||"0":"",Math.round(S.earGap*100),Math.round(S.earBack*10),Math.round(S.earSize*100)]}; history.replaceState(null,"","#k="+encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(o))))))}catch(e){}}
 function readHash(){try{const m=((window.KEYCAP_FILE&&window.KEYCAP_FILE.hash)||location.hash).match(/#k=(.+)/); if(!m) return; const o=JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1])))));
   const opt=(set,v,d)=>Object.prototype.hasOwnProperty.call(set,v)?v:d, col=(v,d)=>/^#[0-9A-Fa-f]{6}$/.test(v||"")?v.toUpperCase():d;
   Object.assign(S,{base:opt(OPT.base,o.bs,S.base),baseColor:col(o.bc,S.baseColor),shape:opt(PROFILES,o.s,S.shape),mat:opt(OPT.mat,o.m,S.mat),color:col(o.c,S.color),
     charPos:opt(OPT.charPos,o.p,S.charPos),deco:opt(OPT.deco,o.d,S.deco),decoMat:opt(OPT.decoMat,o.dm,S.decoMat),decoColor:col(o.dc,S.decoColor),glitter:opt(OPT.glitter,o.g,S.glitter),
-    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1,standSize:(o.ss>=70&&o.ss<=170)?o.ss/100:1});
+    sw:opt(OPT.sw,o.w,S.sw),rgb:opt(OPT.rgb,o.r,S.rgb),rgbColor:col(o.rc,S.rgbColor),bg:opt(OPT.bg,o.b,S.bg),name:typeof o.n==="string"?o.n.slice(0,6):"",glitColor:/^#[0-9A-Fa-f]{6}$/.test(o.gc||"")?o.gc.toUpperCase():"",glow:o.gl===1,standSize:(o.ss>=70&&o.ss<=170)?o.ss/100:1,capOp:(o.co>=10&&o.co<=100)?o.co:null,baseOp:(o.bo>=10&&o.bo<=100)?o.bo:null,swColor:/^#[0-9A-Fa-f]{6}$/.test(o.wc||"")?o.wc.toUpperCase():""});
   if(o.s==="catface"||o.s==="bunnyface"){S.shape="soft"; S.ears=o.s==="catface"?"cat":"bunny"}   // old links: the face shapes became 말랑 + ear presets
   const fe=Array.isArray(o.fe)?o.fe:[];
-  if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],""); S.odd=!!fe[7]; S.eyeColor2=fe[7]==="0"?"":col(fe[7],"#3E6FD8")}
+  if(fe.length){FACE_KEYS.forEach((k,i)=>{S[k]=opt(OPT[k],fe[i],S[k])}); S.extra=String(fe[5]||"").split(".").filter(k=>OPT.extra[k]); S.eyeColor=col(fe[6],""); S.odd=!!fe[7]; S.eyeColor2=fe[7]==="0"?"":col(fe[7],"#3E6FD8");
+    const num=(v,lo,hi,d)=>(typeof v==="number"&&v>=lo&&v<=hi)?v:d; S.earGap=num(fe[8],60,150,100)/100; S.earBack=num(fe[9],-40,40,0)/10; S.earSize=num(fe[10],70,140,100)/100}
   $("name").value=S.name}catch(e){}}
 $("share").addEventListener("click",async()=>{writeHash(); try{await navigator.clipboard.writeText(location.href); toast("조합 링크를 복사했어요 (캐릭터 그림은 친구가 직접 넣어요)")}catch(e){toast("주소창의 링크를 복사해서 보내 주세요")}});
 function resetRun(){rebuild()}

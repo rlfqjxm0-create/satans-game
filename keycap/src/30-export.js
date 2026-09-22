@@ -115,6 +115,7 @@ $("makeVid").addEventListener("click",async()=>{
 $("deskFile").addEventListener("click",async()=>{
   writeHash(); const it=S.items[0];
   const data={app:"satan-keycap",v:1,hash:location.hash,image:it&&it.canvas?it.canvas.toDataURL("image/png"):null};
+  if(window.KEYCAP_EDIT&&window.deskAPI&&window.deskAPI.save){window.deskAPI.save(JSON.stringify(data)); toast("바탕화면 키캡에 바로 적용했어요"); return}   // inside the program's editor window
   const blob=new Blob([JSON.stringify(data)],{type:"application/octet-stream"});
   saveFile(`${(S.name||"나의").replace(/[\\/:*?"<>|]/g,"")}-키캡.keycap`,blob);
   toast("받은 파일을 사탄의 키캡 프로그램으로 열면 바탕화면에 떠요");

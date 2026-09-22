@@ -37,6 +37,10 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
 - Long runs: no warm-up in the desktop, `powerPreference:low-power`, frames 60/25/30 (cursor over)/10 (animating)/2
   (still). Measured: two keycaps + menu, presses every 4 s for 2 min - memory 637 → 627 MB (flat after the first
   minute), ~17% of one core while both spin, ~7% idle. `__k.shot()` sets PAUSE - don't use it before an fps test.
+- 키캡 수정하기: `openEditor` opens the full page (local copy, `--kc-edit` → `window.KEYCAP_EDIT`) with the keycap's data;
+  its 바탕화면 키캡 button sends the JSON over IPC (`kc-save`) and main writes it over the keycap's file and reloads every
+  window showing it. A blob download from the kc:// scheme ends "interrupted" - don't go back to will-download.
+- 연결고리 (chain) can be taken off per keycap (`kcChain`, saved; `kc-cmd chain-on/off` hides the `chain` group and refits).
 - `kc://app/…` serves `page/` (and `/ui/…` from `ui/`); `KC_POS="x,y"` puts every window there and `KC_DATA` gives a
   separate state folder - **tests use both, on the Dell monitor** (see ena-mascot/tests/dellmon.py), never the main screen.
 - Releases: upload `dist/SatanKeycap-Setup.exe` to a GitHub release of this repo with exactly that name; the site links

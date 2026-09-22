@@ -93,8 +93,9 @@ back of the key (-z)**, so the camera looks from higher up (`camApply`) and the 
 **back wall** (`backZ` finds it from the fence table), pointing backwards and tilted up - never stuck into the top
 (rejected) or laid into the outline (rejected). Ears lie flat (level with the top, reaching back); they use the cap's own material object; dog ears hang at the sides.
 Keep every face part within 0.42 of the canvas centre (the top outline clips the rest - whiskers/blush were cut
-before). Lines always stay dark; on a dark keycap (`faceDark`) every part gets a pale sticker rim instead (the parts are
-drawn on their own layer and the rim is that layer spread out) - pale lines disappeared on the cream fox mask/muzzle. Soft edges: the face texture is a `DataTexture` whose empty pixels take the
+before). On a dark keycap (`faceDark`) the parts themselves are white and the eye highlights / nose shine dark (`ink`/`hi`);
+the cream fox mask and muzzle become a faint light patch so white parts still read on them. (A pale rim around dark
+parts was tried and rejected as ugly.) Ear sliders 간격·앞뒤·크기 (`S.earGap/earBack/earSize`, share link `fe[8..10]`). Soft edges: the face texture is a `DataTexture` whose empty pixels take the
 nearest drawn colour (`bleedTex`, alpha stays 0) - canvas transparent-black otherwise filters into a dark jagged rim - and
 the face mesh doesn't write depth and draws after the cap (depth made the resin stop at a hard stepped line). The picture
 is cached per face (`FACE_TEX`, 6 kept) because every rebuild remakes the mesh. The share link carries the face as `fe`. `15-faces.js` also
@@ -141,6 +142,13 @@ background (the previous one comes back when it's turned off), and makes the cap
 and the glitter glow neon green, breathing slowly. Each material's own emissive is kept in `userData.em0` to restore.
 
 ## Other options
+
+불투명도 sliders: `S.capOp` (resin / jelly) and `S.baseOp` (clear / tint), percent or null = the material's default
+(`OP_DEF`); `capOp()/baseOp()` turn them into `transmission`, and the desktop program adds 0.2 (a glassy keycap over a
+real desktop had no weight). Switch colour: `S.swColor` ("" = the switch's own `SWC`), share link `wc`; the 카라멜마끼아또축
+pack is the owner's link65 silver recording. Hologram (`holoize`) is a pastel rainbow now; `holoize(mat,true)` is the
+old vivid one, kept for the aurora / heart glitter. The lobster clasp's gate spans exactly the arc's end points and beads
+round the tube's cuts (the seam looked broken).
 
 Background image blur (`applyBgBlur`, 3 steps, canvas `filter` or a shrink/grow fallback for old Safari), acrylic
 stand size (`S.standSize` 0.7-1.7, share link `ss`; decorations float above the stand's real height), glasses in the

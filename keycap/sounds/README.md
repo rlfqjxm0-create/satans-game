@@ -9,6 +9,7 @@
 | `frog/` | 개구리축 | frog mini | 〃 |
 | `tico/` | 저소음축 | hanseoung TICO | key1~24 · space1~4 · enter1~4 · shift1~4 · back1~4 |
 | `violet/` | 바이올렛축 | link65 gold | key1~10 · space1 · enter1 · shift1 · back1 |
+| `caramel/` | 카라멜마끼아또축 | link65 silver | 〃 |
 | `black/` | 흑축 | neo65 black | 〃 |
 
 - 누를 때마다 `key` 중 하나를 무작위로 틀고(바로 전 두 개는 피해요), 가끔 space·enter·shift·back

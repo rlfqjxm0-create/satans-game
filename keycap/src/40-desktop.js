@@ -6,10 +6,11 @@
    - clicks on the empty (transparent) part of the window must reach whatever is behind it: after each frame the pixel
      under the cursor is read, and the program is told when it changes between "keycap" and "empty";
    - fewer frames while nothing moves (DRAW_GATE), so a keycap sitting on the desktop costs almost nothing. */
+// a .keycap file's picture (the desktop keycap, or the program's "키캡 수정하기" editor window)
+if(window.KEYCAP_FILE&&window.KEYCAP_FILE.image){fetch(window.KEYCAP_FILE.image).then(r=>r.blob()).then(b=>processFile(new File([b],"keycap.png",{type:"image/png"})))
+  .then(({it})=>{S.items=[it]; if(!DESK) renderSlots(); rebuild()}).catch(e=>console.error("keycap picture",e))}
 if(DESK){(function(){
-  const D=window.deskAPI||{move(){},zoom(){},hit(){},menu(){},on(){}}, F=window.KEYCAP_FILE;
-  if(F&&F.image){fetch(F.image).then(r=>r.blob()).then(b=>processFile(new File([b],"keycap.png",{type:"image/png"})))
-    .then(({it})=>{S.items=[it]; rebuild()}).catch(e=>console.error("keycap picture",e))}
+  const D=window.deskAPI||{move(){},zoom(){},hit(){},menu(){},on(){}};
 
   // framing: everything on the tester (base, chain, a tall stand, floating decorations, shadow) must fit the window at
   // every turn angle. The unrotated bounding box is swept around y (a cylinder), its corners projected, and the zoom /
@@ -18,7 +19,7 @@ if(DESK){(function(){
   const FIT_V=new THREE.Vector3(), FIT_T=new THREE.Vector3();
   function fitView(){
     const rx=root.rotation.x, ry=root.rotation.y; root.rotation.set(0,0,0); root.updateMatrixWorld(true);
-    const box=new THREE.Box3(); root.traverse(o=>{if(o.isMesh&&!o.isSprite&&o.visible&&o!==rgbGlow) box.expandByObject(o)}); root.rotation.set(rx,ry,0);
+    const box=new THREE.Box3(); const vis=o=>{for(let p=o;p;p=p.parent) if(!p.visible) return false; return true}; root.traverse(o=>{if(o.isMesh&&!o.isSprite&&vis(o)&&o!==rgbGlow) box.expandByObject(o)}); root.rotation.set(rx,ry,0);
     if(box.isEmpty()) return;
     const r=Math.max(Math.hypot(box.min.x,box.min.z),Math.hypot(box.max.x,box.min.z),Math.hypot(box.min.x,box.max.z),Math.hypot(box.max.x,box.max.z))+0.8;
     const y0=Math.min(box.min.y,shadow.position.y)-0.5, y1=box.max.y+1.6;   // +1.6: floating decorations bob up and down
@@ -45,7 +46,9 @@ if(DESK){(function(){
   addEventListener("contextmenu",stop,true);
   addEventListener("dblclick",stop,true);
   addEventListener("wheel",e=>{stop(e); D.zoom(e.deltaY<0?1:-1)},{capture:true,passive:false});
-  D.on(c=>{if(c==="spin"){CAM.locked=!CAM.locked; velY=0} if(c==="sound") S.sound=!S.sound; if(c==="press"){ac(); pressKey()} idle=0});
+  // 연결고리: the chain can be taken off (menu); the framing is redone since the chain widens the turn
+  const chainOn=on=>{chain.visible=!!on; fitView()}; if(window.KEYCAP_FILE&&window.KEYCAP_FILE.chain===false) chain.visible=false;
+  D.on(c=>{if(c==="spin"){CAM.locked=!CAM.locked; velY=0} if(c==="sound") S.sound=!S.sound; if(c==="press"){ac(); pressKey()} if(c==="chain-on") chainOn(true); if(c==="chain-off") chainOn(false); idle=0});
 
   // is the pixel under the cursor part of the keycap? (read right after the frame is drawn, before it is shown)
   const gl=renderer.getContext(), px=new Uint8Array(4), render0=renderer.render.bind(renderer);

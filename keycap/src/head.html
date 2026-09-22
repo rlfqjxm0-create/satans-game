@@ -237,15 +237,18 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
       <div class="group"><h2>캐릭터 위치</h2><p class="sub">캐릭터 모양대로 자른 투명 아크릴이에요. 레진 속에 세우거나 눕히고, 스탠드는 키캡 위에 세워요.</p><div class="chips" id="posChips"></div>
         <label class="slider" id="standRow" hidden style="margin-top:12px"><span class="lbl">스탠드 크기</span><input type="range" id="standSize" min="70" max="170" step="5" value="100" aria-label="스탠드 크기"></label></div>
       <div class="group"><h2>키캡 모양</h2><div class="chips" id="shapeChips"></div></div>
-      <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div></div>
+      <div class="group"><h2>키캡 재질</h2><div class="chips" id="matChips"></div>
+        <label class="slider" id="capOpRow" style="margin:12px 0 0"><span class="lbl">불투명도</span><input type="range" id="capOp" min="10" max="100" step="5" value="45" aria-label="키캡 불투명도"></label></div>
       <div class="group"><h2>키캡 색</h2><p class="sub">★는 캐릭터에서 뽑은 색이에요.</p><div class="swatches" id="colSw"></div></div>
       <div class="group"><h2>윗면 장식</h2><div class="chips" id="decoChips"></div>
         <p class="sub" style="margin-top:12px">장식 재질</p><div class="chips" id="decoMatChips"></div>
         <div class="swatches" id="decoSw" style="margin-top:12px"></div></div>
       <div class="group"><h2>반짝이</h2><p class="sub">투명 레진과 젤리 속에 들어가요. 누르면 스노우볼처럼 흩날려요. 무지개 동그라미는 반짝이마다의 기본 색이에요.</p><div class="chips" id="glitChips"></div><div class="swatches" id="glitSw" style="margin-top:12px" aria-label="반짝이 색"></div></div>
-      <div class="group"><h2>스위치</h2><p class="sub">직접 녹음한 키보드 소리예요. 누를 때마다 다른 키 소리가 나요.</p><div class="chips" id="swChips"></div></div>
+      <div class="group"><h2>스위치</h2><p class="sub">직접 녹음한 키보드 소리예요. 누를 때마다 다른 키 소리가 나요.</p><div class="chips" id="swChips"></div>
+        <p class="sub" style="margin:12px 0 8px">스위치 색 · 무지개 동그라미는 그 축의 원래 색이에요</p><div class="swatches" id="swSw" aria-label="스위치 색"></div></div>
       <div class="group"><h2>RGB 조명</h2><div class="chips" id="rgbChips"></div><div class="swatches" id="rgbSw" style="margin-top:12px"></div></div>
-      <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div></div>
+      <div class="group"><h2>받침대</h2><p class="sub">키링 받침대의 재질과 색이에요.</p><div class="chips" id="baseChips"></div><div class="swatches" id="baseSw" style="margin-top:12px"></div>
+        <label class="slider" id="baseOpRow" style="margin:12px 0 0"><span class="lbl">불투명도</span><input type="range" id="baseOp" min="10" max="100" step="5" value="14" aria-label="받침대 불투명도"></label></div>
       <div class="group"><h2>이름 스티커</h2><p class="sub">받침대 앞면에 이름 스티커가 붙어요.</p><div class="textrow"><input type="text" id="name" maxlength="6" placeholder="이름" autocomplete="off" aria-label="이름 스티커"><span class="count" id="count">0/6</span></div></div>
       <div class="group"><h2>배경</h2><div class="chips" id="bgChips"></div><div class="chips" style="margin-top:10px"><button type="button" class="chip" id="glowBtn" aria-pressed="false">🌙 야광 모드</button></div><p class="sub" style="margin-top:6px">불을 끈 듯 어두워지고, 키캡과 장식·반짝이가 형광 초록으로 빛나요.</p>
         <div class="chips" style="margin-top:12px"><button type="button" class="chip" id="bgPick">🖼 배경 이미지 넣기</button><button type="button" class="chip" id="snd" aria-pressed="true">🔊 타건음 켜짐</button></div>
@@ -255,7 +258,10 @@ html.desk #cv,html.desk .frame #cv{width:100vw!important; height:100vh!important
       <div class="pane" id="paneFace" role="tabpanel" hidden>
         <div class="group"><h2>동물 고르기</h2><p class="sub">누르면 귀·눈·코·입·색이 한 번에 바뀌어요. 그다음 아래에서 하나씩 바꿔 보세요. 얼굴은 윗면에 그려지고, 귀는 키캡 뒤쪽 옆면에 붙어요.</p><div class="chips" id="animalChips"></div>
           <div class="chips" style="margin-top:10px"><button type="button" class="chip" id="faceClear">얼굴 지우기</button></div></div>
-        <div class="group"><h2>귀</h2><div class="chips" id="earsChips"></div></div>
+        <div class="group"><h2>귀</h2><div class="chips" id="earsChips"></div>
+          <label class="slider" style="margin:12px 0 0"><span class="lbl">간격</span><input type="range" id="earGap" min="60" max="150" step="5" value="100" aria-label="귀 간격"></label>
+          <label class="slider" style="margin:6px 0 0"><span class="lbl">앞뒤</span><input type="range" id="earBack" min="-40" max="40" step="5" value="0" aria-label="귀 앞뒤 위치"></label>
+          <label class="slider" style="margin:6px 0 0"><span class="lbl">크기</span><input type="range" id="earSize" min="70" max="140" step="5" value="100" aria-label="귀 크기"></label></div>
         <div class="group"><h2>눈</h2><div class="chips" id="eyesChips"></div>
           <p class="lab">눈 하이라이트</p><div class="chips" id="shineChips"></div>
           <p class="lab"><span id="eyeLab">눈 색</span> <span style="opacity:.75">· 맨 앞 까만 동그라미가 기본이에요</span></p><div class="swatches" id="eyeSw" aria-label="눈 색"></div>

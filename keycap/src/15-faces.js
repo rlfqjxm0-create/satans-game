@@ -43,7 +43,7 @@ function buildEars(p,g,mat){
     const geo=GEO("ear.dog",()=>{const s=new THREE.Shape(); s.moveTo(0,0); s.bezierCurveTo(1.9,-0.4,2.5,-4.2,1.5,-6.2); s.bezierCurveTo(0.8,-7.2,-0.9,-7.1,-1.4,-5.9); s.bezierCurveTo(-2.1,-4.1,-1.6,-0.4,0,0);
       const g2=new THREE.ExtrudeGeometry(s,{depth:0.9,bevelEnabled:true,bevelThickness:0.45,bevelSize:0.4,bevelSegments:6,curveSegments:28}); g2.translate(0,0,-0.45); return g2});
     const earMat=mat.clone(); earMat.color=earMat.color.clone().lerp(lin("#6B4A3A"),0.35);
-    for(const sd of [-1,1]){const W=wallW(p,top-1), pivot=new THREE.Group(); pivot.position.set(sd*(W-0.7),top-0.3,backZ(F,sd*0.62)*W*0.7); pivot.rotation.set(0,0,sd*0.55);
+    for(const sd of [-1,1]){const W=wallW(p,top-1), pivot=new THREE.Group(); pivot.position.set(sd*(W-0.7)*S.earGap,top-0.3,backZ(F,sd*0.62)*W*0.7+S.earBack); pivot.rotation.set(0,0,sd*0.55); pivot.scale.setScalar(S.earSize);
       const o=new THREE.Mesh(geo,earMat); o.scale.x=sd; o.renderOrder=2; pivot.add(o); grp.add(pivot)}
     return grp;
   }
@@ -53,7 +53,7 @@ function buildEars(p,g,mat){
   const pink=surfMat(S.mat==="matte"?"matte":"gloss",E.innerCol);
   const y=top-(D/2+0.55), W=wallW(p,top-p.bev);               // the ear's upper face is level with the top
   for(const sd of [-1,1]){const xu=sd*E.x, pivot=new THREE.Group();
-    pivot.position.set(xu*W,y,backZ(F,xu)*W+p.bev+0.4);           // starts inside the rounded edge, so no dip shows
+    pivot.position.set(xu*W*S.earGap,y,backZ(F,Math.max(-0.95,Math.min(0.95,xu*S.earGap)))*W+p.bev+0.4+S.earBack); pivot.scale.setScalar(S.earSize);   // 간격·앞뒤·크기 sliders           // starts inside the rounded edge, so no dip shows
     pivot.rotation.order="YXZ"; pivot.rotation.set(-Math.PI/2,sd*E.yaw,0);   // lying flat, pointing back, turned out a touch
     const o=new THREE.Mesh(outer,mat); o.renderOrder=2; pivot.add(o);
     pivot.add(new THREE.Mesh(inner,pink)); grp.add(pivot)}
@@ -62,11 +62,11 @@ function buildEars(p,g,mat){
 
 /* the face, drawn in a 1024 square that maps onto the top (canvas top edge = back of the key).
    Everything is kept within 0.42 of the centre so nothing is clipped by the top's outline. */
-function faceTex(f,dark){ // dark keycap: the lines stay dark and every part gets a pale sticker rim (pale lines vanished on the cream mask)
-  const ink="#3B2F37"; return canvasTex(1024,1024,(b,u)=>{const fc=document.createElement("canvas"); fc.width=fc.height=u; const x=fc.getContext("2d");   // b: base layer (mask, blush), x: the parts
+function faceTex(f,dark){ // dark keycap: the parts themselves are white (no rim - requested); the mask / muzzle become a faint light patch
+  const ink=dark?"#FFF6F9":"#3B2F37", hi=dark?"#3B2F37":"#FFFFFF"; return canvasTex(1024,1024,(b,u)=>{const fc=document.createElement("canvas"); fc.width=fc.height=u; const x=fc.getContext("2d");   // b: base layer (mask, blush), x: the parts
     for(const c of [b,x]){c.lineCap="round"; c.lineJoin="round"; c.translate(u/2,u*0.63); c.scale(1.3,1.3); c.translate(-u/2,-u*0.56)}
     const cx=u/2, ey=u*0.5, ex=u*0.18, r=u*0.052, ny=u*0.585, ex2=f.extra||[];
-    const cream="rgba(255,248,238,.96)";
+    const cream=dark?"rgba(255,255,255,.2)":"rgba(255,248,238,.96)";
     if(ex2.includes("fox")){b.fillStyle=cream; b.beginPath(); b.moveTo(cx-u*0.31,u*0.49); b.quadraticCurveTo(cx-u*0.17,u*0.55,cx,u*0.56); b.quadraticCurveTo(cx+u*0.17,u*0.55,cx+u*0.31,u*0.49); b.quadraticCurveTo(cx+u*0.26,u*0.74,cx,u*0.76); b.quadraticCurveTo(cx-u*0.26,u*0.74,cx-u*0.31,u*0.49); b.fill()}
     if(ex2.includes("muzzle")){b.fillStyle=cream; b.beginPath(); b.ellipse(cx,u*0.62,u*0.15,u*0.105,0,0,7); b.fill()}
     if(ex2.includes("blush")){b.fillStyle="rgba(255,120,150,.5)"; for(const s of [-1,1]){b.beginPath(); b.ellipse(cx+s*u*0.25,u*0.585,u*0.055,u*0.03,0,0,7); b.fill()}}
@@ -75,7 +75,7 @@ function faceTex(f,dark){ // dark keycap: the lines stay dark and every part get
       for(const s of [-1,1]) for(const dy of [-0.012,0.018]){x.beginPath(); x.moveTo(cx+s*u*0.21,u*(0.6+dy)); x.quadraticCurveTo(cx+s*u*0.25,u*(0.593+dy*1.3),cx+s*u*0.29,u*(0.598+dy*1.8)); x.stroke()}}
     // eyes
     const n=f.shine==="none"?0:f.shine==="one"?1:3;
-    const shine=(px,py,rr)=>{x.fillStyle="#FFFFFF"; if(n>=1){x.beginPath(); x.arc(px-rr*0.3,py-rr*0.32,rr*0.3,0,7); x.fill()}
+    const shine=(px,py,rr)=>{x.fillStyle=hi; if(n>=1){x.beginPath(); x.arc(px-rr*0.3,py-rr*0.32,rr*0.3,0,7); x.fill()}
       if(n>=3){x.beginPath(); x.arc(px+rr*0.32,py+rr*0.26,rr*0.14,0,7); x.fill(); x.beginPath(); x.arc(px-rr*0.02,py+rr*0.5,rr*0.08,0,7); x.fill()} x.fillStyle=ink};
     // eye colour: a chosen colour is drawn like an anime iris - darker at the top, the colour below
     let ec=f.eyeColor; const eye=(py,R)=>{if(!ec) return ink; const g=x.createLinearGradient(0,py-R,0,py+R); g.addColorStop(0,mixHex(ec,"#1E1A24",0.55)); g.addColorStop(0.55,ec); g.addColorStop(1,mixHex(ec,"#FFFFFF",0.25)); return g};
@@ -109,7 +109,7 @@ function faceTex(f,dark){ // dark keycap: the lines stay dark and every part get
     // nose
     const nz=f.nose;
     if(nz==="tri"){x.fillStyle="#FF8FA8"; x.beginPath(); x.moveTo(cx-u*0.03,ny-u*0.012); x.quadraticCurveTo(cx,ny-u*0.022,cx+u*0.03,ny-u*0.012); x.quadraticCurveTo(cx+u*0.004,ny+u*0.024,cx,ny+u*0.026); x.quadraticCurveTo(cx-u*0.004,ny+u*0.024,cx-u*0.03,ny-u*0.012); x.fill()}
-    if(nz==="dot"||nz==="big"){const k=nz==="big"?1.45:1; x.fillStyle=ink; x.beginPath(); x.ellipse(cx,ny,u*0.034*k,u*0.024*k,0,0,7); x.fill(); x.fillStyle="rgba(255,255,255,.8)"; x.beginPath(); x.ellipse(cx-u*0.01*k,ny-u*0.009*k,u*0.01*k,u*0.006*k,0,0,7); x.fill()}
+    if(nz==="dot"||nz==="big"){const k=nz==="big"?1.45:1; x.fillStyle=ink; x.beginPath(); x.ellipse(cx,ny,u*0.034*k,u*0.024*k,0,0,7); x.fill(); x.fillStyle=dark?"rgba(59,47,55,.8)":"rgba(255,255,255,.8)"; x.beginPath(); x.ellipse(cx-u*0.01*k,ny-u*0.009*k,u*0.01*k,u*0.006*k,0,0,7); x.fill()}
     if(nz==="heart"){x.fillStyle="#FF8FA8"; heart(x,cx,ny+u*0.004,u*0.026); x.fill()}
     if(nz==="pig"){const W=u*0.09, Hh=u*0.064, py=ny+u*0.014; x.fillStyle="#FF9FB6"; x.strokeStyle="#E0708F"; x.lineWidth=u*0.008;
       x.beginPath(); x.ellipse(cx,py,W,Hh,0,0,7); x.fill(); x.stroke(); x.fillStyle="#C24E72";
@@ -132,9 +132,6 @@ function faceTex(f,dark){ // dark keycap: the lines stay dark and every part get
       x.fillStyle="#FF8FA3"; x.beginPath(); x.ellipse(cx,top+u*0.078,u*0.028,u*0.018,0,0,7); x.fill(); x.fillStyle=ink;
       omega()}
     b.setTransform(1,0,0,1,0,0);
-    if(dark){const o=document.createElement("canvas"); o.width=o.height=u; const oc=o.getContext("2d"), R=u*0.012;
-      for(let k=0;k<16;k++){const a=k/16*Math.PI*2; oc.drawImage(fc,Math.cos(a)*R,Math.sin(a)*R)}
-      oc.globalCompositeOperation="source-in"; oc.fillStyle="#FFF4F8"; oc.fillRect(0,0,u,u); b.drawImage(o,0,0)}
     b.drawImage(fc,0,0);
   },true);
 }
@@ -177,12 +174,14 @@ function renderFaceUI(){
   for(const [k,a] of Object.entries(ANIMALS)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=a.name;
     b.addEventListener("click",()=>{Object.assign(S,{ears:a.ears,eyes:a.eyes,shine:a.shine,nose:a.nose,mouth:a.mouth,extra:a.extra.slice(),color:a.color,eyeColor:"",odd:false}); renderUI(); renderFaceUI(); rebuild()}); box.appendChild(b)}
   for(const k of FACE_KEYS) chipGroup(k+"Chips",k,OPT[k]);
+  let earJob=0; for(const [id,key,div] of [["earGap","earGap",100],["earBack","earBack",10],["earSize","earSize",100]]){const el=$(id); el.value=Math.round(S[key]*div);
+    el.oninput=()=>{S[key]=(+el.value)/div; if(!earJob) earJob=requestAnimationFrame(()=>{earJob=0; rebuild()})}}
   const EYE_COLS=["","#5A3A2E","#3E6FD8","#3FA36B","#9A5BE0","#E0457B","#E0A03A","#D8323C","#8FD3FF"];
   swatches("eyeSw","eyeColor",EYE_COLS); swatches("eyeSw2","eyeColor2",EYE_COLS); oddUI();
   const el=$("extraChips"); el.innerHTML="";
   for(const k of Object.keys(OPT.extra)){const b=document.createElement("button"); b.type="button"; b.className="chip"; b.textContent=OPT.extra[k]; b.setAttribute("aria-pressed",String(S.extra.includes(k)));
     b.addEventListener("click",()=>{const i=S.extra.indexOf(k); if(i>=0) S.extra.splice(i,1); else {S.extra.push(k); const other={rglass:"sglass",sglass:"rglass"}[k]; if(other&&S.extra.includes(other)){S.extra.splice(S.extra.indexOf(other),1); renderFaceUI()}} b.setAttribute("aria-pressed",String(i<0)); rebuild()}); el.appendChild(b)}
-  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false}); renderFaceUI(); rebuild()};
+  $("faceClear").onclick=()=>{Object.assign(S,{ears:"none",eyes:"none",nose:"none",mouth:"none",extra:[],eyeColor:"",odd:false,earGap:1,earBack:0,earSize:1}); renderFaceUI(); rebuild()};
   $("oddBtn").onclick=()=>{S.odd=!S.odd; if(S.odd&&S.eyeColor2===S.eyeColor) S.eyeColor2=S.eyeColor==="#3E6FD8"?"#E0A03A":"#3E6FD8"; renderFaceUI(); rebuild()};
 }
 function oddUI(){const b=$("oddBtn"); b.setAttribute("aria-pressed",String(S.odd)); b.textContent=S.odd?"👀 오드아이 켜짐":"👀 오드아이"; $("oddBox").hidden=!S.odd;
