@@ -1,7 +1,7 @@
 {
   "name": "satan-keycap",
   "productName": "사탄의 키캡",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "사탄의 키캡 - 바탕화면에 띄우는 키캡",
   "main": "main.js",
   "author": "rlfqjxm0",

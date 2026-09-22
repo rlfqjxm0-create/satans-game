@@ -674,7 +674,7 @@ function applyRGB(t){
   rgbGlow.material.color.copy(col).multiplyScalar(boost); rgbGlow.material.opacity=on?Math.min(1,0.55*k*(boost>1?1.5:1)):0;
   // An opaque base hides the light, and the glow card (which always faces the camera) cut through its walls
   // in a hard diagonal. There the glow sits right behind the base instead, so it shows as a soft halo around it.
-  const see=S.base==="clear"||S.base==="tint";
+  const see=(S.base==="clear"||S.base==="tint")&&baseOp()<0.6;   // a base made nearly opaque with the slider hides the light inside it, too
   if(see){rgbGlow.position.set(0,-2,0); rgbGlow.scale.set(34,34,1)}
   else{root.updateMatrixWorld(); GLOW_P.set(0,-4,0); root.localToWorld(GLOW_P); GLOW_D.copy(GLOW_P).sub(camera.position).normalize(); GLOW_P.addScaledVector(GLOW_D,17); root.worldToLocal(GLOW_P);
     rgbGlow.position.copy(GLOW_P); rgbGlow.scale.set(48,48,1); rgbGlow.material.opacity=on?0.7*k:0}

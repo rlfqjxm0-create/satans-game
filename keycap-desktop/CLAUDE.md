@@ -20,6 +20,9 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
   `setIgnoreMouseEvents(!solid,{forward:true})` - forward keeps mouse moves coming so it can switch back.
 - The RGB light must fit inside the window (it was cut off): in the desktop the camera steps back (see Framing below) and
   the floor glow is half size.
+- The RGB glow sprite / floor use `NormalBlending` in the desktop (40-desktop.js): additive blending leaves alpha at 0 and
+  was invisible over the transparent window. A base pushed past 60% opacity counts as opaque for the glow (`see` in
+  `applyRGB`), so the light sits behind it as a halo instead of being hidden inside.
 - Frames: 60 while pressing/dragging, 30 while spinning, 10 when settled (`DRAW_GATE`).
 - **One menu design for everything** (keycap right-click, tray icon, home window): drawn like the owner's desktop-timer
   menu (ena-mascot `_pm_open`) - white card, thin ring, one-tone icons in round badges, dotted separators, ticks, a pill

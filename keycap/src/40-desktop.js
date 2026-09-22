@@ -16,6 +16,9 @@ if(DESK){(function(){
   // every turn angle. The unrotated bounding box is swept around y (a cylinder), its corners projected, and the zoom /
   // vertical pan searched so they stay inside with a margin. Runs after every rebuild (the picture arrives later).
   rgbFloor.scale.set(0.36,0.36,1); shadow.scale.set(0.5,0.5,1);   // the floor light and shadow stay under the base
+  // the RGB light's glow is drawn with additive blending, which leaves the alpha at 0 - over a transparent window it was
+  // simply invisible (the site's background is opaque, so it showed there). Normal blending writes alpha.
+  for(const o of [rgbGlow,rgbFloor]){o.material.blending=THREE.NormalBlending; o.material.needsUpdate=true}
   const FIT_V=new THREE.Vector3(), FIT_T=new THREE.Vector3();
   function fitView(){
     const rx=root.rotation.x, ry=root.rotation.y; root.rotation.set(0,0,0); root.updateMatrixWorld(true);

@@ -1382,7 +1382,7 @@ function applyRGB(t){
   rgbGlow.material.color.copy(col).multiplyScalar(boost); rgbGlow.material.opacity=on?Math.min(1,0.55*k*(boost>1?1.5:1)):0;
   // An opaque base hides the light, and the glow card (which always faces the camera) cut through its walls
   // in a hard diagonal. There the glow sits right behind the base instead, so it shows as a soft halo around it.
-  const see=S.base==="clear"||S.base==="tint";
+  const see=(S.base==="clear"||S.base==="tint")&&baseOp()<0.6;   // a base made nearly opaque with the slider hides the light inside it, too
   if(see){rgbGlow.position.set(0,-2,0); rgbGlow.scale.set(34,34,1)}
   else{root.updateMatrixWorld(); GLOW_P.set(0,-4,0); root.localToWorld(GLOW_P); GLOW_D.copy(GLOW_P).sub(camera.position).normalize(); GLOW_P.addScaledVector(GLOW_D,17); root.worldToLocal(GLOW_P);
     rgbGlow.position.copy(GLOW_P); rgbGlow.scale.set(48,48,1); rgbGlow.material.opacity=on?0.7*k:0}
@@ -2010,6 +2010,9 @@ if(DESK){(function(){
   // every turn angle. The unrotated bounding box is swept around y (a cylinder), its corners projected, and the zoom /
   // vertical pan searched so they stay inside with a margin. Runs after every rebuild (the picture arrives later).
   rgbFloor.scale.set(0.36,0.36,1); shadow.scale.set(0.5,0.5,1);   // the floor light and shadow stay under the base
+  // the RGB light's glow is drawn with additive blending, which leaves the alpha at 0 - over a transparent window it was
+  // simply invisible (the site's background is opaque, so it showed there). Normal blending writes alpha.
+  for(const o of [rgbGlow,rgbFloor]){o.material.blending=THREE.NormalBlending; o.material.needsUpdate=true}
   const FIT_V=new THREE.Vector3(), FIT_T=new THREE.Vector3();
   function fitView(){
     const rx=root.rotation.x, ry=root.rotation.y; root.rotation.set(0,0,0); root.updateMatrixWorld(true);
