@@ -43,5 +43,7 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
 - 연결고리 (chain) can be taken off per keycap (`kcChain`, saved; `kc-cmd chain-on/off` hides the `chain` group and refits).
 - `kc://app/…` serves `page/` (and `/ui/…` from `ui/`); `KC_POS="x,y"` puts every window there and `KC_DATA` gives a
   separate state folder - **tests use both, on the Dell monitor** (see ena-mascot/tests/dellmon.py), never the main screen.
+- App icon: `build/icon.png/.ico` is a render of `build/icon.keycap` (the owner's own keycap) in desktop mode with the chain
+  and shadow hidden (`__k.chain/shadow`), cropped to its alpha box - remake it the same way if the look changes.
 - Releases: upload `dist/SatanKeycap-Setup.exe` to a GitHub release of this repo with exactly that name; the site links
   to `releases/latest/download/SatanKeycap-Setup.exe`. Not code-signed: Windows shows "PC 보호" (추가 정보 → 실행).

@@ -1987,7 +1987,7 @@ $("deskFile").addEventListener("click",async()=>{
   toast("받은 파일을 사탄의 키캡 프로그램으로 열면 바탕화면에 떠요");
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
-window.__k={S,rebuild,renderer,scene,setBg,pressKey,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};
+window.__k={S,rebuild,renderer,scene,setBg,pressKey,chain,shadow,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};
 
 /* back to the game list: only inside the "사탄의 장난감" site, not inside the Claude viewer (same rule as laundry) */
 (function(){try{const host=location.hostname||""; const inClaude=/claude\.ai$|claudeusercontent|anthropic/.test(host)||window.top!==window; if(!inClaude) document.getElementById("backLink").hidden=false}catch(e){}})();
