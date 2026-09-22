@@ -1,4 +1,4 @@
-# 사탄의 키캡 — 바탕화면 프로그램 (Windows)
+# 사탄 클리커 — 바탕화면 프로그램 (Windows)
 
 The website's "🖥 바탕화면 키캡" button saves a `.keycap` file (`{app:"satan-keycap", v:1, hash:"#k=…", image:dataURL|null}`
 - the share-link options plus the character picture, made on the user's own computer). This Electron program opens
@@ -39,7 +39,7 @@ npm run dist         # sync + build dist/SatanKeycap-Setup.exe (NSIS, one click,
   remembered logical size (`kcW`) with `setBounds` - `setPosition` let Electron re-derive the size on a 150% monitor and the
   window grew a little per step (271x284 → 273x329 after 30 moves); one IPC per mouse event flickered. The page draws no
   frames during a left drag. After a drag one more setBounds (80 ms) applies the new monitor's DPI.
-- 프로그램 제거 in the home window runs `Uninstall 사탄의 키캡.exe` next to the exe (NSIS) after a confirm.
+- 프로그램 제거 in the home window runs `Uninstall 사탄 클리커.exe` next to the exe (NSIS) after a confirm.
 - 위치·크기 고정 (`kcLock`, saved per window): main ignores kc-move / kc-zoom. The menu window is placed where it was
   opened (`menuAt`) - re-reading the cursor on every resize made it run away from the cursor.
 - Long runs: no warm-up in the desktop, `powerPreference:low-power`, frames 60/25/30 (cursor over)/10 (animating)/2

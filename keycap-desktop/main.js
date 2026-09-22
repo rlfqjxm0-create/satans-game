@@ -1,4 +1,4 @@
-/* 사탄의 키캡 (desktop): opens .keycap files from the website as keycaps floating on the desktop.
+/* 사탄 클리커 (desktop): opens .keycap files from the website as keycaps floating on the desktop.
    Each file is its own small window: transparent, frameless, always on top, not on the taskbar. The page inside is
    the website's own keycap page (page/index.html, copied by sync.js) with ?desktop=1. The right-click menu and the
    home window are small HTML pages of our own (ui/) in the site's look - not the plain Windows menu.
@@ -8,6 +8,7 @@ const path=require("path"), fs=require("fs"), {pathToFileURL}=require("url");
 
 app.commandLine.appendSwitch("autoplay-policy","no-user-gesture-required");   // the click sound, right away
 if(process.env.KC_DATA) app.setPath("userData",process.env.KC_DATA);   // tests: their own state
+else app.setPath("userData",path.join(app.getPath("appData"),"사탄의 키캡"));   // the state folder keeps the old name (renamed to 사탄 클리커 in 1.0.7) - open keycaps and positions survive the rename
 protocol.registerSchemesAsPrivileged([{scheme:"kc",privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}}]);
 if(!app.requestSingleInstanceLock()){app.quit(); return}
 app.setAppUserModelId("com.satansgame.keycap");
@@ -34,7 +35,7 @@ function refreshHome(){if(home&&!home.isDestroyed()) home.webContents.send("ui-r
 function readKeycap(file){
   if(!file) return null;
   const d=JSON.parse(fs.readFileSync(file,"utf8"));
-  if(!d||d.app!=="satan-keycap"||typeof d.hash!=="string") throw new Error("사탄의 키캡 파일이 아니에요");
+  if(!d||d.app!=="satan-keycap"||typeof d.hash!=="string") throw new Error("사탄 클리커 파일이 아니에요");
   return {hash:d.hash,image:typeof d.image==="string"&&d.image.startsWith("data:image/")?d.image:null};
 }
 
@@ -42,7 +43,7 @@ function openKeycap(file,copy){
   copy=copy||0; const key=keyOf(file)+(copy?"#"+copy:"");
   for(const w of keycaps()) if(w.kcKey===key){w.show(); return w}   // already open: just bring it up
   let data=null;
-  try{data=readKeycap(file)}catch(e){dialog.showErrorBox("사탄의 키캡","이 파일을 열 수 없어요.\n"+(file||"")+"\n\n"+e.message); return null}
+  try{data=readKeycap(file)}catch(e){dialog.showErrorBox("사탄 클리커","이 파일을 열 수 없어요.\n"+(file||"")+"\n\n"+e.message); return null}
   const saved=state.wins[key]||{}, w=Math.min(MAX_W,Math.max(MIN_W,saved.w||270)), h=Math.round(w*ASPECT);
   const area=screen.getPrimaryDisplay().workArea, n=keycaps().length;
   let x=saved.x, y=saved.y;
@@ -50,7 +51,7 @@ function openKeycap(file,copy){
   if(x==null||!onScreen(x,y)){x=area.x+area.width-w-30-n*50; y=area.y+area.height-h-20}                          // new: bottom right
   if(process.env.KC_POS){const [px,py]=process.env.KC_POS.split(",").map(Number); x=px+n*(w+10); y=py}              // tests
   const win=new BrowserWindow({x,y,width:w,height:h,transparent:true,frame:false,resizable:false,maximizable:false,fullscreenable:false,
-    alwaysOnTop:state.top!==false,skipTaskbar:true,hasShadow:false,backgroundColor:"#00000000",show:false,title:"사탄의 키캡",icon:ICON,
+    alwaysOnTop:state.top!==false,skipTaskbar:true,hasShadow:false,backgroundColor:"#00000000",show:false,title:"사탄 클리커",icon:ICON,
     webPreferences:{preload:path.join(__dirname,"preload.js"),contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,spellcheck:false}});
   win.kcKey=key; win.kcFile=file; win.kcCopy=copy; win.kcW=w; win.kcData=data; win.kcSolid=true; win.kcSt={spin:true,sound:true}; win.kcLock=!!saved.lock; win.kcChain=saved.chain!==false;
   win.setMenu(null);
@@ -74,7 +75,7 @@ function duplicate(w){let c=1; const used=new Set(keycaps().filter(k=>k.kcFile==
 function openEditor(w){
   for(const e of BrowserWindow.getAllWindows()) if(e.kcEditor&&e.kcEditFile===w.kcFile){e.show(); e.focus(); return}
   const area=screen.getDisplayMatching(w.getBounds()).workArea, W=Math.min(1100,area.width-40), H=Math.min(860,area.height-40), tp=testPos(300);
-  const ed=new BrowserWindow({width:W,height:H,x:tp?tp.x:Math.round(area.x+(area.width-W)/2),y:tp?tp.y:Math.round(area.y+(area.height-H)/2),title:"키캡 수정하기 · 사탄의 키캡",icon:ICON,
+  const ed=new BrowserWindow({width:W,height:H,x:tp?tp.x:Math.round(area.x+(area.width-W)/2),y:tp?tp.y:Math.round(area.y+(area.height-H)/2),title:"키캡 수정하기 · 사탄 클리커",icon:ICON,
     backgroundColor:"#FFFFFF",autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,"preload.js"),contextIsolation:true,nodeIntegration:false,additionalArguments:["--kc-edit"]}});
   ed.kcEditor=true; ed.kcEditFile=w.kcFile; ed.kcData=w.kcData; ed.setMenu(null);
   ed.loadURL("kc://app/index.html");
@@ -83,14 +84,14 @@ function openEditor(w){
 // "interrupted" in Chromium): written over the keycap's own file, then every window showing it reloads
 ipcMain.on("kc-save",(e,json)=>{const ed=BrowserWindow.fromWebContents(e.sender); if(process.env.KC_DATA) console.log("kc-save",!!ed,ed&&ed.kcEditor,ed&&ed.kcEditFile,typeof json,json&&json.length); if(!ed||!ed.kcEditor) return;
   let target=ed.kcEditFile;
-  if(!target){target=dialog.showSaveDialogSync(ed,{title:"키캡 파일로 저장",defaultPath:path.join(app.getPath("desktop"),"나의-키캡.keycap"),filters:[{name:"사탄의 키캡 파일",extensions:["keycap"]}]}); if(!target) return}
-  try{fs.writeFileSync(target+".tmp",json); fs.renameSync(target+".tmp",target)}catch(err){dialog.showErrorBox("사탄의 키캡","파일을 저장하지 못했어요.\n"+err.message); return}
+  if(!target){target=dialog.showSaveDialogSync(ed,{title:"키캡 파일로 저장",defaultPath:path.join(app.getPath("desktop"),"나의-키캡.keycap"),filters:[{name:"사탄 클리커 파일",extensions:["keycap"]}]}); if(!target) return}
+  try{fs.writeFileSync(target+".tmp",json); fs.renameSync(target+".tmp",target)}catch(err){dialog.showErrorBox("사탄 클리커","파일을 저장하지 못했어요.\n"+err.message); return}
   if(!ed.kcEditFile){ed.kcEditFile=target; openKeycap(target); return}
   let data=null; try{data=readKeycap(target)}catch(err){return}
   for(const k of keycaps()) if(k.kcFile===target){k.kcData=data; k.reload()}   // the new look, right away
 });
 function openDialog(parent){
-  const r=dialog.showOpenDialogSync(parent&&!parent.isDestroyed()?parent:undefined,{title:"키캡 파일 열기",filters:[{name:"사탄의 키캡 파일",extensions:["keycap"]}],properties:["openFile","multiSelections"]});
+  const r=dialog.showOpenDialogSync(parent&&!parent.isDestroyed()?parent:undefined,{title:"키캡 파일 열기",filters:[{name:"사탄 클리커 파일",extensions:["keycap"]}],properties:["openFile","multiSelections"]});
   (r||[]).forEach(f=>openKeycap(f));
 }
 
@@ -100,7 +101,7 @@ function openHome(){
   const area=screen.getPrimaryDisplay().workArea, W=380, H=560;
   const tp=testPos(0);
   home=new BrowserWindow({width:W,height:H,x:tp?tp.x:Math.round(area.x+(area.width-W)/2),y:tp?tp.y:Math.round(area.y+(area.height-H)/2),transparent:true,frame:false,
-    resizable:false,maximizable:false,backgroundColor:"#00000000",title:"사탄의 키캡",icon:ICON,show:false,
+    resizable:false,maximizable:false,backgroundColor:"#00000000",title:"사탄 클리커",icon:ICON,show:false,
     webPreferences:{preload:path.join(UI,"ui-preload.js"),contextIsolation:true}});
   home.setMenu(null); home.loadURL("kc://app/ui/home.html"); home.once("ready-to-show",()=>home.show());
   home.on("closed",()=>{home=null; if(!quitting&&!keycaps().length) app.quit()});
@@ -154,9 +155,9 @@ ipcMain.on("ui-act",(e,a,arg)=>{
     case "closeOne": {const k=BrowserWindow.fromId(arg); if(k) k.close(); break}
     case "login": done(); app.setLoginItemSettings({openAtLogin:!app.getLoginItemSettings().openAtLogin}); refreshHome(); break;
     case "hideHome": if(home) home.close(); break;
-    case "uninstall": {const un=path.join(path.dirname(app.getPath("exe")),"Uninstall 사탄의 키캡.exe");
-      if(!fs.existsSync(un)){dialog.showMessageBoxSync(from,{type:"info",title:"사탄의 키캡",message:"설치한 프로그램에서만 제거할 수 있어요.",buttons:["확인"]}); break}
-      const r=dialog.showMessageBoxSync(from,{type:"question",title:"사탄의 키캡",message:"사탄의 키캡 프로그램을 제거할까요?",detail:"키캡 파일(.keycap)은 지워지지 않아요. 다시 설치하면 그대로 쓸 수 있어요.",buttons:["제거하기","취소"],defaultId:1,cancelId:1});
+    case "uninstall": {const un=path.join(path.dirname(app.getPath("exe")),"Uninstall 사탄 클리커.exe");
+      if(!fs.existsSync(un)){dialog.showMessageBoxSync(from,{type:"info",title:"사탄 클리커",message:"설치한 프로그램에서만 제거할 수 있어요.",buttons:["확인"]}); break}
+      const r=dialog.showMessageBoxSync(from,{type:"question",title:"사탄 클리커",message:"사탄 클리커 프로그램을 제거할까요?",detail:"키캡 파일(.keycap)은 지워지지 않아요. 다시 설치하면 그대로 쓸 수 있어요.",buttons:["제거하기","취소"],defaultId:1,cancelId:1});
       if(r===0){shell.openPath(un); setTimeout(()=>app.quit(),300)} break}
   }
 });
@@ -186,7 +187,7 @@ ipcMain.on("kc-menu",(e,st)=>{const w=BrowserWindow.fromWebContents(e.sender); i
 
 function makeTray(){
   let img=nativeImage.createFromPath(ICON); if(!img.isEmpty()) img=img.resize({width:16,height:16});
-  tray=new Tray(img); tray.setToolTip("사탄의 키캡");
+  tray=new Tray(img); tray.setToolTip("사탄 클리커");
   tray.on("click",openHome);
   tray.on("right-click",()=>openMenu(null,"tray"));   // the same little menu as the keycaps'
 }

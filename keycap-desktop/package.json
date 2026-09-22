@@ -1,8 +1,8 @@
 {
   "name": "satan-keycap",
-  "productName": "사탄의 키캡",
-  "version": "1.0.6",
-  "description": "사탄의 키캡 - 바탕화면에 띄우는 키캡",
+  "productName": "사탄 클리커",
+  "version": "1.0.7",
+  "description": "사탄 클리커 - 바탕화면에 띄우는 키캡",
   "main": "main.js",
   "author": "rlfqjxm0",
   "license": "UNLICENSED",
@@ -14,7 +14,7 @@
   },
   "build": {
     "appId": "com.satansgame.keycap",
-    "productName": "사탄의 키캡",
+    "productName": "사탄 클리커",
     "artifactName": "SatanKeycap-Setup.${ext}",
     "files": [
       "main.js",
@@ -35,13 +35,13 @@
       "perMachine": false,
       "runAfterFinish": true,
       "createDesktopShortcut": true,
-      "shortcutName": "사탄의 키캡"
+      "shortcutName": "사탄 클리커"
     },
     "fileAssociations": [
       {
         "ext": "keycap",
         "name": "SatanKeycap",
-        "description": "사탄의 키캡 파일",
+        "description": "사탄 클리커 파일",
         "icon": "build/icon.ico"
       }
     ]

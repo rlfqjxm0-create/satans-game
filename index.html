@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>사탄의 장난감</title>
+<title>사탄과 장난감</title>
 <link rel="icon" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"%3E%3Cg fill="%232A2C33" stroke="%232A2C33" stroke-width="2.4" stroke-linejoin="round"%3E%3Cpath d="M11 31 L12.6 7.2 Q13.2 5.4 14.8 6.6 L30.5 19 Z"/%3E%3Cpath d="M53 31 L51.4 7.2 Q50.8 5.4 49.2 6.6 L33.5 19 Z"/%3E%3C/g%3E%3Cpath d="M15.2 25 L15.9 12.8 L25.2 20.2 Z M48.8 25 L48.1 12.8 L38.8 20.2 Z" fill="%234B4F5A"/%3E%3Cellipse cx="32" cy="37" rx="23.5" ry="19.5" fill="%232A2C33"/%3E%3Ccircle cx="22.5" cy="37" r="7" fill="%23FFD45C"/%3E%3Ccircle cx="41.5" cy="37" r="7" fill="%23FFD45C"/%3E%3Ccircle cx="22.8" cy="37.8" r="5.6" fill="%23121317"/%3E%3Ccircle cx="41.8" cy="37.8" r="5.6" fill="%23121317"/%3E%3Ccircle cx="20.6" cy="35.2" r="1.9" fill="%23FFFFFF"/%3E%3Ccircle cx="39.6" cy="35.2" r="1.9" fill="%23FFFFFF"/%3E%3Ccircle cx="24.8" cy="40.2" r=".9" fill="%23FFFFFF"/%3E%3Ccircle cx="43.8" cy="40.2" r=".9" fill="%23FFFFFF"/%3E%3C/svg%3E'>
 <meta name="description" content="사탄이 만든 작은 장난감들">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,7 +65,7 @@ footer{margin-top:30px; text-align:center; font-size:13px; color:var(--ink-soft)
   <header>
     <div class="logo">
       <svg viewBox="0 0 64 64" aria-hidden="true"><use href="#satanCat"/></svg>
-      <h1>사탄의 장난감</h1>
+      <h1>사탄과 장난감</h1>
     </div>
     <p class="lede">사탄이 만든 작은 장난감들. 로그인 없이 바로 놀 수 있어요.</p>
   </header>
@@ -99,7 +99,7 @@ footer{margin-top:30px; text-align:center; font-size:13px; color:var(--ink-soft)
         </svg>
       </div>
       <div class="body">
-        <div class="title"><h2>사탄의 세탁</h2><span class="play">하러 가기</span></div>
+        <div class="title"><h2>사탄 세탁소</h2><span class="play">하러 가기</span></div>
         <p class="desc">캐릭터를 세탁기에 돌려 보세요. 뭐가 나올지는 세탁기 마음이에요.</p>
         <div class="meta" id="laundryMeta"><span id="laundryDex">도감 0/19</span><span class="bar"><i id="laundryBar" style="width:0"></i></span></div>
       </div>
@@ -133,7 +133,7 @@ footer{margin-top:30px; text-align:center; font-size:13px; color:var(--ink-soft)
         </svg>
       </div>
       <div class="body">
-        <div class="title"><h2>사탄의 키캡</h2><span class="play">만들러 가기</span></div>
+        <div class="title"><h2>사탄 클리커</h2><span class="play">만들러 가기</span></div>
         <p class="desc">캐릭터를 넣어 나만의 키캡을 만들어 보세요. 돌려 보고, 눌러서 딸깍!</p>
       </div>
     </a>
@@ -152,7 +152,7 @@ footer{margin-top:30px; text-align:center; font-size:13px; color:var(--ink-soft)
 <script>
 (function(){
   // progress from each game's own on-device record (same site, so it can be read here)
-  const TOTAL=19;   // 사탄의 세탁 도감 종류 수 (히든 '사탄'은 따로) — laundry 쪽 DEX_ORDER 와 같은 값
+  const TOTAL=19;   // 사탄 세탁소 도감 종류 수 (히든 '사탄'은 따로) — laundry 쪽 DEX_ORDER 와 같은 값
   try{
     const raw=localStorage.getItem("choiae-laundry-dex"); const got=raw?JSON.parse(raw):[]; const arr=Array.isArray(got)?got:[];
     const n=Math.min(TOTAL,arr.filter(k=>k!=="satan").length);

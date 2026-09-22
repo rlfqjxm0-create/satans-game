@@ -1,4 +1,4 @@
-/* ================= 사탄의 키캡 v3 ================= */
+/* ================= 사탄 클리커 v3 ================= */
 const $=id=>document.getElementById(id);
 const ICO=n=>'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-'+n+'"/></svg> ';   // one-tone button icons (sprite in head.html)
 /* 바탕화면 키캡 (keycap-desktop): the same page, opened by the desktop program with ?desktop=1 - a transparent

@@ -1,4 +1,4 @@
-# 사탄의 키캡 (Satan's Keycap)
+# 사탄 클리커 (Satan Clicker)
 
 A single-page 3D "artisan keycap" maker. Users upload a character image and customise a keycap
 that sits on a keychain switch tester; they can spin it, press it (it clicks and the glitter swirls

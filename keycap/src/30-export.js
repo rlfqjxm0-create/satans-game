@@ -17,7 +17,7 @@ function snap(W,H){ // render one frame at a given size and hand back a 2D canva
 function restoreSize(){renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); resize(); camApply()}
 /* a little die-cut sticker, like the ones on handmade goods for sale: white border, soft shadow, the site cat */
 function watermark(x,W,H){
-  const s=W/1080; x.save(); x.font=`${38*s}px Jua, sans-serif`; const tw=x.measureText("사탄의 키캡").width; x.restore();
+  const s=W/1080; x.save(); x.font=`${38*s}px Jua, sans-serif`; const tw=x.measureText("사탄 클리커").width; x.restore();
   const bw=24*s+60*s+12*s+tw+30*s, bh=92*s, cx=W-60*s-bw/2, cy=H-64*s-bh/2, r=bh/2, col=S.color;   // cat + text, even margins
   const fill=mixHex(col,"#FFFFFF",0.55), ink=mixHex(col,"#2A2230",0.78), edge=mixHex(col,"#FFFFFF",0.2);
   x.save(); x.translate(cx,cy); x.rotate(-0.07);
@@ -27,7 +27,7 @@ function watermark(x,W,H){
   x.shadowColor="transparent";
   pill(bw,bh,r); x.fillStyle=fill; x.fill(); x.lineWidth=2.5*s; x.setLineDash([7*s,6*s]); x.strokeStyle=edge; pill(bw-12*s,bh-12*s,r-6*s); x.stroke(); x.setLineDash([]);
   x.save(); x.translate(-bw/2+24*s,-30*s); x.scale(60*s/64,60*s/64); drawSatanCat(x); x.restore();
-  x.font=`${38*s}px Jua, sans-serif`; x.textAlign="left"; x.textBaseline="middle"; x.fillStyle=ink; x.fillText("사탄의 키캡",-bw/2+96*s,2*s);
+  x.font=`${38*s}px Jua, sans-serif`; x.textAlign="left"; x.textBaseline="middle"; x.fillStyle=ink; x.fillText("사탄 클리커",-bw/2+96*s,2*s);
   x.restore();
 }
 function cardOverlay(x,W,H){ // the title and a little list, as a label sticker at the top left (+ the corner sticker)
@@ -118,10 +118,10 @@ $("deskFile").addEventListener("click",async()=>{
   if(window.KEYCAP_EDIT&&window.deskAPI&&window.deskAPI.save){window.deskAPI.save(JSON.stringify(data)); toast("바탕화면 키캡에 바로 적용했어요"); return}   // inside the program's editor window
   const blob=new Blob([JSON.stringify(data)],{type:"application/octet-stream"});
   saveFile(`${(S.name||"나의").replace(/[\\/:*?"<>|]/g,"")}-키캡.keycap`,blob);
-  toast("받은 파일을 사탄의 키캡 프로그램으로 열면 바탕화면에 떠요");
+  toast("받은 파일을 사탄 클리커 프로그램으로 열면 바탕화면에 떠요");
 });
 $("saveOut").addEventListener("click",()=>{if(outBlob) saveFile("satan-keycap."+outExt,outBlob)});
 window.__k={S,rebuild,renderer,scene,setBg,pressKey,chain,shadow,shot:(ry)=>{PAUSE=true; if(ry!=null) rotY=ry; poseAt(T); renderer.render(scene,camera); return cv.toDataURL("image/png")}};
 
-/* back to the game list: only inside the "사탄의 장난감" site, not inside the Claude viewer (same rule as laundry) */
+/* back to the game list: only inside the "사탄과 장난감" site, not inside the Claude viewer (same rule as laundry) */
 (function(){try{const host=location.hostname||""; const inClaude=/claude\.ai$|claudeusercontent|anthropic/.test(host)||window.top!==window; if(!inClaude) document.getElementById("backLink").hidden=false}catch(e){}})();
